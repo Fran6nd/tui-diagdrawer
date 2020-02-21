@@ -20,14 +20,6 @@ def canva_point_to_screen_point(stdscr, p):
     #height -= 2
     down_left = point(int(x-width/2), int(y-height/2))
     up_right = point(int(x+width/2), int(y+height/2))
-    if(_p.x < down_left.x):
-        _p.x = down_left.x
-    if(_p.y < down_left.y):
-        _p.y = down_left.y
-    if(_p.x >= up_right.x):
-        _p.x = up_right.x-1
-    if(_p.y >= up_right.y):
-        _p.y = up_right.y-1
     return point(_p.x - down_left.x, _p.y - down_left.y)
 
 
@@ -50,6 +42,12 @@ def draw(stdscr):
             else:
                 stdscr.addstr(
                     _y+2, _x, canva[start_x + _x][start_y + height + 1 - _y], curses.color_pair(1))
+
+def add_char(stdscr,  _y, _x,c, color = None):
+    height, width = stdscr.getmaxyx()
+    height -= 2
+    if(_x > 1 and _x <= width and _y > 1 and _y <= height):
+        stdscr.addstr(_y, _x, c)
 
 def main(stdscr):
     curses.curs_set(0)
@@ -85,17 +83,21 @@ def main(stdscr):
                 _max.y = height - _max.y
                 _min.y = height - _min.y
                 for _x in range(_min.x, _max.x):
-                    stdscr.addstr(_min.y, _x, '-')
+                    if _x > 0 and _x < width:
+                        add_char(stdscr,_min.y, _x, '-')
                 for _x in range(_min.x, _max.x):
-                    stdscr.addstr(_max.y, _x, '-')
+                    if _x > 0 and _x < width:
+                        add_char(stdscr,_max.y, _x, '-')
                 for _y in range(_max.y, _min.y):
-                    stdscr.addstr(_y, _min.x, '|')
+                    if _y > 0 and _y < height:
+                        add_char(stdscr,_y, _min.x, '|')
                 for _y in range(_max.y, _min.y):
-                    stdscr.addstr(_y, _max.x, '|')
-                stdscr.addstr(_max.y, _max.x, '+')
-                stdscr.addstr(_min.y, _max.x, '+')
-                stdscr.addstr(_max.y, _min.x, '+')
-                stdscr.addstr(_min.y, _min.x, '+')
+                    if _y > 0 and _y < height:
+                        add_char(stdscr,_y, _max.x, '|')
+                add_char(stdscr,_max.y, _max.x, '+')
+                add_char(stdscr,_min.y, _max.x, '+')
+                add_char(stdscr,_max.y, _min.x, '+')
+                add_char(stdscr,_min.y, _min.x, '+')
         stdscr.refresh()
 
         stdscr.refresh()
