@@ -1,8 +1,8 @@
 import curses
 import copy
 
-MODE = 1
-MODES = ['SQUARE', 'LINE', 'TEXT']
+MODE = 0
+MODES = ['SQUARE', 'PUT', 'TEXT']
 
 
 canva = list()
