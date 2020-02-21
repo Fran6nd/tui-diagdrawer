@@ -2,7 +2,7 @@ import curses
 import copy
 
 MODE = 0
-MODES = ['SQUARE', 'PUT', 'TEXT']
+MODES = ['SQUARE', 'PUT', 'TEXT', 'SELECT']
 
 
 canva = list()
@@ -17,7 +17,6 @@ class point():
 def canva_point_to_screen_point(stdscr, p):
     _p = copy.deepcopy(p)
     height, width = stdscr.getmaxyx()
-    #height -= 2
     down_left = point(int(x-width/2), int(y-height/2))
     up_right = point(int(x+width/2), int(y+height/2))
     return point(_p.x - down_left.x, _p.y - down_left.y)
@@ -44,10 +43,28 @@ def draw(stdscr):
                     _y+2, _x, canva[start_x + _x][start_y + height + 1 - _y], curses.color_pair(1))
 
 def add_char(stdscr,  _y, _x,c, color = None):
+    if c:
+        height, width = stdscr.getmaxyx()
+        height -= 2
+        _y = _y + 2
+        if(_x > 1 and _x <= width and _y > 1 and _y <= height):
+            if color:
+                stdscr.addstr(_y, _x, c, color)
+            else:
+                stdscr.addstr(_y, _x, c)
+def get_char(stdscr,  _y, _x):
     height, width = stdscr.getmaxyx()
     height -= 2
+    _y = _y + 2
     if(_x > 1 and _x <= width and _y > 1 and _y <= height):
-        stdscr.addstr(_y, _x, c)
+        return chr(stdscr.inch(_y, _x))
+
+def rect_from_points(p1, p2):
+    x_min = min(p1.x, p2.x)
+    x_max = max(p1.x, p2.x)
+    y_min = min(p1.y, p2.y)
+    y_max = max(p1.y, p2.y)
+    return point(x_min, y_min), point(x_max, y_max)
 
 def main(stdscr):
     curses.curs_set(0)
@@ -72,12 +89,7 @@ def main(stdscr):
         draw(stdscr)
         if(MODES[MODE] == 'SQUARE'):
             if p1:
-                x_min = min(p1.x, x)
-                x_max = max(p1.x, x)
-                y_min = min(p1.y-2, y-2)
-                y_max = max(p1.y-2, y-2)
-                _max = point(x_max, y_max)
-                _min = point(x_min, y_min)
+                _min, _max = rect_from_points(p1, point(x, y))
                 _max = canva_point_to_screen_point(stdscr,  _max)
                 _min = canva_point_to_screen_point(stdscr, _min)
                 _max.y = height - _max.y
@@ -85,6 +97,29 @@ def main(stdscr):
                 for _x in range(_min.x, _max.x):
                     if _x > 0 and _x < width:
                         add_char(stdscr,_min.y, _x, '-')
+                for _x in range(_min.x, _max.x):
+                    if _x > 0 and _x < width:
+                        add_char(stdscr,_max.y, _x, '-')
+                for _y in range(_max.y, _min.y):
+                    if _y > 0 and _y < height:
+                        add_char(stdscr,_y, _min.x, '|')
+                for _y in range(_max.y, _min.y):
+                    if _y > 0 and _y < height:
+                        add_char(stdscr,_y, _max.x, '|')
+                add_char(stdscr,_max.y, _max.x, '+')
+                add_char(stdscr,_min.y, _max.x, '+')
+                add_char(stdscr,_max.y, _min.x, '+')
+                add_char(stdscr,_min.y, _min.x, '+')
+        if(MODES[MODE] == 'SELECT'):
+            if p1:
+                _min, _max = rect_from_points(p1, point(x, y))
+                _max = canva_point_to_screen_point(stdscr,  _max)
+                _min = canva_point_to_screen_point(stdscr, _min)
+                _max.y = height - _max.y
+                _min.y = height - _min.y
+                for _x in range(_min.x, _max.x):
+                    if _x > 0 and _x < width:
+                        add_char(stdscr,_min.y, _x, get_char(stdscr,_min.y, _x), 2)
                 for _x in range(_min.x, _max.x):
                     if _x > 0 and _x < width:
                         add_char(stdscr,_max.y, _x, '-')
@@ -139,6 +174,13 @@ def main(stdscr):
                         canva[x_min][y_max] = '+'
                         canva[x_max][y_min] = '+'
                         canva[x_max][y_max] = '+'
+                        p1 = None
+                        p2 = None
+            if(MODES[MODE] == 'SELECT'):
+                if(c == 32):
+                    if p1 == None:
+                        p1 = point(x, y)
+                    else:
                         p1 = None
                         p2 = None
             elif(MODES[MODE] == 'TEXT'):
