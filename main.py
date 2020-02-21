@@ -1,5 +1,6 @@
 import curses
 import copy
+import math
 
 MODE = 0
 MODES = ['SQUARE', 'PUT', 'TEXT', 'SELECT']
@@ -17,8 +18,8 @@ class point():
 def canva_point_to_screen_point(stdscr, p):
     _p = copy.deepcopy(p)
     height, width = stdscr.getmaxyx()
-    down_left = point(int(x-width/2), int(y-height/2))
-    up_right = point(int(x+width/2), int(y+height/2))
+    down_left = point(math.floor(x-width/2),math.floor(y-height/2))
+    up_right = point(math.floor(x+width/2),math.floor(y+height/2))
     return point(_p.x - down_left.x, _p.y - down_left.y)
 
 
@@ -30,12 +31,14 @@ def draw(stdscr):
         1, 0, 'Press [KEY_F1] so switch beween edit modes (' + MODES[MODE] + ' selected)')
     height, width = stdscr.getmaxyx()
     height -= 2
-    start_x = int(x - width/2)
-    start_y = int(y - height/2)
+    start_x =math.floor(x - width/2)
+    start_y =math.floor(y - height/2)
 
     for _x in range(0, width-1):
         for _y in range(0, height-1):
-            if start_x + _x == x and start_y + _y == y:
+            center = point(math.floor(width/2), math.floor(height/2))
+            center = canva_point_to_screen_point(stdscr, point(x, y))
+            if _x == center.x and _y == center.y:
                 stdscr.addstr(
                     _y+2, _x, canva[start_x + _x][start_y + height + 1 - _y], curses.color_pair(2))
             else:
@@ -54,10 +57,10 @@ def add_char(stdscr,  _y, _x,c, color = None):
                 stdscr.addstr(_y, _x, c)
 def get_char(stdscr,  _y, _x):
     height, width = stdscr.getmaxyx()
-    height -= 2
+    #height -= 2
     _y = _y + 2
     if(_x > 1 and _x <= width and _y > 1 and _y <= height):
-        return chr(stdscr.inch(_y, _x))
+        return chr(stdscr.inch(_y, _x) & 0xFF)
 
 def rect_from_points(p1, p2):
     x_min = min(p1.x, p2.x)
@@ -76,8 +79,8 @@ def main(stdscr):
         canva.append([' '] * (height*10))
     global x
     global y
-    x = int(len(canva)/2)
-    y = int(len(canva[0])/2)
+    x =math.floor(len(canva)/2)
+    y =math.floor(len(canva[0])/2)
     c = 0
     p1 = None
     p2 = None
@@ -106,31 +109,17 @@ def main(stdscr):
                 add_char(stdscr,_min.y, _max.x, '+')
                 add_char(stdscr,_max.y, _min.x, '+')
                 add_char(stdscr,_min.y, _min.x, '+')
-        if(MODES[MODE] == 'SELECT'):
+        elif(MODES[MODE] == 'SELECT'):
             if p1:
                 _min, _max = rect_from_points(p1, point(x, y))
                 _max = canva_point_to_screen_point(stdscr,  _max)
                 _min = canva_point_to_screen_point(stdscr, _min)
                 _max.y = height - _max.y
                 _min.y = height - _min.y
-                for _x in range(_min.x, _max.x):
-                    if _x > 0 and _x < width:
-                        add_char(stdscr,_min.y, _x, get_char(stdscr,_min.y, _x), 2)
-                for _x in range(_min.x, _max.x):
-                    if _x > 0 and _x < width:
-                        add_char(stdscr,_max.y, _x, '-')
                 for _y in range(_max.y, _min.y):
-                    if _y > 0 and _y < height:
-                        add_char(stdscr,_y, _min.x, '|')
-                for _y in range(_max.y, _min.y):
-                    if _y > 0 and _y < height:
-                        add_char(stdscr,_y, _max.x, '|')
-                add_char(stdscr,_max.y, _max.x, '+')
-                add_char(stdscr,_min.y, _max.x, '+')
-                add_char(stdscr,_max.y, _min.x, '+')
-                add_char(stdscr,_min.y, _min.x, '+')
-        stdscr.refresh()
-
+                    for _x in range(_min.x, _max.x):
+                        if _x > 0 and _x < width:
+                            add_char(stdscr,_y, _x, get_char(stdscr,_y, _x), curses.color_pair(2))
         stdscr.refresh()
         c = stdscr.getch()
         if c == curses.KEY_UP:
