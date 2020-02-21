@@ -33,10 +33,10 @@ def draw(stdscr):
         for _y in range(0, height-1):
             if start_x + _x == x and start_y + _y == y:
                 stdscr.addstr(
-                    _y+2, _x, canva[start_x + _x][start_y + _y], curses.color_pair(2))
+                    _y+2, _x, canva[start_x + _x][start_y + height + 1 -_y], curses.color_pair(2))
             else:
                 stdscr.addstr(
-                    _y+2, _x, canva[start_x + _x][start_y + _y], curses.color_pair(1))
+                    _y+2, _x, canva[start_x + _x][start_y + height + 1 -_y], curses.color_pair(1))
     stdscr.refresh()
 
 
@@ -51,13 +51,13 @@ def main(stdscr):
     global y
     x = int(len(canva)/2)
     y = int(len(canva[0])/2)
-    c = ' '
-    while c != 'q':
+    c = 0
+    while chr(c) != 'q':
         stdscr.clear()
         draw(stdscr)
 
         stdscr.refresh()
-        c = stdscr.getkey()
+        c = stdscr.getch()
         if c == curses.KEY_UP:
             y = y + 1
             add_line_up()
@@ -65,13 +65,13 @@ def main(stdscr):
             y = y - 1
             add_line_down()
         elif c == curses.KEY_RIGHT:
-            x = x - 1
-            add_column_right()
-        elif c == curses.KEY_UP:
             x = x + 1
+            add_column_right()
+        elif c == curses.KEY_LEFT:
+            x = x - 1
             add_column_left()
         else:
-            canva[x][y] = c
+            canva[x][y] = chr(c)
 
 
 curses.wrapper(main)
