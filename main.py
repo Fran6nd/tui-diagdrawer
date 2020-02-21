@@ -45,7 +45,7 @@ def draw(stdscr):
 def add_char(stdscr,  _y, _x,c, color = None):
     if c:
         height, width = stdscr.getmaxyx()
-        height -= 2
+        height -= 1
         _y = _y + 2
         if(_x > 1 and _x <= width and _y > 1 and _y <= height):
             if color:
@@ -95,17 +95,13 @@ def main(stdscr):
                 _max.y = height - _max.y
                 _min.y = height - _min.y
                 for _x in range(_min.x, _max.x):
-                    if _x > 0 and _x < width:
-                        add_char(stdscr,_min.y, _x, '-')
+                    add_char(stdscr,_min.y, _x, '-')
                 for _x in range(_min.x, _max.x):
-                    if _x > 0 and _x < width:
-                        add_char(stdscr,_max.y, _x, '-')
+                    add_char(stdscr,_max.y, _x, '-')
                 for _y in range(_max.y, _min.y):
-                    if _y > 0 and _y < height:
-                        add_char(stdscr,_y, _min.x, '|')
+                    add_char(stdscr,_y, _min.x, '|')
                 for _y in range(_max.y, _min.y):
-                    if _y > 0 and _y < height:
-                        add_char(stdscr,_y, _max.x, '|')
+                    add_char(stdscr,_y, _max.x, '|')
                 add_char(stdscr,_max.y, _max.x, '+')
                 add_char(stdscr,_min.y, _max.x, '+')
                 add_char(stdscr,_max.y, _min.x, '+')
@@ -176,7 +172,7 @@ def main(stdscr):
                         canva[x_max][y_max] = '+'
                         p1 = None
                         p2 = None
-            if(MODES[MODE] == 'SELECT'):
+            elif(MODES[MODE] == 'SELECT'):
                 if(c == 32):
                     if p1 == None:
                         p1 = point(x, y)
