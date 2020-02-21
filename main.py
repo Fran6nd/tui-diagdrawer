@@ -9,6 +9,7 @@ MODES = ['SQUARE', 'PUT', 'TEXT', 'SELECT']
 canva = list()
 x, y = 0, 0
 SELECTION = None
+charset = 'AZERTYUIOPMLKJHGFDSQWXCVBNazertyuiop mlkjhgfdsqwxcvbn?!\'$",;.:/\\+-*/=|&1230456789'
 
 
 class point():
@@ -182,11 +183,11 @@ def main(stdscr):
                     p1 = None
                     p2 = None
         elif(MODES[MODE] == 'TEXT'):
-            if(chr(c) in 'AZERTYUIOPMLKJHGFDSQWXCVBNazertyuiopmlkjhgfdsqwxcvbn?!,;.:/\\+-*/=|&1230456789'):
+            if(chr(c) in charset):
                 canva[x][y] = chr(c)
                 x += 1
         elif(MODES[MODE] == 'PUT'):
-            if(chr(c) in 'AZERTYUIOPMLKJHGFDSQWXCVBN azertyuiopmlkjhgfdsqwxcvbn?!,;.:/\\+-*/=|&1230456789'):
+            if(chr(c) in charset):
                 canva[x][y] = chr(c)
 
 
