@@ -2,7 +2,7 @@ import curses
 import copy
 
 MODE = 1
-MODES = ['SQUARE', 'LINE', 'MANUAL']
+MODES = ['SQUARE', 'LINE', 'TEXT']
 
 
 canva = list()
@@ -139,6 +139,9 @@ def main(stdscr):
                         canva[x_max][y_max] = '+'
                         p1 = None
                         p2 = None
+            elif(MODES[MODE] == 'TEXT'):
+                canva[x][y] = chr(c)
+                x += 1
             else:
                 canva[x][y] = chr(c)
 
