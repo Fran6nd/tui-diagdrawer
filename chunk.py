@@ -1,3 +1,5 @@
+from COLORS import *
+
 from position import *
 
 class chunk():
@@ -47,6 +49,6 @@ class chunk():
                 if c:
                     stdscr.addstr(height -y ,x, c)
                 else:
-                    stdscr.addstr(height -y ,x, ' ')
+                    stdscr.addstr(height -y ,x, ' ', COLOR_NORMAL)
 
 

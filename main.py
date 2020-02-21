@@ -210,10 +210,12 @@ def main(stdscr):
     main_chunk = chunk(position(width, height))
     looping = True
     pos = position(width, height)
+    center = position(width/2, height/2)
     while looping:
         stdscr.addstr(0, 0, 'ascii-drawer by Fran6nd.' + str(pos.x) + ' ' + str(pos.y))
         stdscr.addstr(1, 0, '[' + MODES[MODE] + '] (press [tab] to switch mode)')
         main_chunk.draw(stdscr, pos)
+        stdscr.addstr(center.y, center.x, chr(stdscr.inch(center.y, center.x) & 0xFF), curses.color_pair(COLOR_CURSOR))
         stdscr.refresh()
         c = stdscr.getch()
         x, y = 0, 0
