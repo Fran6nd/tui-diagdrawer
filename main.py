@@ -148,6 +148,13 @@ def main(stdscr):
             MODE += 1
             if MODE == len(MODES):
                 MODE = 0
+        elif c == 27:
+            if p1 or p2:
+                p1 = None
+                p2 = None
+            else:
+                SELECTION = None
+        stdscr.refresh()
 
         if(MODES[MODE] == 'SQUARE'):
             if(c == 32):
