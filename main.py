@@ -1,6 +1,8 @@
 import curses
 import copy
 import math
+from chunk import *
+from position import *
 
 MODE = 0
 MODES = ['SQUARE', 'PUT', 'TEXT', 'SELECT']
@@ -87,7 +89,7 @@ def rect_from_points(p1, p2):
     y_max = max(p1.y, p2.y)
     return point(x_min, y_min), point(x_max, y_max)
 
-def main(stdscr):
+def _main(stdscr):
     curses.curs_set(0)
     # Clear screen
     curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
@@ -196,6 +198,20 @@ def main(stdscr):
         elif(MODES[MODE] == 'PUT'):
             if(chr(c) in charset):
                 canva[x][y] = chr(c)
+
+def main(stdscr):
+    curses.curs_set(0)
+    # Clear screen
+    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_RED)
+    height, width = stdscr.getmaxyx()
+    height -= 2
+    stdscr.addstr(0, 0, 'ascii-drawer by Fran6nd.')
+    stdscr.addstr(1, 0, '[MODE] (press [tab] to switch mode)')
+    main_chunk = chunk(position(width, height))
+    stdscr.refresh()
+    stdscr.getch()
+
 
 
 curses.wrapper(main)
