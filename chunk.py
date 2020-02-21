@@ -39,11 +39,14 @@ class chunk():
 
     def draw(self, stdscr, center):
         height, width = stdscr.getmaxyx()
-        offset = position(center.x - width / 2, center.y - width / 2)
         height -= 2
+        offset = position(center.x - width / 2, center.y - height / 2)
         for x in range(0, width):
             for y in range(0, height - 1):
                 c = self.get_char(offset + position(x, y))
-                stdscr.addstr(height -y ,x, "c")
+                if c:
+                    stdscr.addstr(height -y ,x, c)
+                else:
+                    stdscr.addstr(height -y ,x, ' ')
 
 

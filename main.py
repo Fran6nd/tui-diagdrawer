@@ -3,6 +3,7 @@ import copy
 import math
 from chunk import *
 from position import *
+from COLORS import *
 
 MODE = 0
 MODES = ['SQUARE', 'PUT', 'TEXT', 'SELECT']
@@ -202,18 +203,36 @@ def _main(stdscr):
 def main(stdscr):
     curses.curs_set(0)
     # Clear screen
-    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)
-    curses.init_pair(2, curses.COLOR_WHITE, curses.COLOR_RED)
+    curses.init_pair(COLOR_NORMAL, curses.COLOR_WHITE, curses.COLOR_BLACK)
+    curses.init_pair(COLOR_CURSOR, curses.COLOR_WHITE, curses.COLOR_RED)
     height, width = stdscr.getmaxyx()
     height -= 2
-    stdscr.addstr(0, 0, 'ascii-drawer by Fran6nd.')
-    stdscr.addstr(1, 0, '[MODE] (press [tab] to switch mode)')
-    main_chunk = chunk(position(width*2, height*2))
-    main_chunk.draw(stdscr, position(width, height))
+    main_chunk = chunk(position(width, height))
+    looping = True
+    pos = position(width, height)
+    while looping:
+        stdscr.addstr(0, 0, 'ascii-drawer by Fran6nd.' + str(pos.x) + ' ' + str(pos.y))
+        stdscr.addstr(1, 0, '[' + MODES[MODE] + '] (press [tab] to switch mode)')
+        main_chunk.draw(stdscr, pos)
+        stdscr.refresh()
+        c = stdscr.getch()
+        x, y = 0, 0
+        if c == curses.KEY_UP:
+            y += 1
+        elif c == curses.KEY_DOWN:
+            y += - 1
+        elif c == curses.KEY_RIGHT:
+            x += 1
+        elif c == curses.KEY_LEFT:
+            x += - 1
+        elif chr(c) == 'q':
+            looping = False
+        pos = pos + position(x, y)
+        
 
 
-    stdscr.refresh()
-    stdscr.getch()
+
+
 
 
 
