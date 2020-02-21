@@ -14,82 +14,6 @@ x, y = 0, 0
 SELECTION = None
 charset = 'AZERTYUIOPMLKJHGFDSQWXCVBNazertyuiop mlkjhgfdsqwxcvbn?!\'$",;.:/\\+-*/=|&1230456789'
 
-
-class point():
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-class rect():
-    def __init__(self, p1, p2):
-        self.min, self.max = rect_from_points(p1, p2)
-
-def canva_point_to_screen_point(stdscr, p):
-    _p = copy.deepcopy(p)
-    height, width = stdscr.getmaxyx()
-    down_left = point(math.floor(x-width/2),math.floor(y-height/2))
-    up_right = point(math.floor(x+width/2),math.floor(y+height/2))
-    return point(_p.x - down_left.x, _p.y - down_left.y)
-
-
-
-def draw(stdscr):
-    global x, y
-    stdscr.addstr(0, 0, 'ascii-drawer by Fran6nd.' + str(x) + ' ' + str(y))
-    stdscr.addstr(
-        1, 0, 'Press [KEY_F1] so switch beween edit modes (' + MODES[MODE] + ' selected)')
-    height, width = stdscr.getmaxyx()
-    height -= 2
-    start_x =math.floor(x - width/2)
-    start_y =math.floor(y - height/2)
-
-    for _x in range(0, width-1):
-        for _y in range(0, height-1):
-            center = point(math.floor(width/2), math.floor(height/2))
-            center = canva_point_to_screen_point(stdscr, point(x, y))
-            if start_x + _x == x and start_y + _y == y:
-                stdscr.addstr(
-                    _y+2, _x, canva[start_x + _x][start_y + height + 1 - _y], curses.color_pair(2))
-            else:
-                stdscr.addstr(
-                    _y+2, _x, canva[start_x + _x][start_y + height + 1 - _y], curses.color_pair(1))
-
-def draw_selection(stdscr):
-    height, width = stdscr.getmaxyx()
-    if(SELECTION):
-        _max = canva_point_to_screen_point(stdscr, SELECTION.max)
-        _min = canva_point_to_screen_point(stdscr, SELECTION.min)
-        _max.y = height - _max.y
-        _min.y = height - _min.y
-        for _y in range(_max.y, _min.y+1):
-            for _x in range(_min.x, _max.x+1):
-                if _x > 0 and _x < width:
-                    add_char(stdscr,_y, _x, get_char(stdscr,_y, _x), curses.color_pair(2))
-
-def add_char(stdscr,  _y, _x,c, color = None):
-    if c:
-        height, width = stdscr.getmaxyx()
-        height -= 1
-        _y = _y + 2
-        if(_x > 1 and _x <= width and _y > 1 and _y <= height):
-            if color:
-                stdscr.addstr(_y, _x, c, color)
-            else:
-                stdscr.addstr(_y, _x, c)
-def get_char(stdscr,  _y, _x):
-    height, width = stdscr.getmaxyx()
-    #height -= 2
-    _y = _y + 2
-    if(_x > 1 and _x <= width and _y > 1 and _y <= height):
-        return chr(stdscr.inch(_y, _x) & 0xFF)
-
-def rect_from_points(p1, p2):
-    x_min = min(p1.x, p2.x)
-    x_max = max(p1.x, p2.x)
-    y_min = min(p1.y, p2.y)
-    y_max = max(p1.y, p2.y)
-    return point(x_min, y_min), point(x_max, y_max)
-
 def _main(stdscr):
     curses.curs_set(0)
     # Clear screen
@@ -201,37 +125,55 @@ def _main(stdscr):
                 canva[x][y] = chr(c)
 
 def main(stdscr):
+    global MODE, MODES
     curses.curs_set(0)
     # Clear screen
     curses.init_pair(COLOR_NORMAL, curses.COLOR_WHITE, curses.COLOR_BLACK)
     curses.init_pair(COLOR_CURSOR, curses.COLOR_WHITE, curses.COLOR_RED)
+    curses.init_pair(COLOR_EMPTY, curses.COLOR_BLUE, curses.COLOR_BLUE)
     height, width = stdscr.getmaxyx()
     height -= 2
     main_chunk = chunk(position(width, height))
     looping = True
-    pos = position(width, height)
+    pos = position(width/2, height/2)
     center = position(width/2, height/2)
     while looping:
+        mode = MODES[MODE]
         stdscr.addstr(0, 0, 'ascii-drawer by Fran6nd.' + str(pos.x) + ' ' + str(pos.y))
         stdscr.addstr(1, 0, '[' + MODES[MODE] + '] (press [tab] to switch mode)')
         main_chunk.draw(stdscr, pos)
         stdscr.addstr(center.y, center.x, chr(stdscr.inch(center.y, center.x) & 0xFF), curses.color_pair(COLOR_CURSOR))
         stdscr.refresh()
         c = stdscr.getch()
-        x, y = 0, 0
-        if c == curses.KEY_UP:
-            y += 1
-        elif c == curses.KEY_DOWN:
-            y += - 1
-        elif c == curses.KEY_RIGHT:
-            x += 1
-        elif c == curses.KEY_LEFT:
-            x += - 1
-        elif chr(c) == 'q':
-            looping = False
+        if c == 9:
+            p1 = None
+            p2 = None
+            MODE += 1
+            if MODE == len(MODES):
+                MODE = 0
         else:
-            main_chunk.set_char(pos, chr(c))
-        pos = pos + position(x, y)
+            x, y = 0, 0
+            if mode == 'PUT' or mode == 'TEXT' or mode == 'SQUARE':
+                if c == curses.KEY_UP:
+                    y += 1
+                elif c == curses.KEY_DOWN:
+                    y += - 1
+                elif c == curses.KEY_RIGHT:
+                    x += 1
+                elif c == curses.KEY_LEFT:
+                    x += - 1
+                elif chr(c) == 'q':
+                    looping = False
+                if mode == "PUT" :
+                    if chr(c) in charset:
+                        main_chunk.set_char(pos, chr(c))
+                elif mode == 'TEXT':
+                    if c in (10, curses.KEY_ENTER):
+                        y -= 1
+                    elif chr(c) in charset:
+                        main_chunk.set_char(pos, chr(c))
+                        x+=1
+            pos = pos + position(x, y)
         
 
 

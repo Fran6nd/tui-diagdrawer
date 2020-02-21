@@ -1,3 +1,5 @@
+import curses
+
 from COLORS import *
 
 from position import *
@@ -53,6 +55,6 @@ class chunk():
                 if c:
                     stdscr.addstr(height -y ,x, c)
                 else:
-                    stdscr.addstr(height -y ,x, ' ', COLOR_NORMAL)
+                    stdscr.addstr(height -y ,x, ' ',  curses.color_pair(COLOR_EMPTY))
 
 
