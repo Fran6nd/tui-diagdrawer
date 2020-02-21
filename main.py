@@ -229,6 +229,8 @@ def main(stdscr):
             x += - 1
         elif chr(c) == 'q':
             looping = False
+        else:
+            main_chunk.set_char(pos, chr(c))
         pos = pos + position(x, y)
         
 

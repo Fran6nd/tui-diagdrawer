@@ -18,13 +18,17 @@ class chunk():
                     self.chunk[x].append(chunk.get_char(position(x, y) + self.min))
         else:
             for x in range(0, self.width):
-                self.chunk.append(['x'] * self.height)       
+                self.chunk.append([' '] * self.height)       
 
     def get_char(self, pos):
         if self.is_inside(pos):
             return self.chunk[pos.x][pos.y]
         else:
             return None
+
+    def set_char(self, pos, c):
+        if self.is_inside(pos):
+            self.chunk[pos.x][pos.y] = c
 
     def is_inside(self, pos):
         if(pos.x >= 0 and pos.x < self.width and pos.y >=0 and pos.y < self.height) :
