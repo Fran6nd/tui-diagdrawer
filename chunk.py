@@ -16,15 +16,15 @@ class chunk():
                     self.chunk[x].append(chunk.get_char(position(x, y) + self.min))
         else:
             for x in range(0, self.width):
-                self.chunk.append([' '] * self.height)       
+                self.chunk.append(['x'] * self.height)       
 
-    def get_char(pos):
+    def get_char(self, pos):
         if self.is_inside(pos):
             return self.chunk[pos.x][pos.y]
         else:
             return None
 
-    def is_inside(pos):
+    def is_inside(self, pos):
         if(pos.x >= 0 and pos.x < self.width and pos.y >=0 and pos.y < self.height) :
             return True
         return False
@@ -37,6 +37,13 @@ class chunk():
                 output[x].append(self.get_char(position(x, y) + pos))
         return output
 
-    def draw(stdscr, center):
-        for x in range 
+    def draw(self, stdscr, center):
+        height, width = stdscr.getmaxyx()
+        offset = position(center.x - width / 2, center.y - width / 2)
+        height -= 2
+        for x in range(0, width):
+            for y in range(0, height - 1):
+                c = self.get_char(offset + position(x, y))
+                stdscr.addstr(height -y ,x, "c")
+
 

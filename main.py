@@ -208,7 +208,10 @@ def main(stdscr):
     height -= 2
     stdscr.addstr(0, 0, 'ascii-drawer by Fran6nd.')
     stdscr.addstr(1, 0, '[MODE] (press [tab] to switch mode)')
-    main_chunk = chunk(position(width, height))
+    main_chunk = chunk(position(width*2, height*2))
+    main_chunk.draw(stdscr, position(width, height))
+
+
     stdscr.refresh()
     stdscr.getch()
 
