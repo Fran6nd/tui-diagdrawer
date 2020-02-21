@@ -8,12 +8,17 @@ MODES = ['SQUARE', 'PUT', 'TEXT', 'SELECT']
 
 canva = list()
 x, y = 0, 0
+SELECTION = None
 
 
 class point():
     def __init__(self, x, y):
         self.x = x
         self.y = y
+
+class rect():
+    def __init__(self, p1, p2):
+        self.min, self.max = rect_from_points(p1, p2)
 
 def canva_point_to_screen_point(stdscr, p):
     _p = copy.deepcopy(p)
@@ -38,12 +43,24 @@ def draw(stdscr):
         for _y in range(0, height-1):
             center = point(math.floor(width/2), math.floor(height/2))
             center = canva_point_to_screen_point(stdscr, point(x, y))
-            if _x == center.x and _y == center.y:
+            if start_x + _x == x and start_y + _y == y:
                 stdscr.addstr(
                     _y+2, _x, canva[start_x + _x][start_y + height + 1 - _y], curses.color_pair(2))
             else:
                 stdscr.addstr(
                     _y+2, _x, canva[start_x + _x][start_y + height + 1 - _y], curses.color_pair(1))
+
+def draw_selection(stdscr):
+    height, width = stdscr.getmaxyx()
+    if(SELECTION):
+        _max = canva_point_to_screen_point(stdscr, SELECTION.max)
+        _min = canva_point_to_screen_point(stdscr, SELECTION.min)
+        _max.y = height - _max.y
+        _min.y = height - _min.y
+        for _y in range(_max.y, _min.y+1):
+            for _x in range(_min.x, _max.x+1):
+                if _x > 0 and _x < width:
+                    add_char(stdscr,_y, _x, get_char(stdscr,_y, _x), curses.color_pair(2))
 
 def add_char(stdscr,  _y, _x,c, color = None):
     if c:
@@ -87,6 +104,7 @@ def main(stdscr):
     global MODE
     global MODES
     global buffer
+    global SELECTION
     while chr(c) != 'q':
         stdscr.clear()
         draw(stdscr)
@@ -111,15 +129,8 @@ def main(stdscr):
                 add_char(stdscr,_min.y, _min.x, '+')
         elif(MODES[MODE] == 'SELECT'):
             if p1:
-                _min, _max = rect_from_points(p1, point(x, y))
-                _max = canva_point_to_screen_point(stdscr,  _max)
-                _min = canva_point_to_screen_point(stdscr, _min)
-                _max.y = height - _max.y
-                _min.y = height - _min.y
-                for _y in range(_max.y, _min.y):
-                    for _x in range(_min.x, _max.x):
-                        if _x > 0 and _x < width:
-                            add_char(stdscr,_y, _x, get_char(stdscr,_y, _x), curses.color_pair(2))
+                SELECTION = rect(p1, point(x, y))
+        draw_selection(stdscr)
         stdscr.refresh()
         c = stdscr.getch()
         if c == curses.KEY_UP:
@@ -136,42 +147,47 @@ def main(stdscr):
             MODE += 1
             if MODE == len(MODES):
                 MODE = 0
-        else:
-            if(MODES[MODE] == 'SQUARE'):
-                if(c == 32):
-                    if p1 == None:
-                        p1 = point(x, y)
-                    else:
-                        p2 = point(x, y)
-                        x_min = min(p1.x, p2.x)
-                        x_max = max(p1.x, p2.x)
-                        y_min = min(p1.y, p2.y)
-                        y_max = max(p1.y, p2.y)
-                        for _x in range(x_min, x_max):
-                            canva[_x][y_min] = '-'
-                        for _x in range(x_min, x_max):
-                            canva[_x][y_max] = '-'
-                        for _y in range(y_min, y_max):
-                            canva[x_min][_y] = '|'
-                        for _y in range(y_min, y_max):
-                            canva[x_max][_y] = '|'
-                        canva[x_min][y_min] = '+'
-                        canva[x_min][y_max] = '+'
-                        canva[x_max][y_min] = '+'
-                        canva[x_max][y_max] = '+'
-                        p1 = None
-                        p2 = None
-            elif(MODES[MODE] == 'SELECT'):
-                if(c == 32):
-                    if p1 == None:
-                        p1 = point(x, y)
-                    else:
-                        p1 = None
-                        p2 = None
-            elif(MODES[MODE] == 'TEXT'):
+
+        if(MODES[MODE] == 'SQUARE'):
+            if(c == 32):
+                if p1 == None:
+                    p1 = point(x, y)
+                else:
+                    p2 = point(x, y)
+                    x_min = min(p1.x, p2.x)
+                    x_max = max(p1.x, p2.x)
+                    y_min = min(p1.y, p2.y)
+                    y_max = max(p1.y, p2.y)
+                    for _x in range(x_min, x_max):
+                        canva[_x][y_min] = '-'
+                    for _x in range(x_min, x_max):
+                        canva[_x][y_max] = '-'
+                    for _y in range(y_min, y_max):
+                        canva[x_min][_y] = '|'
+                    for _y in range(y_min, y_max):
+                        canva[x_max][_y] = '|'
+                    canva[x_min][y_min] = '+'
+                    canva[x_min][y_max] = '+'
+                    canva[x_max][y_min] = '+'
+                    canva[x_max][y_max] = '+'
+                    p1 = None
+                    p2 = None
+        elif(MODES[MODE] == 'SELECT'):
+            if(c == 32):
+                if p1 == None:
+                    p1 = point(x, y)
+                elif p2 == None:
+                    p2 = point(x, y)
+                    SELECTION = rect(p1, p2)
+                else:
+                    p1 = None
+                    p2 = None
+        elif(MODES[MODE] == 'TEXT'):
+            if(chr(c) in 'AZERTYUIOPMLKJHGFDSQWXCVBNazertyuiopmlkjhgfdsqwxcvbn?!,;.:/\\+-*/=|&1230456789'):
                 canva[x][y] = chr(c)
                 x += 1
-            else:
+        elif(MODES[MODE] == 'PUT'):
+            if(chr(c) in 'AZERTYUIOPMLKJHGFDSQWXCVBN azertyuiopmlkjhgfdsqwxcvbn?!,;.:/\\+-*/=|&1230456789'):
                 canva[x][y] = chr(c)
 
 
