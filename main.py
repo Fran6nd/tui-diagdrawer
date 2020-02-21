@@ -1,10 +1,12 @@
 import curses
+import copy
 
 MODE = 1
 MODES = ['SQUARE', 'LINE', 'MANUAL']
 
 
 canva = list()
+buffer = None
 x, y = 0, 0
 
 
@@ -32,6 +34,24 @@ def draw(stdscr):
             else:
                 stdscr.addstr(
                     _y+2, _x, canva[start_x + _x][start_y + height + 1 - _y], curses.color_pair(1))
+def draw_buffer(stdscr):
+    global x, y
+    stdscr.addstr(0, 0, 'ascii-drawer by Fran6nd.' + str(x) + ' ' + str(y))
+    stdscr.addstr(
+        1, 0, 'Press [KEY_F1] so switch beween edit modes (' + MODES[MODE] + ' selected)')
+    height, width = stdscr.getmaxyx()
+    height -= 2
+    start_x = int(x - width/2)
+    start_y = int(y - height/2)
+
+    for _x in range(0, width-1):
+        for _y in range(0, height-1):
+            if start_x + _x == x and start_y + _y == y:
+                stdscr.addstr(
+                    _y+2, _x, buffer[start_x + _x][start_y + height + 1 - _y], curses.color_pair(2))
+            else:
+                stdscr.addstr(
+                    _y+2, _x, buffer[start_x + _x][start_y + height + 1 - _y], curses.color_pair(1))
 
 def main(stdscr):
     # Clear screen
@@ -47,9 +67,32 @@ def main(stdscr):
     c = 0
     p1 = None
     p2 = None
+    global MODE
+    global MODES
+    global buffer
     while chr(c) != 'q':
         stdscr.clear()
         draw(stdscr)
+        if(MODES[MODE] == 'SQUARE'):
+            if p1:
+                buffer = copy.deepcopy(canva)
+                x_min = min(p1.x, x)
+                x_max = max(p1.x, x)
+                y_min = min(p1.y, y)
+                y_max = max(p1.y, y)
+                for _x in range(x_min, x_max):
+                    buffer[_x][y_min] = '-'
+                for _x in range(x_min, x_max):
+                    buffer[_x][y_max] = '-'
+                for _y in range(y_min, y_max):
+                    buffer[x_min][_y] = '|'
+                for _y in range(y_min, y_max):
+                    buffer[x_max][_y] = '|'
+                buffer[x_min][y_min] = '+'
+                buffer[x_min][y_max] = '+'
+                buffer[x_max][y_min] = '+'
+                buffer[x_max][y_max] = '+'
+                draw_buffer(stdscr)
         stdscr.refresh()
 
         stdscr.refresh()
@@ -65,7 +108,6 @@ def main(stdscr):
         elif c == 9:
             p1 = None
             p2 = None
-            global MODE
             MODE += 1
             if MODE == len(MODES):
                 MODE = 0
