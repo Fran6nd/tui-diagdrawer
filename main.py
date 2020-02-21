@@ -176,10 +176,9 @@ def main(stdscr):
             if(c == 32):
                 if p1 == None:
                     p1 = point(x, y)
-                elif p2 == None:
+                else:
                     p2 = point(x, y)
                     SELECTION = rect(p1, p2)
-                else:
                     p1 = None
                     p2 = None
         elif(MODES[MODE] == 'TEXT'):
