@@ -52,9 +52,11 @@ class chunk():
         for x in range(0, width):
             for y in range(0, height - 1):
                 c = self.get_char(offset + position(x, y))
-                if c:
-                    stdscr.addstr(height -y ,x, c)
+                if self.is_inside(position(x, y) + offset):
+                    p = position(x, y) + offset
+                    stdscr.addstr(height -y ,x, self.chunk[p.x][p.y])
                 else:
                     stdscr.addstr(height -y ,x, ' ',  curses.color_pair(COLOR_EMPTY))
+                #stdscr.addstr(height -y ,x, 'c')
 
 
