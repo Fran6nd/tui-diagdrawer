@@ -10,8 +10,15 @@
 #define COL_CURSOR 3
 #define COL_NORMAL 4
 
+#define MODE_NONE 0
+#define MODE_SELECT 1
+#define MODE_PUT 2
+#define MODE_TEXT 3
+#define MODE_RECT 4
+
 position UP_LEFT_CORNER = {0, 0};
 ad_file CURRENT_FILE;
+int MODE = MODE_PUT;
 
 void clear_screen()
 {
@@ -27,11 +34,13 @@ void clear_screen()
     }
 }
 
-int is_writable(char c){
-    char * charset = "azertyuiopqsdfghjklmwxcvbn?,.;/:§!\\_-+*=()[]{}^$&1234567890AZERTYUIOPQSDFGHJKLMWXCVBN <>";
+int is_writable(char c)
+{
+    char *charset = "azertyuiopqsdfghjklmwxcvbn?,.;/:§!\\_-+*=()[]{}^$&1234567890AZERTYUIOPQSDFGHJKLMWXCVBN <>";
     int i;
-    for(i=0; i < strlen(charset); i ++){
-        if(charset[i] == c)
+    for (i = 0; i < strlen(charset); i++)
+    {
+        if (charset[i] == c)
             return 1;
     }
     return 0;
@@ -80,11 +89,24 @@ void draw_file()
 void draw()
 {
     clear_screen();
+    draw_file();
     move(0, 0);
     addstr("Hello!!!");
     move(1, 0);
-    addstr("Second line!");
-    draw_file();
+    switch (MODE)
+    {
+    case MODE_NONE:
+        addstr("Press [q] to exit\n"
+               "      [p] to enter PUT mode\n"
+               "      [s] to enter SELECT mode\n"
+               "      [r] to enter RECT mode"
+        );
+        break;
+    
+    default:
+        addstr("Second line!");
+        break;
+    }
 }
 
 int main(int argc, char *argv[])
@@ -104,32 +126,60 @@ int main(int argc, char *argv[])
     {
         draw();
         char c = getch();
-        if (c == 'q')
+        if (MODE == MODE_NONE)
         {
-            looping = 0;
-        }
-        else if (c == '\033')
-        {
-            getch();
-            switch (getch())
+            switch (c)
             {
-            case 'A':
-                UP_LEFT_CORNER.y--;
+            case 's':
+                MODE = MODE_SELECT;
                 break;
-            case 'B':
-                UP_LEFT_CORNER.y++;
+            case 'p':
+                MODE = MODE_PUT;
                 break;
-            case 'C':
-                UP_LEFT_CORNER.x++;
+            case 'q':
+                looping = 0;
                 break;
-            case 'D':
-                UP_LEFT_CORNER.x--;
+            case 'r':
+                MODE = MODE_RECT;
+                break;
+            case '\033':
+                getch();
+                getch();
+                break;
+            default:
                 break;
             }
         }
-        else if (is_writable(c)){
-            position tmp = {UP_LEFT_CORNER.x + COLS/2, UP_LEFT_CORNER.y + (LINES -2 ) / 2};
-            ad_file_set_char(&CURRENT_FILE, tmp, c);
+        else
+        {
+            if (c == 'q')
+            {
+               MODE = MODE_NONE;
+            }
+            else if (c == '\033')
+            {
+                getch();
+                switch (getch())
+                {
+                case 'A':
+                    UP_LEFT_CORNER.y--;
+                    break;
+                case 'B':
+                    UP_LEFT_CORNER.y++;
+                    break;
+                case 'C':
+                    UP_LEFT_CORNER.x++;
+                    break;
+                case 'D':
+                    UP_LEFT_CORNER.x--;
+                    break;
+                }
+            }
+            else if (is_writable(c))
+            {
+                position tmp = {UP_LEFT_CORNER.x + COLS / 2, UP_LEFT_CORNER.y + (LINES - 2) / 2};
+                ad_file_set_char(&CURRENT_FILE, tmp, c);
+            }
         }
     }
     endwin();
