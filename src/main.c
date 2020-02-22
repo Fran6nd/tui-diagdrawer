@@ -49,7 +49,14 @@ void draw_file()
             char c = ad_file_get_char(&CURRENT_FILE, p);
             if (c != 0)
             {
-                draw_char(pos_on_screen, c, COL_NORMAL);
+                if (pos_on_screen.x == COLS / 2 && pos_on_screen.y == (LINES + 2) / 2)
+                {
+                    draw_char(pos_on_screen, c, COL_CURSOR);
+                }
+                else
+                {
+                    draw_char(pos_on_screen, c, COL_NORMAL);
+                }
             }
             else
             {
