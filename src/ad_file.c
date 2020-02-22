@@ -27,8 +27,7 @@ void ad_file_free(ad_file * f){
     int i;
     for(i = 0; i < f->lines; i++)
     {
-        free(f->file[i]);
-        
+        free(f->file[i]); 
     }
     free(f->file);
     f->lines = -1;
