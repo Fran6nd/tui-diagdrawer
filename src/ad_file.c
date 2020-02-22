@@ -14,7 +14,7 @@ ad_file ad_file_new(int x, int y){
     for(i = 0; i < f.lines; i++)
     {
         f.file[i] = malloc(sizeof(char) *(cols+1));
-        memset(f.file[i], ' ', cols);
+        memset(f.file[i], 'a' + i, cols);
         f.file[i][cols] = 0;
 
     }
@@ -32,4 +32,13 @@ void ad_file_free(ad_file * f){
     }
     free(f->file);
     f->lines = -1;
+}
+
+char ad_file_get_char(ad_file * f, position p){
+    if(p.y < f->lines && p.y >= 0){
+        if(p.x < strlen(f->file[p.y]) && p.x >= 0){
+            return f->file[p.y][p.x];
+        }
+    }
+    return 0;
 }
