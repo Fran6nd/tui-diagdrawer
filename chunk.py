@@ -1,4 +1,5 @@
 import curses
+import time
 
 from COLORS import *
 
@@ -39,24 +40,22 @@ class chunk():
 
     def get_snapshot(self, pos, width, height):
         output = list()
-        for x in range(0, width):
+        for x in range(pos.x, pos.x + width):
             output.append(list())
-            for y in range(0, height):
-                output[x].append(self.get_char(position(x, y) + pos))
+            for y in range(pos.y, pos.y + height):
+                output[x - pos.x ].append(self.get_char(position(x, y)))
         return output
 
-    def draw(self, stdscr, center):
+    def draw(self, stdscr, down_left_corner):
         height, width = stdscr.getmaxyx()
         height -= 2
-        offset = position(center.x - width / 2, center.y - height / 2)
+        snap = self.get_snapshot(down_left_corner, width, height)
         for x in range(0, width):
-            for y in range(0, height - 1):
-                c = self.get_char(offset + position(x, y))
-                if self.is_inside(position(x, y) + offset):
-                    p = position(x, y) + offset
-                    stdscr.addstr(height -y ,x, self.chunk[p.x][p.y])
+            for y in range(0, height-2):
+                if(snap[x][y]):
+                    stdscr.addstr(y, x, snap[x][y], curses.color_pair(COLOR_NORMAL))
                 else:
-                    stdscr.addstr(height -y ,x, ' ',  curses.color_pair(COLOR_EMPTY))
-                #stdscr.addstr(height -y ,x, 'c')
+                    stdscr.addstr(y, x, ' ', curses.color_pair(COLOR_EMPTY))
+        
 
 

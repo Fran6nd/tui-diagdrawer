@@ -137,43 +137,52 @@ def main(stdscr):
     looping = True
     pos = position(width/2, height/2)
     center = position(width/2, height/2)
+    menu = False
     while looping:
         mode = MODES[MODE]
-        stdscr.addstr(0, 0, 'ascii-drawer by Fran6nd.' + str(pos.x) + ' ' + str(pos.y))
-        stdscr.addstr(1, 0, '[' + MODES[MODE] + '] (press [tab] to switch mode)')
-        main_chunk.draw(stdscr, pos)
+        stdscr.addstr(height, 0, 'ascii-drawer by Fran6nd.' + str(pos.x) + ' ' + str(pos.y) + ' [' + str(main_chunk.get_char(pos)) + ']')
+        if not menu:
+            stdscr.addstr(height + 1, 0, '[' + MODES[MODE] + '] (press [ESC] to go back to the menu)')
+        else:
+            stdscr.addstr(height + 1, 0, '[' + MODES[MODE] + '] (press tab to change, and enter to validate.)')
+        main_chunk.draw(stdscr, pos-center)
         stdscr.addstr(center.y, center.x, chr(stdscr.inch(center.y, center.x) & 0xFF), curses.color_pair(COLOR_CURSOR))
         stdscr.refresh()
         c = stdscr.getch()
-        if c == 9:
-            p1 = None
-            p2 = None
-            MODE += 1
-            if MODE == len(MODES):
-                MODE = 0
-        else:
-            x, y = 0, 0
-            if mode == 'PUT' or mode == 'TEXT' or mode == 'SQUARE':
-                if c == curses.KEY_UP:
-                    y += 1
-                elif c == curses.KEY_DOWN:
-                    y += - 1
-                elif c == curses.KEY_RIGHT:
-                    x += 1
-                elif c == curses.KEY_LEFT:
-                    x += - 1
-                elif chr(c) == 'q':
-                    looping = False
-                if mode == "PUT" :
-                    if chr(c) in charset:
-                        main_chunk.set_char(pos, chr(c))
-                elif mode == 'TEXT':
-                    if c in (10, curses.KEY_ENTER):
+        if not menu:
+            if c == 27:
+                menu = True
+            else:
+                x, y = 0, 0
+                if mode == 'PUT' or mode == 'TEXT' or mode == 'SQUARE':
+                    if c == curses.KEY_UP:
                         y -= 1
-                    elif chr(c) in charset:
-                        main_chunk.set_char(pos, chr(c))
-                        x+=1
-            pos = pos + position(x, y)
+                    elif c == curses.KEY_DOWN:
+                        y += 1
+                    elif c == curses.KEY_RIGHT:
+                        x += 1
+                    elif c == curses.KEY_LEFT:
+                        x -= 1
+                    elif chr(c) == 'q':
+                        looping = False
+                    if mode == "PUT" :
+                        if chr(c) in charset:
+                            main_chunk.set_char(pos, chr(c))
+                    elif mode == 'TEXT':
+                        if c in (10, curses.KEY_ENTER):
+                            y -= 1
+                        elif chr(c) in charset:
+                            main_chunk.set_char(pos, chr(c))
+                            x+=1
+                pos = pos + position(x, y)
+        else:
+            if c == 9:
+                MODE += 1
+                if MODE == len(MODES):
+                    MODE = 0
+            if c == curses.KEY_ENTER or c == 10 or c == 13:
+                menu = False
+
         
 
 
