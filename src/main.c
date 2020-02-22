@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <curses.h>
+#include <string.h>
 #include <stdio.h>
 
 #include "ad_file.h"
@@ -9,7 +10,7 @@
 #define COL_CURSOR 3
 #define COL_NORMAL 4
 
-position CURSOR_POSITION = {0, 0};
+position UP_LEFT_CORNER = {0, 0};
 ad_file CURRENT_FILE;
 
 void clear_screen()
@@ -24,6 +25,16 @@ void clear_screen()
             addch(' ');
         }
     }
+}
+
+int is_writable(char c){
+    char * charset = "azertyuiopqsdfghjklmwxcvbn?,.;/:§!\\_-+*=()[]{}^$&1234567890AZERTYUIOPQSDFGHJKLMWXCVBN <>";
+    int i;
+    for(i=0; i < strlen(charset); i ++){
+        if(charset[i] == c)
+            return 1;
+    }
+    return 0;
 }
 
 void draw_char(position p, char c, int col)
@@ -44,8 +55,8 @@ void draw_file()
         {
             position pos_on_screen = {x, y};
             position p = {x, y - 2};
-            p.x += CURSOR_POSITION.x;
-            p.y += CURSOR_POSITION.y;
+            p.x += UP_LEFT_CORNER.x;
+            p.y += UP_LEFT_CORNER.y;
             char c = ad_file_get_char(&CURRENT_FILE, p);
             if (c != 0)
             {
@@ -103,18 +114,22 @@ int main(int argc, char *argv[])
             switch (getch())
             {
             case 'A':
-                CURSOR_POSITION.y--;
+                UP_LEFT_CORNER.y--;
                 break;
             case 'B':
-                CURSOR_POSITION.y++;
+                UP_LEFT_CORNER.y++;
                 break;
             case 'C':
-                CURSOR_POSITION.x++;
+                UP_LEFT_CORNER.x++;
                 break;
             case 'D':
-                CURSOR_POSITION.x--;
+                UP_LEFT_CORNER.x--;
                 break;
             }
+        }
+        else if (is_writable(c)){
+            position tmp = {UP_LEFT_CORNER.x + COLS/2, UP_LEFT_CORNER.y + (LINES -2 ) / 2};
+            ad_file_set_char(&CURRENT_FILE, tmp, c);
         }
     }
     endwin();

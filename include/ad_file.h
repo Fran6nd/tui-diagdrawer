@@ -14,6 +14,6 @@ ad_file ad_file_new(int x, int y);
 ad_file ad_load_file(char * f);
 void ad_file_free(ad_file * f);
 char ad_file_get_char(ad_file * f, position);
-char ad_file_set_char(ad_file * f, position, char c);
+void ad_file_set_char(ad_file * f, position, char c);
 
 #endif

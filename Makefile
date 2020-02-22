@@ -4,7 +4,7 @@ ad_file.o: src/ad_file.c
 	gcc -O -c src/ad_file.c -std=c99 -o ad_file.o -Iinclude
 main.o: ad_file.o
 	gcc -D _DEFAULT_SOURCE -O -c src/main.c -std=c99 -o main.o -Iinclude
-all: clean main.o
+all: main.o
 	gcc -g main.o ad_file.o -Iinclude -lncurses -o ascii-drawer
 clean:
 	rm *.o
