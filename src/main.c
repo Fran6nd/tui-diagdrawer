@@ -91,7 +91,7 @@ void draw()
     clear_screen();
     draw_file();
     move(0, 0);
-    addstr("Hello!!!");
+    addstr("ASCII-Drawer by Fran6nd (press [tab] to swith mode)");
     move(1, 0);
     switch (MODE)
     {
@@ -99,10 +99,14 @@ void draw()
         addstr("Press [q] to exit\n"
                "      [p] to enter PUT mode\n"
                "      [s] to enter SELECT mode\n"
-               "      [r] to enter RECT mode"
-        );
+               "      [r] to enter RECT mode");
         break;
-    
+    case MODE_PUT:
+        addstr("[PUT MODE] -> move with arrows and set keys as you wish!");
+        break;
+    case MODE_RECT:
+        addstr("[RECT MODE] -> move with arrows and set keys, use [space] to set p1 and p2.");
+        break;
     default:
         addstr("Second line!");
         break;
@@ -111,10 +115,11 @@ void draw()
 
 int main(int argc, char *argv[])
 {
-    initscr();
+    WINDOW * w = initscr();
     curs_set(0);
     noecho();
     start_color();
+    //keypad(w, TRUE);
 
     init_pair(COL_CURSOR, COLOR_WHITE, COLOR_RED);
     init_pair(COL_NORMAL, COLOR_WHITE, COLOR_BLACK);
@@ -152,33 +157,36 @@ int main(int argc, char *argv[])
         }
         else
         {
-            if (c == 'q')
+            if (c == '\t')
             {
-               MODE = MODE_NONE;
+                MODE = MODE_NONE;
             }
-            else if (c == '\033')
+            else if (MODE == MODE_PUT)
             {
-                getch();
-                switch (getch())
+                if (c == '\033')
                 {
-                case 'A':
-                    UP_LEFT_CORNER.y--;
-                    break;
-                case 'B':
-                    UP_LEFT_CORNER.y++;
-                    break;
-                case 'C':
-                    UP_LEFT_CORNER.x++;
-                    break;
-                case 'D':
-                    UP_LEFT_CORNER.x--;
-                    break;
+                    getch();
+                    switch (getch())
+                    {
+                    case 'A':
+                        UP_LEFT_CORNER.y--;
+                        break;
+                    case 'B':
+                        UP_LEFT_CORNER.y++;
+                        break;
+                    case 'C':
+                        UP_LEFT_CORNER.x++;
+                        break;
+                    case 'D':
+                        UP_LEFT_CORNER.x--;
+                        break;
+                    }
                 }
-            }
-            else if (is_writable(c))
-            {
-                position tmp = {UP_LEFT_CORNER.x + COLS / 2, UP_LEFT_CORNER.y + (LINES - 2) / 2};
-                ad_file_set_char(&CURRENT_FILE, tmp, c);
+                else if (is_writable(c))
+                {
+                    position tmp = {UP_LEFT_CORNER.x + COLS / 2, UP_LEFT_CORNER.y + (LINES - 2) / 2};
+                    ad_file_set_char(&CURRENT_FILE, tmp, c);
+                }
             }
         }
     }
