@@ -146,7 +146,6 @@ void draw_file()
                     if (MODE == MODE_SELECT && P1.null == 0 && is_in_rect(P1, tmp, p))
                     {
                         draw_char(pos_on_screen, c, COL_SELECTION);
-
                     }
                     else
                     {
@@ -184,7 +183,15 @@ void draw()
         addstr("[RECT MODE] -> move with arrows, use [space] to set p1 and p2, use [tab][tab] to abort.");
         break;
     case MODE_SELECT:
-        addstr("[SELECT MODE] -> move with arrows, use [space] to set p1 and p2 or unselect, then move the selection.");
+        if (!P1.null && !P2.null)
+        {
+            addstr("[SELECT MODE] -> press [space] to select, [f] to fill then give a character to fill with!");
+        }
+        else
+        {
+            addstr("[SELECT MODE] -> move with arrows, use [space] to set p1 and p2 or unselect.");
+        }
+
         break;
     default:
         addstr("Current mode not implemented yet.");
@@ -342,38 +349,72 @@ int main(int argc, char *argv[])
             }
             else if (MODE == MODE_SELECT)
             {
-                if (c == '\033')
+                if (P1.null || P2.null)
                 {
-                    getch();
-                    switch (getch())
+                    if (c == '\033')
                     {
-                    case 'A':
-                        UP_LEFT_CORNER.y--;
-                        break;
-                    case 'B':
-                        UP_LEFT_CORNER.y++;
-                        break;
-                    case 'C':
-                        UP_LEFT_CORNER.x++;
-                        break;
-                    case 'D':
-                        UP_LEFT_CORNER.x--;
-                        break;
+                        getch();
+                        switch (getch())
+                        {
+                        case 'A':
+                            UP_LEFT_CORNER.y--;
+                            break;
+                        case 'B':
+                            UP_LEFT_CORNER.y++;
+                            break;
+                        case 'C':
+                            UP_LEFT_CORNER.x++;
+                            break;
+                        case 'D':
+                            UP_LEFT_CORNER.x--;
+                            break;
+                        }
+                    }
+                    else if (c == ' ')
+                    {
+                        position tmp = get_cursor_pos();
+                        if (P1.null)
+                        {
+                            P1 = tmp;
+                        }
+                        else if (P2.null)
+                        {
+                            P2 = tmp;
+                        }
+                        else
+                        {
+                            P1.null = 1;
+                            P2.null = 1;
+                        }
                     }
                 }
-                else if (c == ' ')
+                else if (!P2.null)
                 {
-                    position tmp = get_cursor_pos();
-                    if (P1.null)
+                    if (c == ' ')
                     {
-                        P1 = tmp;
-                    }
-                    else if(P2.null){
-                        P2 = tmp;
-                    }
-                    else{
-                        P1.null = 1;
                         P2.null = 1;
+                        P1.null = 1;
+                    }
+                    else if (c == 'f')
+                    {
+                        do
+                        {
+                            c = getch();
+                        } while (!is_writable(c));
+                        position min = min_pos(P1, P2);
+                        position max = max_pos(P1, P2);
+                        int x;
+                        int y;
+                        for (x = min.x; x <= max.x; x++)
+                        {
+                            for (y = min.y; y <= max.y; y++)
+                            {
+                                position tmp = {x, y};
+                                ad_file_set_char(&CURRENT_FILE, tmp, c);
+                            }
+                        }
+                        P2.null = 1;
+                        P1.null = 1;
                     }
                 }
             }
