@@ -20,6 +20,7 @@ position UP_LEFT_CORNER = {0, 0};
 position P1, P2;
 ad_file CURRENT_FILE;
 int MODE = MODE_PUT;
+int PREVIOUS_MODE = 0;
 
 position get_cursor_pos()
 {
@@ -70,6 +71,15 @@ int is_on_rect_border(position r1, position r2, position p)
             return 1;
     if (p.y > min.y && p.y < max.y)
         if (p.x == max.x || p.x == min.x)
+            return 1;
+    return 0;
+}
+int is_in_rect(position r1, position r2, position p)
+{
+    position min = min_pos(r1, r2);
+    position max = max_pos(r1, r2);
+    if (p.x >= min.x && p.x <= max.x)
+        if (p.y <= max.y && p.y >= min.y)
             return 1;
     return 0;
 }
@@ -132,7 +142,16 @@ void draw_file()
                 }
                 else
                 {
-                    draw_char(pos_on_screen, c, COL_NORMAL);
+                    position tmp = P2.null == 0 ? P2 : get_cursor_pos();
+                    if (MODE == MODE_SELECT && P1.null == 0 && is_in_rect(P1, tmp, p))
+                    {
+                        draw_char(pos_on_screen, c, COL_SELECTION);
+
+                    }
+                    else
+                    {
+                        draw_char(pos_on_screen, c, COL_NORMAL);
+                    }
                 }
             }
             else
@@ -162,10 +181,13 @@ void draw()
         addstr("[PUT MODE] -> move with arrows and set keys as you wish!");
         break;
     case MODE_RECT:
-        addstr("[RECT MODE] -> move with arrows and set keys, use [space] to set p1 and p2.");
+        addstr("[RECT MODE] -> move with arrows, use [space] to set p1 and p2, use [tab][tab] to abort.");
+        break;
+    case MODE_SELECT:
+        addstr("[SELECT MODE] -> move with arrows, use [space] to set p1 and p2 or unselect, then move the selection.");
         break;
     default:
-        addstr("Second line!");
+        addstr("Current mode not implemented yet.");
         break;
     }
 }
@@ -181,6 +203,7 @@ int main(int argc, char *argv[])
     init_pair(COL_CURSOR, COLOR_WHITE, COLOR_RED);
     init_pair(COL_NORMAL, COLOR_WHITE, COLOR_BLACK);
     init_pair(COL_EMPTY, COLOR_BLACK, COLOR_BLUE);
+    init_pair(COL_SELECTION, COLOR_BLACK, COLOR_BLUE);
 
     P1.null = 1;
     P2.null = 1;
@@ -192,6 +215,7 @@ int main(int argc, char *argv[])
         char c = getch();
         if (MODE == MODE_NONE)
         {
+            P1.null = 1;
             switch (c)
             {
             case 's':
@@ -202,6 +226,9 @@ int main(int argc, char *argv[])
                 break;
             case 'q':
                 looping = 0;
+                break;
+            case '\t':
+                MODE = PREVIOUS_MODE;
                 break;
             case 'r':
                 MODE = MODE_RECT;
@@ -218,6 +245,7 @@ int main(int argc, char *argv[])
         {
             if (c == '\t')
             {
+                PREVIOUS_MODE = MODE;
                 MODE = MODE_NONE;
             }
             else if (MODE == MODE_PUT)
@@ -309,6 +337,43 @@ int main(int argc, char *argv[])
                         }
 
                         P1.null = 1;
+                    }
+                }
+            }
+            else if (MODE == MODE_SELECT)
+            {
+                if (c == '\033')
+                {
+                    getch();
+                    switch (getch())
+                    {
+                    case 'A':
+                        UP_LEFT_CORNER.y--;
+                        break;
+                    case 'B':
+                        UP_LEFT_CORNER.y++;
+                        break;
+                    case 'C':
+                        UP_LEFT_CORNER.x++;
+                        break;
+                    case 'D':
+                        UP_LEFT_CORNER.x--;
+                        break;
+                    }
+                }
+                else if (c == ' ')
+                {
+                    position tmp = get_cursor_pos();
+                    if (P1.null)
+                    {
+                        P1 = tmp;
+                    }
+                    else if(P2.null){
+                        P2 = tmp;
+                    }
+                    else{
+                        P1.null = 1;
+                        P2.null = 1;
                     }
                 }
             }
