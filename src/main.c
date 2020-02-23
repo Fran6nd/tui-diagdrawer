@@ -17,6 +17,7 @@
 #define MODE_RECT 4
 
 position UP_LEFT_CORNER = {0, 0};
+position P1, P2;
 ad_file CURRENT_FILE;
 int MODE = MODE_PUT;
 
@@ -125,6 +126,8 @@ int main(int argc, char *argv[])
     init_pair(COL_NORMAL, COLOR_WHITE, COLOR_BLACK);
     init_pair(COL_EMPTY, COLOR_BLACK, COLOR_BLUE);
 
+    P1.null = 1;
+    P2.null = 1;
     CURRENT_FILE = ad_file_new(COLS - 2, LINES - 2);
     int looping = 1;
     while (looping)
@@ -186,6 +189,69 @@ int main(int argc, char *argv[])
                 {
                     position tmp = {UP_LEFT_CORNER.x + COLS / 2, UP_LEFT_CORNER.y + (LINES - 2) / 2};
                     ad_file_set_char(&CURRENT_FILE, tmp, c);
+                }
+            }
+            else if (MODE == MODE_RECT)
+            {
+                if (c == '\033')
+                {
+                    getch();
+                    switch (getch())
+                    {
+                    case 'A':
+                        UP_LEFT_CORNER.y--;
+                        break;
+                    case 'B':
+                        UP_LEFT_CORNER.y++;
+                        break;
+                    case 'C':
+                        UP_LEFT_CORNER.x++;
+                        break;
+                    case 'D':
+                        UP_LEFT_CORNER.x--;
+                        break;
+                    }
+                }
+                else if (c == ' ')
+                {
+                    position tmp = {UP_LEFT_CORNER.x + COLS / 2, UP_LEFT_CORNER.y + (LINES - 2) / 2, 0};
+                    if(P1.null){
+                        P1 = tmp;
+                    }
+                    else {
+                        position down_left = min_pos(P1, tmp);
+                        position up_right = max_pos(P1, tmp);
+                        position up_left = {down_left.x, up_right.y};
+                        position down_right = {up_right.x, down_left.y};
+                        ad_file_set_char(&CURRENT_FILE, down_left, '+');
+                        ad_file_set_char(&CURRENT_FILE, up_right, '+');
+                        ad_file_set_char(&CURRENT_FILE, down_right, '+');
+                        ad_file_set_char(&CURRENT_FILE, up_left, '+');
+                        int x;
+                        for(x = down_left.x + 1; x < down_right.x; x++){
+                            position tmp1 = {x, up_right.y};
+                            ad_file_set_char(&CURRENT_FILE, tmp1, '-');
+
+                        }
+                        for(x = down_left.x + 1; x < down_right.x; x++){
+                            position tmp1 = {x, down_right.y};
+                            ad_file_set_char(&CURRENT_FILE, tmp1, '-');
+
+                        }
+                        int y;
+                        for(y = down_left.y + 1; y < up_left.y; y++){
+                            position tmp1 = {up_left.x, y};
+                            ad_file_set_char(&CURRENT_FILE, tmp1, '|');
+
+                        }
+                        for(y = down_left.y + 1; y < up_left.y; y++){
+                            position tmp1 = {up_right.x, y};
+                            ad_file_set_char(&CURRENT_FILE, tmp1, '|');
+
+                        }
+
+                        P1.null = 1;
+                    }
                 }
             }
         }
