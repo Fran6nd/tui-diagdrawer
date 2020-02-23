@@ -188,7 +188,7 @@ void draw()
     case MODE_SELECT:
         if (!P1.null && !P2.null)
         {
-            addstr("[SELECT MODE] -> press [space] to select, [f] to fill then give a character to fill with!");
+            addstr("[SELECT MODE] -> press [space] to select, [m] to move selection or [f] to fill then give a character to fill with!");
         }
         else
         {
@@ -439,6 +439,27 @@ int main(int argc, char *argv[])
                         P1.null = 1;
                     }
                     else if (c == 'f')
+                    {
+                        do
+                        {
+                            c = getch();
+                        } while (!is_writable(c));
+                        position min = min_pos(P1, P2);
+                        position max = max_pos(P1, P2);
+                        int x;
+                        int y;
+                        for (x = min.x; x <= max.x; x++)
+                        {
+                            for (y = min.y; y <= max.y; y++)
+                            {
+                                position tmp = {x, y};
+                                ad_file_set_char(&CURRENT_FILE, tmp, c);
+                            }
+                        }
+                        P2.null = 1;
+                        P1.null = 1;
+                    }
+                    else if (c == 'm')
                     {
                         do
                         {
