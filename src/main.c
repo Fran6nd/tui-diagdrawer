@@ -214,7 +214,12 @@ int main(int argc, char *argv[])
 
     P1.null = 1;
     P2.null = 1;
-    CURRENT_FILE = ad_file_new(COLS - 2, LINES - 2);
+    if (argc != 2)
+        CURRENT_FILE = ad_file_new(COLS - 2, LINES - 2);
+    else
+    {
+        CURRENT_FILE = ad_load_file(argv[1]);
+    }
     int looping = 1;
     while (looping)
     {
