@@ -63,7 +63,8 @@ ad_file ad_load_file(char *f)
     for (c = getc(fp); c != EOF; c = getc(fp))
         if (c == '\n') // Increment count if this character is newline
         {
-            y++;;
+            y++;
+            ;
             x = 0;
         }
         else
@@ -72,8 +73,20 @@ ad_file ad_load_file(char *f)
             position tmp = {x, y};
             ad_file_set_char(&output, tmp, c);
         }
-        fclose(fp);
-    return  output;
+    fclose(fp);
+    return output;
+}
+
+void ad_save_file(ad_file *file, char *f)
+{
+    int y;
+    FILE * fOut = fopen(f, "w");
+    for (y = 0; y < file->lines; y++)
+    {
+        fputs(file->file[y], fOut);
+        fputs("\n", fOut);
+    }
+    fclose (fOut);
 }
 void ad_file_free(ad_file *f)
 {

@@ -21,6 +21,7 @@ position P1, P2;
 ad_file CURRENT_FILE;
 int MODE = MODE_PUT;
 int PREVIOUS_MODE = 0;
+char *NAME = "Untitled.txt";
 
 position get_cursor_pos()
 {
@@ -173,8 +174,10 @@ void draw()
     case MODE_NONE:
         addstr("Press [q] to exit\n"
                "      [p] to enter PUT mode\n"
+               "      [t] to enter TEXT mode\n"
                "      [s] to enter SELECT mode\n"
-               "      [r] to enter RECT mode");
+               "      [r] to enter RECT mode\n"
+               "      [w] to write to file");
         break;
     case MODE_PUT:
         addstr("[PUT MODE] -> move with arrows and set keys as you wish!");
@@ -205,7 +208,6 @@ int main(int argc, char *argv[])
     curs_set(0);
     noecho();
     start_color();
-    //keypad(w, TRUE);
 
     init_pair(COL_CURSOR, COLOR_WHITE, COLOR_RED);
     init_pair(COL_NORMAL, COLOR_WHITE, COLOR_BLACK);
@@ -219,6 +221,7 @@ int main(int argc, char *argv[])
     else
     {
         CURRENT_FILE = ad_load_file(argv[1]);
+        NAME = argv[1];
     }
     int looping = 1;
     while (looping)
@@ -238,6 +241,13 @@ int main(int argc, char *argv[])
                 break;
             case 'q':
                 looping = 0;
+                break;
+            case 't':
+                MODE = MODE_TEXT;
+                break;
+            case 'w':
+                ad_save_file(&CURRENT_FILE, NAME);
+                MODE = PREVIOUS_MODE;
                 break;
             case '\t':
                 MODE = PREVIOUS_MODE;
@@ -285,6 +295,34 @@ int main(int argc, char *argv[])
                 {
                     position tmp = get_cursor_pos();
                     ad_file_set_char(&CURRENT_FILE, tmp, c);
+                }
+            }
+            else if (MODE == MODE_TEXT)
+            {
+                if (c == '\033')
+                {
+                    getch();
+                    switch (getch())
+                    {
+                    case 'A':
+                        UP_LEFT_CORNER.y--;
+                        break;
+                    case 'B':
+                        UP_LEFT_CORNER.y++;
+                        break;
+                    case 'C':
+                        UP_LEFT_CORNER.x++;
+                        break;
+                    case 'D':
+                        UP_LEFT_CORNER.x--;
+                        break;
+                    }
+                }
+                else if (is_writable(c))
+                {
+                    position tmp = get_cursor_pos();
+                    ad_file_set_char(&CURRENT_FILE, tmp, c);
+                    UP_LEFT_CORNER.x++;
                 }
             }
             else if (MODE == MODE_RECT)
