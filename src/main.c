@@ -21,6 +21,12 @@ position P1, P2;
 ad_file CURRENT_FILE;
 int MODE = MODE_PUT;
 
+position get_cursor_pos()
+{
+    position tmp = {UP_LEFT_CORNER.x + COLS / 2, UP_LEFT_CORNER.y + (LINES - 2) / 2};
+    return tmp;
+}
+
 void clear_screen()
 {
     int x;
@@ -55,6 +61,35 @@ void draw_char(position p, char c, int col)
     attroff(COLOR_PAIR(col));
 }
 
+int is_on_rect_border(position r1, position r2, position p)
+{
+    position min = min_pos(r1, r2);
+    position max = max_pos(r1, r2);
+    if (p.x > min.x && p.x < max.x)
+        if (p.y == max.y || p.y == min.y)
+            return 1;
+    if (p.y > min.y && p.y < max.y)
+        if (p.x == max.x || p.x == min.x)
+            return 1;
+    return 0;
+}
+int is_on_rect_corner(position r1, position r2, position p)
+{
+    position down_left = min_pos(r1, r2);
+    position up_right = max_pos(r1, r2);
+    position up_left = {down_left.x, up_right.y};
+    position down_right = {up_right.x, down_left.y};
+    if (p.x == down_left.x && p.y == down_left.y)
+        return 1;
+    if (p.x == up_right.x && p.y == up_right.y)
+        return 1;
+    if (p.x == up_left.x && p.y == up_left.y)
+        return 1;
+    if (p.x == down_right.x && p.y == down_right.y)
+        return 1;
+    return 0;
+}
+
 void draw_file()
 {
     int x;
@@ -70,6 +105,27 @@ void draw_file()
             char c = ad_file_get_char(&CURRENT_FILE, p);
             if (c != 0)
             {
+                if (MODE == MODE_RECT)
+                {
+                    if (P1.null == 0)
+                    {
+                        if (is_on_rect_corner(P1, get_cursor_pos(), p))
+                        {
+                            c = '+';
+                        }
+                        else if (is_on_rect_border(P1, get_cursor_pos(), p))
+                        {
+                            if (p.y == P1.y || p.y == get_cursor_pos().y)
+                            {
+                                c = '-';
+                            }
+                            if (p.x == P1.x || p.x == get_cursor_pos().x)
+                            {
+                                c = '|';
+                            }
+                        }
+                    }
+                }
                 if (pos_on_screen.x == COLS / 2 && pos_on_screen.y == (LINES + 2) / 2)
                 {
                     draw_char(pos_on_screen, c, COL_CURSOR);
@@ -116,7 +172,7 @@ void draw()
 
 int main(int argc, char *argv[])
 {
-    WINDOW * w = initscr();
+    WINDOW *w = initscr();
     curs_set(0);
     noecho();
     start_color();
@@ -187,7 +243,7 @@ int main(int argc, char *argv[])
                 }
                 else if (is_writable(c))
                 {
-                    position tmp = {UP_LEFT_CORNER.x + COLS / 2, UP_LEFT_CORNER.y + (LINES - 2) / 2};
+                    position tmp = get_cursor_pos();
                     ad_file_set_char(&CURRENT_FILE, tmp, c);
                 }
             }
@@ -214,11 +270,13 @@ int main(int argc, char *argv[])
                 }
                 else if (c == ' ')
                 {
-                    position tmp = {UP_LEFT_CORNER.x + COLS / 2, UP_LEFT_CORNER.y + (LINES - 2) / 2, 0};
-                    if(P1.null){
+                    position tmp = get_cursor_pos();
+                    if (P1.null)
+                    {
                         P1 = tmp;
                     }
-                    else {
+                    else
+                    {
                         position down_left = min_pos(P1, tmp);
                         position up_right = max_pos(P1, tmp);
                         position up_left = {down_left.x, up_right.y};
@@ -228,26 +286,26 @@ int main(int argc, char *argv[])
                         ad_file_set_char(&CURRENT_FILE, down_right, '+');
                         ad_file_set_char(&CURRENT_FILE, up_left, '+');
                         int x;
-                        for(x = down_left.x + 1; x < down_right.x; x++){
+                        for (x = down_left.x + 1; x < down_right.x; x++)
+                        {
                             position tmp1 = {x, up_right.y};
                             ad_file_set_char(&CURRENT_FILE, tmp1, '-');
-
                         }
-                        for(x = down_left.x + 1; x < down_right.x; x++){
+                        for (x = down_left.x + 1; x < down_right.x; x++)
+                        {
                             position tmp1 = {x, down_right.y};
                             ad_file_set_char(&CURRENT_FILE, tmp1, '-');
-
                         }
                         int y;
-                        for(y = down_left.y + 1; y < up_left.y; y++){
+                        for (y = down_left.y + 1; y < up_left.y; y++)
+                        {
                             position tmp1 = {up_left.x, y};
                             ad_file_set_char(&CURRENT_FILE, tmp1, '|');
-
                         }
-                        for(y = down_left.y + 1; y < up_left.y; y++){
+                        for (y = down_left.y + 1; y < up_left.y; y++)
+                        {
                             position tmp1 = {up_right.x, y};
                             ad_file_set_char(&CURRENT_FILE, tmp1, '|');
-
                         }
 
                         P1.null = 1;
