@@ -1,11 +1,16 @@
 .DEFAULT_GOAL := all
 
-ad_file.o: src/ad_file.c
-	gcc -O -c src/ad_file.c -std=c99 -o ad_file.o -Iinclude
-main.o: ad_file.o
+
+position.o: src/position.c
+	gcc -O -c src/position.c -std=c99 -o position.o -Iinclude
+position_list.o: src/position_list.c
+	gcc -O -c src/position_list.c -std=c99 -o position_list.o -Iinclude
+chunk.o: src/chunk.c position.o position_list.o
+	gcc -O -c src/chunk.c -std=c99 -o chunk.o -Iinclude
+main.o: chunk.o
 	gcc -D _DEFAULT_SOURCE -O -c src/main.c -std=c99 -o main.o -Iinclude
 all: main.o
-	gcc -g main.o ad_file.o -Iinclude -lncurses -o ascii-drawer
+	gcc -g main.o chunk.o position.o position_list.o -Iinclude -lncurses -o ascii-drawer
 clean:
 	rm *.o
 	rm ascii-drawer

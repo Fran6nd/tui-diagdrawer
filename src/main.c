@@ -3,7 +3,9 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "ad_file.h"
+#include "chunk.h"
+#include "position.h"
+#include "position_list.h"
 
 #define COL_SELECTION 1
 #define COL_EMPTY 2
@@ -15,10 +17,14 @@
 #define MODE_PUT 2
 #define MODE_TEXT 3
 #define MODE_RECT 4
+#define MODE_LINE 5
+#define MODE_ARROW 6
 
 position UP_LEFT_CORNER = {0, 0};
 position P1, P2;
-ad_file CURRENT_FILE;
+chunk CURRENT_FILE;
+chunk CLIPBOARD;
+position_list PATH;
 int MODE = MODE_PUT;
 int PREVIOUS_MODE = 0;
 char *NAME = "Untitled.txt";
@@ -65,8 +71,8 @@ void draw_char(position p, char c, int col)
 
 int is_on_rect_border(position r1, position r2, position p)
 {
-    position min = min_pos(r1, r2);
-    position max = max_pos(r1, r2);
+    position min = pos_min(r1, r2);
+    position max = pos_max(r1, r2);
     if (p.x > min.x && p.x < max.x)
         if (p.y == max.y || p.y == min.y)
             return 1;
@@ -77,8 +83,8 @@ int is_on_rect_border(position r1, position r2, position p)
 }
 int is_in_rect(position r1, position r2, position p)
 {
-    position min = min_pos(r1, r2);
-    position max = max_pos(r1, r2);
+    position min = pos_min(r1, r2);
+    position max = pos_max(r1, r2);
     if (p.x >= min.x && p.x <= max.x)
         if (p.y <= max.y && p.y >= min.y)
             return 1;
@@ -86,8 +92,8 @@ int is_in_rect(position r1, position r2, position p)
 }
 int is_on_rect_corner(position r1, position r2, position p)
 {
-    position down_left = min_pos(r1, r2);
-    position up_right = max_pos(r1, r2);
+    position down_left = pos_min(r1, r2);
+    position up_right = pos_max(r1, r2);
     position up_left = {down_left.x, up_right.y};
     position down_right = {up_right.x, down_left.y};
     if (p.x == down_left.x && p.y == down_left.y)
@@ -113,7 +119,7 @@ void draw_file()
             position p = {x, y - 2};
             p.x += UP_LEFT_CORNER.x;
             p.y += UP_LEFT_CORNER.y;
-            char c = ad_file_get_char(&CURRENT_FILE, p);
+            char c = chk_get_char_at(&CURRENT_FILE, p);
             if (c != 0)
             {
                 if (MODE == MODE_RECT)
@@ -135,6 +141,22 @@ void draw_file()
                                 c = '|';
                             }
                         }
+                    }
+                }
+                else if (MODE == MODE_LINE)
+                {
+                    int i = pl_is_inside(&PATH, p);
+                    if (i != -1)
+                    {
+                        c = pl_get_line_char(&PATH, i);
+                    }
+                }
+                else if (MODE == MODE_ARROW)
+                {
+                    int i = pl_is_inside(&PATH, p);
+                    if (i != -1)
+                    {
+                        c = pl_get_arrow_char(&PATH, i);
                     }
                 }
                 if (pos_on_screen.x == COLS / 2 && pos_on_screen.y == (LINES + 2) / 2)
@@ -177,13 +199,25 @@ void draw()
                "      [t] to enter TEXT mode\n"
                "      [s] to enter SELECT mode\n"
                "      [r] to enter RECT mode\n"
-               "      [w] to write to file");
+               "      [l] to enter LINE mode\n"
+               "      [a] to enter ARROW mode\n"
+               "      [w] to write to file\n"
+               "      [x] to write to file and exit");
         break;
     case MODE_PUT:
         addstr("[PUT MODE] -> move with arrows and set keys as you wish!");
         break;
+    case MODE_TEXT:
+        addstr("[TEXT MODE] -> move with arrows and set keys as you wish!");
+        break;
     case MODE_RECT:
         addstr("[RECT MODE] -> move with arrows, use [space] to set p1 and p2, use [tab][tab] to abort.");
+        break;
+    case MODE_LINE:
+        addstr("[LINE MODE] -> move with arrows, use [space] to start/stop drawing and use [tab][tab] to abort.");
+        break;
+    case MODE_ARROW:
+        addstr("[ARROW MODE] -> move with arrows, use [space] to start/stop drawing and use [tab][tab] to abort.");
         break;
     case MODE_SELECT:
         if (!P1.null && !P2.null)
@@ -202,36 +236,135 @@ void draw()
     }
 }
 
+int move_cursor(int c)
+{
+    if (c == '\033')
+    {
+        getch();
+        switch (getch())
+        {
+        case 'A':
+            UP_LEFT_CORNER.y--;
+            break;
+        case 'B':
+            UP_LEFT_CORNER.y++;
+            break;
+        case 'C':
+            UP_LEFT_CORNER.x++;
+            break;
+        case 'D':
+            UP_LEFT_CORNER.x--;
+            break;
+        }
+        return 1;
+    }
+    return 0;
+}
+
 int main(int argc, char *argv[])
 {
     WINDOW *w = initscr();
     curs_set(0);
     noecho();
     start_color();
+    CLIPBOARD.null = 1;
 
     init_pair(COL_CURSOR, COLOR_WHITE, COLOR_RED);
     init_pair(COL_NORMAL, COLOR_WHITE, COLOR_BLACK);
     init_pair(COL_EMPTY, COLOR_BLACK, COLOR_BLUE);
-    init_pair(COL_SELECTION, COLOR_BLACK, COLOR_BLUE);
+    init_pair(COL_SELECTION, COLOR_BLACK, COLOR_CYAN);
 
     P1.null = 1;
     P2.null = 1;
     if (argc != 2)
-        CURRENT_FILE = ad_file_new(COLS - 2, LINES - 2);
+        CURRENT_FILE = chk_new(COLS - 2, LINES - 2);
     else
     {
-        CURRENT_FILE = ad_load_file(argv[1]);
+        CURRENT_FILE = chk_new_from_file(argv[1]);
         NAME = argv[1];
     }
     int looping = 1;
     while (looping)
     {
+        while (get_cursor_pos().x < 0)
+        {
+            chk_add_col_left(&CURRENT_FILE);
+            UP_LEFT_CORNER.x++;
+            P1.x++;
+            P2.x++;
+        }
+        while (get_cursor_pos().y < 0)
+        {
+            chk_add_line_up(&CURRENT_FILE);
+            UP_LEFT_CORNER.y++;
+            P1.y++;
+            P2.y++;
+        }
+        while (get_cursor_pos().y >= CURRENT_FILE.lines)
+        {
+            chk_add_line_down(&CURRENT_FILE);
+        }
+        while (get_cursor_pos().x >= CURRENT_FILE.cols)
+        {
+            chk_add_col_right(&CURRENT_FILE);
+        }
+        if (!P1.null)
+        {
+            while (P1.x < 0)
+            {
+                chk_add_col_left(&CURRENT_FILE);
+                UP_LEFT_CORNER.x++;
+                P1.x++;
+                P2.x++;
+            }
+            while (P1.y < 0)
+            {
+                chk_add_line_up(&CURRENT_FILE);
+                UP_LEFT_CORNER.y++;
+                P1.y++;
+                P2.y++;
+            }
+            while (P1.y >= CURRENT_FILE.lines)
+            {
+                chk_add_line_down(&CURRENT_FILE);
+            }
+            while (P1.x >= CURRENT_FILE.cols)
+            {
+                chk_add_col_right(&CURRENT_FILE);
+            }
+        }
+        if (!P2.null)
+        {
+            while (P2.x < 0)
+            {
+                chk_add_col_left(&CURRENT_FILE);
+                UP_LEFT_CORNER.x++;
+                P1.x++;
+                P2.x++;
+            }
+            while (P2.y < 0)
+            {
+                chk_add_col_left(&CURRENT_FILE);
+                UP_LEFT_CORNER.y++;
+                P1.y++;
+                P2.y++;
+            }
+            while (P2.y >= CURRENT_FILE.lines)
+            {
+                chk_add_line_down(&CURRENT_FILE);
+            }
+            while (P2.x >= CURRENT_FILE.cols)
+            {
+                chk_add_col_right(&CURRENT_FILE);
+            }
+        }
         draw();
-        char c = getch();
+        int c = getch();
         if (MODE == MODE_NONE)
         {
             P1.null = 1;
-            switch (c)
+            pl_empty(&PATH);
+            switch ((char)c)
             {
             case 's':
                 MODE = MODE_SELECT;
@@ -245,9 +378,19 @@ int main(int argc, char *argv[])
             case 't':
                 MODE = MODE_TEXT;
                 break;
+            case 'a':
+                MODE = MODE_ARROW;
+                break;
             case 'w':
-                ad_save_file(&CURRENT_FILE, NAME);
+                chk_save_to_file(&CURRENT_FILE, NAME);
                 MODE = PREVIOUS_MODE;
+                break;
+            case 'x':
+                chk_save_to_file(&CURRENT_FILE, NAME);
+                looping = 0;
+                break;
+            case 'l':
+                MODE = MODE_LINE;
                 break;
             case '\t':
                 MODE = PREVIOUS_MODE;
@@ -272,121 +415,80 @@ int main(int argc, char *argv[])
             }
             else if (MODE == MODE_PUT)
             {
-                if (c == '\033')
+                if (!move_cursor(c))
                 {
-                    getch();
-                    switch (getch())
+                    if (is_writable(c))
                     {
-                    case 'A':
-                        UP_LEFT_CORNER.y--;
-                        break;
-                    case 'B':
-                        UP_LEFT_CORNER.y++;
-                        break;
-                    case 'C':
-                        UP_LEFT_CORNER.x++;
-                        break;
-                    case 'D':
-                        UP_LEFT_CORNER.x--;
-                        break;
+                        position tmp = get_cursor_pos();
+                        chk_set_char_at(&CURRENT_FILE, tmp, c);
                     }
-                }
-                else if (is_writable(c))
-                {
-                    position tmp = get_cursor_pos();
-                    ad_file_set_char(&CURRENT_FILE, tmp, c);
                 }
             }
             else if (MODE == MODE_TEXT)
             {
-                if (c == '\033')
+                if (!move_cursor(c))
                 {
-                    getch();
-                    switch (getch())
+                    if (is_writable(c))
                     {
-                    case 'A':
-                        UP_LEFT_CORNER.y--;
-                        break;
-                    case 'B':
-                        UP_LEFT_CORNER.y++;
-                        break;
-                    case 'C':
+                        position tmp = get_cursor_pos();
+                        chk_set_char_at(&CURRENT_FILE, tmp, c);
                         UP_LEFT_CORNER.x++;
-                        break;
-                    case 'D':
-                        UP_LEFT_CORNER.x--;
-                        break;
                     }
-                }
-                else if (is_writable(c))
-                {
-                    position tmp = get_cursor_pos();
-                    ad_file_set_char(&CURRENT_FILE, tmp, c);
-                    UP_LEFT_CORNER.x++;
+                    else if (c == 127)
+                    {
+                        position tmp = get_cursor_pos();
+                        chk_set_char_at(&CURRENT_FILE, tmp, ' ');
+                        UP_LEFT_CORNER.x--;
+                        chk_set_char_at(&CURRENT_FILE, get_cursor_pos(), ' ');
+                    }
                 }
             }
             else if (MODE == MODE_RECT)
             {
-                if (c == '\033')
+                if (!move_cursor(c))
                 {
-                    getch();
-                    switch (getch())
+                    if (c == ' ')
                     {
-                    case 'A':
-                        UP_LEFT_CORNER.y--;
-                        break;
-                    case 'B':
-                        UP_LEFT_CORNER.y++;
-                        break;
-                    case 'C':
-                        UP_LEFT_CORNER.x++;
-                        break;
-                    case 'D':
-                        UP_LEFT_CORNER.x--;
-                        break;
-                    }
-                }
-                else if (c == ' ')
-                {
-                    position tmp = get_cursor_pos();
-                    if (P1.null)
-                    {
-                        P1 = tmp;
-                    }
-                    else
-                    {
-                        position down_left = min_pos(P1, tmp);
-                        position up_right = max_pos(P1, tmp);
-                        position up_left = {down_left.x, up_right.y};
-                        position down_right = {up_right.x, down_left.y};
-                        ad_file_set_char(&CURRENT_FILE, down_left, '+');
-                        ad_file_set_char(&CURRENT_FILE, up_right, '+');
-                        ad_file_set_char(&CURRENT_FILE, down_right, '+');
-                        ad_file_set_char(&CURRENT_FILE, up_left, '+');
-                        int x;
-                        for (x = down_left.x + 1; x < down_right.x; x++)
+                        position tmp = get_cursor_pos();
+                        if (P1.null)
                         {
-                            position tmp1 = {x, up_right.y};
-                            ad_file_set_char(&CURRENT_FILE, tmp1, '-');
+                            P1 = tmp;
                         }
-                        for (x = down_left.x + 1; x < down_right.x; x++)
+                        else
                         {
-                            position tmp1 = {x, down_right.y};
-                            ad_file_set_char(&CURRENT_FILE, tmp1, '-');
-                        }
-                        int y;
-                        for (y = down_left.y + 1; y < up_left.y; y++)
-                        {
-                            position tmp1 = {up_left.x, y};
-                            ad_file_set_char(&CURRENT_FILE, tmp1, '|');
-                        }
-                        for (y = down_left.y + 1; y < up_left.y; y++)
-                        {
-                            position tmp1 = {up_right.x, y};
-                            ad_file_set_char(&CURRENT_FILE, tmp1, '|');
-                        }
+                            position down_left = pos_min(P1, tmp);
+                            position up_right = pos_max(P1, tmp);
+                            position up_left = {down_left.x, up_right.y};
+                            position down_right = {up_right.x, down_left.y};
+                            chk_set_char_at(&CURRENT_FILE, down_left, '+');
+                            chk_set_char_at(&CURRENT_FILE, up_right, '+');
+                            chk_set_char_at(&CURRENT_FILE, down_right, '+');
+                            chk_set_char_at(&CURRENT_FILE, up_left, '+');
+                            int x;
+                            for (x = down_left.x + 1; x < down_right.x; x++)
+                            {
+                                position tmp1 = {x, up_right.y};
+                                chk_set_char_at(&CURRENT_FILE, tmp1, '-');
+                            }
+                            for (x = down_left.x + 1; x < down_right.x; x++)
+                            {
+                                position tmp1 = {x, down_right.y};
+                                chk_set_char_at(&CURRENT_FILE, tmp1, '-');
+                            }
+                            int y;
+                            for (y = down_left.y + 1; y < up_left.y; y++)
+                            {
+                                position tmp1 = {up_left.x, y};
+                                chk_set_char_at(&CURRENT_FILE, tmp1, '|');
+                            }
+                            for (y = down_left.y + 1; y < up_left.y; y++)
+                            {
+                                position tmp1 = {up_right.x, y};
+                                chk_set_char_at(&CURRENT_FILE, tmp1, '|');
+                            }
 
-                        P1.null = 1;
+                            P1.null = 1;
+                        }
                     }
                 }
             }
@@ -394,58 +496,58 @@ int main(int argc, char *argv[])
             {
                 if (P1.null || P2.null)
                 {
-                    if (c == '\033')
+                    if (c == 'p')
                     {
-                        getch();
-                        switch (getch())
-                        {
-                        case 'A':
-                            UP_LEFT_CORNER.y--;
-                            break;
-                        case 'B':
-                            UP_LEFT_CORNER.y++;
-                            break;
-                        case 'C':
-                            UP_LEFT_CORNER.x++;
-                            break;
-                        case 'D':
-                            UP_LEFT_CORNER.x--;
-                            break;
-                        }
+                        chk_blit_chunk(&CURRENT_FILE, &CLIPBOARD, get_cursor_pos());
                     }
-                    else if (c == ' ')
+                    if (!move_cursor(c))
                     {
-                        position tmp = get_cursor_pos();
-                        if (P1.null)
+                        if (c == ' ')
                         {
-                            P1 = tmp;
-                        }
-                        else if (P2.null)
-                        {
-                            P2 = tmp;
-                        }
-                        else
-                        {
-                            P1.null = 1;
-                            P2.null = 1;
+                            position tmp = get_cursor_pos();
+                            if (P1.null)
+                            {
+                                P1 = tmp;
+                            }
+                            else if (P2.null)
+                            {
+                                P2 = tmp;
+                            }
+                            else
+                            {
+                                P1.null = 1;
+                                P2.null = 1;
+                            }
                         }
                     }
                 }
                 else if (!P2.null)
                 {
+                    position min = pos_min(P1, P2);
+                    position max = pos_max(P1, P2);
+                    int x;
+                    int y;
                     if (c == ' ')
                     {
                         P2.null = 1;
                         P1.null = 1;
                     }
+                    else if (c == 'y')
+                    {
+                        chk_free(&CLIPBOARD);
+                        CLIPBOARD = chk_extract_chunk(&CURRENT_FILE, min, max);
+                        P2.null = 1;
+                        P1.null = 1;
+                    }
+
                     else if (c == 'f')
                     {
                         do
                         {
                             c = getch();
                         } while (!is_writable(c));
-                        position min = min_pos(P1, P2);
-                        position max = max_pos(P1, P2);
+                        position min = pos_min(P1, P2);
+                        position max = pos_max(P1, P2);
                         int x;
                         int y;
                         for (x = min.x; x <= max.x; x++)
@@ -453,38 +555,111 @@ int main(int argc, char *argv[])
                             for (y = min.y; y <= max.y; y++)
                             {
                                 position tmp = {x, y};
-                                ad_file_set_char(&CURRENT_FILE, tmp, c);
+                                chk_set_char_at(&CURRENT_FILE, tmp, c);
                             }
                         }
-                        P2.null = 1;
-                        P1.null = 1;
                     }
-                    else if (c == 'm')
+                    else if (c == '\033')
                     {
-                        do
+                        getch();
+                        switch (getch())
                         {
-                            c = getch();
-                        } while (!is_writable(c));
-                        position min = min_pos(P1, P2);
-                        position max = max_pos(P1, P2);
-                        int x;
-                        int y;
-                        for (x = min.x; x <= max.x; x++)
-                        {
-                            for (y = min.y; y <= max.y; y++)
-                            {
-                                position tmp = {x, y};
-                                ad_file_set_char(&CURRENT_FILE, tmp, c);
-                            }
+                        case 'A':
+                            UP_LEFT_CORNER.y--;
+                            P1.y--;
+                            P2.y--;
+                            break;
+                        case 'B':
+                            UP_LEFT_CORNER.y++;
+                            P1.y++;
+                            P2.y++;
+                            break;
+                        case 'C':
+                            UP_LEFT_CORNER.x++;
+                            P1.x++;
+                            P2.x++;
+                            break;
+                        case 'D':
+                            UP_LEFT_CORNER.x--;
+                            P1.x--;
+                            P2.x--;
+                            break;
                         }
-                        P2.null = 1;
-                        P1.null = 1;
+                    }
+                }
+            }
+            else if (MODE == MODE_LINE)
+            {
+
+                if (move_cursor(c))
+                {
+                    if (PATH.size != 0)
+                    {
+                        position tmp = get_cursor_pos();
+                        while (pl_is_inside(&PATH, tmp) != -1)
+                        {
+                            pl_remove_last(&PATH);
+                        }
+                        pl_add(&PATH, tmp);
+                    }
+                }
+                else if (c == ' ')
+                {
+                    if (PATH.size != 0)
+                    {
+                        int i;
+                        for (i = 0; i < PATH.size; i++)
+                        {
+
+                            chk_set_char_at(&CURRENT_FILE, PATH.list[i], pl_get_line_char(&PATH, i));
+                        }
+                        pl_empty(&PATH);
+                        PATH = pl_new();
+                    }
+                    else
+                    {
+                        pl_add(&PATH, get_cursor_pos());
+                    }
+                }
+            }
+            else if (MODE == MODE_ARROW)
+            {
+
+                if (move_cursor(c))
+                {
+                    if (PATH.size != 0)
+                    {
+                        position tmp = get_cursor_pos();
+                        while (pl_is_inside(&PATH, tmp) != -1)
+                        {
+                            pl_remove_last(&PATH);
+                        }
+                        pl_add(&PATH, tmp);
+                    }
+                }
+                else if (c == ' ')
+                {
+                    if (PATH.size != 0)
+                    {
+                        int i;
+                        for (i = 0; i < PATH.size; i++)
+                        {
+
+                            chk_set_char_at(&CURRENT_FILE, PATH.list[i], pl_get_arrow_char(&PATH, i));
+                        }
+                        pl_empty(&PATH);
+                        PATH = pl_new();
+                    }
+                    else
+                    {
+                        pl_add(&PATH, get_cursor_pos());
                     }
                 }
             }
         }
     }
     endwin();
-    ad_file_free(&CURRENT_FILE);
+    chk_free(&CURRENT_FILE);
+    chk_free(&CLIPBOARD);
     return 0;
 }
