@@ -12,7 +12,7 @@ chunk.o: src/chunk.c position.o position_list.o
 main.o: chunk.o ui.o
 	gcc -D _DEFAULT_SOURCE -O -c src/main.c -std=c99 -o main.o -Iinclude
 all: main.o
-	gcc -g main.o chunk.o position.o position_list.o -Iinclude -lncurses -o ascii-drawer
+	gcc -g main.o chunk.o position.o position_list.o ui.o -Iinclude -lncurses -o ascii-drawer
 clean:
 	rm *.o
 	rm ascii-drawer

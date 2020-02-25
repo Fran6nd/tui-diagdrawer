@@ -224,13 +224,6 @@ void chk_set_char_at(chunk *f, position p, char c)
     }
 }
 
-void chk_insert_char_at(chunk *chk, position p, char c){
-    if (p.y < chk->lines && p.y >= 0)
-    {
-        chk->chunk[p.y][p.x] = c;
-    }
-}
-
 void chk_add_line_down(chunk *f)
 {
     f->lines++;

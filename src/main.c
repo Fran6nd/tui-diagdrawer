@@ -6,6 +6,7 @@
 #include "chunk.h"
 #include "position.h"
 #include "position_list.h"
+#include "ui.h"
 
 #define COL_SELECTION 1
 #define COL_EMPTY 2
@@ -187,10 +188,13 @@ void draw_file()
 void draw()
 {
     draw_file();
+    position ui_zero = {0, 0};
+    position ui_max = {COLS-1, LINES-1};
+    ui_draw_rect(ui_zero, ui_max);
     refresh();
-    move(0, 0);
+    move(0, 2);
     addstr("ASCII-Drawer by Fran6nd (press [tab] to swith mode)");
-    move(1, 0);
+    move(1, 2);
     switch (MODE)
     {
     case MODE_NONE:

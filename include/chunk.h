@@ -18,7 +18,6 @@ void chk_save_to_file(chunk *file, char *f);
 void chk_free(chunk *f);
 char chk_get_char_at(chunk *f, position);
 void chk_set_char_at(chunk *f, position, char c);
-void chk_insert_char_at(chunk *f, position, char c);
 chunk chk_extract_chunk(chunk *f, position p1, position p2);
 void chk_blit_chunk(chunk *background, chunk *clipboard, position p);
 void chk_add_line_down(chunk *f);
