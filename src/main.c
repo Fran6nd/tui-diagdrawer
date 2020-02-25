@@ -196,7 +196,7 @@ void draw()
     case MODE_NONE:
         addstr("Press [q] to exit\n"
                "      [p] to enter PUT mode\n"
-               "      [t] to enter TEXT mode\n"
+               "      [t] to enter TEXT mode\n" 
                "      [s] to enter SELECT mode\n"
                "      [r] to enter RECT mode\n"
                "      [l] to enter LINE mode\n"
