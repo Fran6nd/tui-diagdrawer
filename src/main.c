@@ -189,7 +189,7 @@ void draw()
 {
     draw_file();
     position ui_zero = {0, 0};
-    position ui_max = {COLS-1, LINES-1};
+    position ui_max = {COLS - 1, LINES - 1};
     ui_draw_rect(ui_zero, ui_max);
     refresh();
     move(0, 2);
@@ -198,15 +198,15 @@ void draw()
     switch (MODE)
     {
     case MODE_NONE:
-        addstr("Press [q] to exit\n"
-               "      [p] to enter PUT mode\n"
-               "      [t] to enter TEXT mode\n" 
-               "      [s] to enter SELECT mode\n"
-               "      [r] to enter RECT mode\n"
-               "      [l] to enter LINE mode\n"
-               "      [a] to enter ARROW mode\n"
-               "      [w] to write to file\n"
-               "      [x] to write to file and exit");
+        ui_show_text("Press [q] to exit\n"
+                     "      [p] to enter PUT mode\n"
+                     "      [t] to enter TEXT mode\n"
+                     "      [s] to enter SELECT mode\n"
+                     "      [r] to enter RECT mode\n"
+                     "      [l] to enter LINE mode\n"
+                     "      [a] to enter ARROW mode\n"
+                     "      [w] to write to file\n"
+                     "      [x] to write to file and exit");
         break;
     case MODE_PUT:
         addstr("[PUT MODE] -> move with arrows and set keys as you wish!");
