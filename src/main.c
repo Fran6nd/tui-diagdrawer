@@ -186,8 +186,8 @@ void draw_file()
 
 void draw()
 {
-    clear_screen();
     draw_file();
+    refresh();
     move(0, 0);
     addstr("ASCII-Drawer by Fran6nd (press [tab] to swith mode)");
     move(1, 0);
