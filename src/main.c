@@ -52,7 +52,7 @@ void clear_screen()
 
 int is_writable(char c)
 {
-    char *charset = "azertyuiopqsdfghjklmwxcvbn?,.;/:§!\\_-+*=()[]{}^$&1234567890AZERTYUIOPQSDFGHJKLMWXCVBN <>";
+    char *charset = "azertyuiopqsdfghjklmwxcvbn?,.;/:§!\\_-'+*=()[]{}^$&1234567890AZERTYUIOPQSDFGHJKLMWXCVBN <>";
     int i;
     for (i = 0; i < strlen(charset); i++)
     {
@@ -543,7 +543,18 @@ int main(int argc, char *argv[])
                         P2.null = 1;
                         P1.null = 1;
                     }
-
+                    else if (c == 'd')
+                    {
+                        chk_fill_chunk(&CURRENT_FILE, min, max, ' ');
+                    }
+                    else if (c == 'c')
+                    {
+                        chk_free(&CLIPBOARD);
+                        CLIPBOARD = chk_extract_chunk(&CURRENT_FILE, min, max);
+                        P2.null = 1;
+                        P1.null = 1;
+                        chk_fill_chunk(&CURRENT_FILE, min, max, ' ');
+                    }
                     else if (c == 'f')
                     {
                         do

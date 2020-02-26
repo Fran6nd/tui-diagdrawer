@@ -22,8 +22,7 @@ ifeq ($(PREFIX),)
     PREFIX := /usr
 endif
 
-install: mz_lib.a
-	install -d /usr/lib/
-	install -m 644 $(DIST)/mz_lib.a /usr/lib
-	install -d $(PREFIX)/include/mz_lib
-	install -m 644 $(LIB_INC)/mz_lib.h $(PREFIX)/include/mz_lib
+install: all
+	sudo cp ascii-drawer /usr/local/bin
+uninstall: all
+	sudo rm /usr/local/bin/ascii-drawer

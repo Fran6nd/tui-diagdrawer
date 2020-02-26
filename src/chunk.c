@@ -42,6 +42,23 @@ chunk chk_extract_chunk(chunk *input, position p1, position p2)
     }
     return output;
 }
+void chk_fill_chunk(chunk *input, position p1, position p2, char c)
+{
+    p2.x++;
+    p2.y++;
+    position min = pos_min(p1, p2);
+    position max = pos_max(p1, p2);
+    int x;
+    int y;
+    for (x = min.x; x < max.x; x++)
+    {
+        for (y = min.y; y < max.y; y++)
+        {
+            position tmp = {x, y};
+            chk_set_char_at(input, tmp, c);
+        }
+    }
+}
 void chk_blit_chunk(chunk *main, chunk *clipboard, position p)
 {
     if (!main->null)
@@ -59,6 +76,7 @@ void chk_blit_chunk(chunk *main, chunk *clipboard, position p)
         }
     }
 }
+
 chunk chk_new_from_file(char *f)
 {
     int lines = 0;
@@ -117,8 +135,33 @@ void chk_save_to_file(chunk *file, char *f)
 {
 
     int y;
-    int empty_lines_at_eof = 0;
+    int x;
+    /* Find empty columns on left. */
+    int global_left_indent = 0;
+    for (x = 0; x < file->cols; x++)
+    {
+        int spaces_only = 1;
+        for (y = 0; y < file->lines; y++)
+        {
+            position tmp = {x, y};
+            if (file->chunk[y][x] != ' ')
+            {
+                spaces_only = 0;
+                break;
+            }
+        }
+        if (spaces_only == 1)
+        {
+            global_left_indent++;
+        }
+        else
+        {
+            break;
+        }
+    }
+
     /* Find number of empty lines at the end of the file. */
+    int empty_lines_at_eof = 0;
     for (y = file->lines - 1; y >= 0; y--)
     {
         char *line = file->chunk[y];
@@ -140,8 +183,9 @@ void chk_save_to_file(chunk *file, char *f)
             y = -1;
         }
     }
-    int empty_lines_at_bof = 0;
+
     /* Find number of empty lines at the beginnng of the file. */
+    int empty_lines_at_bof = 0;
     for (y = 0; y < file->lines; y++)
     {
         char *line = file->chunk[y];
@@ -183,7 +227,11 @@ void chk_save_to_file(chunk *file, char *f)
                 i = -1;
             }
         }
-        fputs(tmp, fOut);
+        for (i = global_left_indent; i < strlen(tmp); i++)
+        {
+            fputc(tmp[i], fOut);
+        }
+
         fputs("\n", fOut);
         free(tmp);
     }
@@ -218,10 +266,25 @@ char chk_get_char_at(chunk *f, position p)
 }
 void chk_set_char_at(chunk *f, position p, char c)
 {
-    if (p.y < f->lines && p.y >= 0)
+    while (p.y < 0)
     {
-        f->chunk[p.y][p.x] = c;
+        p.y++;
+        chk_add_line_up(f);
     }
+    while (p.y >= f->lines)
+    {
+        chk_add_line_down(f);
+    }
+    while (p.x < 0)
+    {
+        p.x++;
+        chk_add_col_left(f);
+    }
+    while (p.x >= f->cols)
+    {
+        chk_add_col_right(f);
+    }
+    f->chunk[p.y][p.x] = c;
 }
 
 void chk_add_line_down(chunk *f)

@@ -49,9 +49,10 @@ int ui_show_text(char *text)
     for (i = 0; i < strlen(text) + 1; i++)
     {
         char c = text[i];
+        if (c == '\n')
+            lines++;
         if (c == '\n' || c == '\0')
         {
-            lines++;
             if (line_len > max_line_len)
             {
                 max_line_len = line_len;
@@ -63,7 +64,7 @@ int ui_show_text(char *text)
             line_len++;
         }
     }
-    position p1 = {3, 3};
+    position p1 = {2, 2};
     position p2 = {p1.x + max_line_len + 2, p1.y + lines + 2};
     ui_draw_and_fill(p1, p2);
     move(p1.y + 1, p1.x + 1);
