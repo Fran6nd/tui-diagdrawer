@@ -1,6 +1,9 @@
 .DEFAULT_GOAL := all
 
-
+show_keyname.o: src/show_keyname.c
+	gcc -O -c src/show_keyname.c -std=c99 -o show_keyname.o -Incurses
+show_keyname: show_keyname.o
+	gcc -g show_keyname.o -Iinclude -lncurses -o show_keyname
 ui.o: src/ui.c
 	gcc -O -c src/ui.c -std=c99 -o ui.o -Iinclude
 position.o: src/position.c

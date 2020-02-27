@@ -89,7 +89,7 @@ chunk chk_new_from_file(char *f)
     // Check if file exists
     if (fp == NULL)
     {
-        printf("Could not open file %s", f);
+        return chk_new(10, 10);
     }
 
     // Extract characters from file and store in character c
@@ -264,6 +264,7 @@ char chk_get_char_at(chunk *f, position p)
     }
     return 0;
 }
+
 void chk_set_char_at(chunk *f, position p, char c)
 {
     while (p.y < 0)
@@ -295,6 +296,7 @@ void chk_add_line_down(chunk *f)
     memset(f->chunk[f->lines - 1], ' ', f->cols);
     f->chunk[f->lines - 1][f->cols] = 0;
 }
+
 void chk_add_line_up(chunk *f)
 {
     chk_add_line_down(f);
@@ -305,6 +307,7 @@ void chk_add_line_up(chunk *f)
     }
     memset(f->chunk[0], ' ', strlen(f->chunk[0]));
 }
+
 void chk_add_col_right(chunk *f)
 {
     f->cols++;
@@ -316,6 +319,7 @@ void chk_add_col_right(chunk *f)
         f->chunk[y][f->cols - 1] = ' ';
     }
 }
+
 void chk_add_col_left(chunk *f)
 {
     chk_add_col_right(f);

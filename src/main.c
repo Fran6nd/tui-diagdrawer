@@ -52,7 +52,7 @@ void clear_screen()
 
 int is_writable(char c)
 {
-    char *charset = "azertyuiopqsdfghjklmwxcvbn?,.;/:§!\\_-'+*=()[]{}^$&1234567890AZERTYUIOPQSDFGHJKLMWXCVBN <>";
+    char *charset = "azertyuiopqsdfghjklmwxcvbn?,.;/:§!\\`_-'+*#=()[]{}^$&1234567890AZERTYUIOPQSDFGHJKLMWXCVBN <>";
     int i;
     for (i = 0; i < strlen(charset); i++)
     {
@@ -240,26 +240,52 @@ void draw()
     }
 }
 
-int move_cursor(int c)
+position move_cursor(int c)
 {
-    switch (c)
+    char *key_name = keyname(c);
+    position delta = UP_LEFT_CORNER;
+    if (strcmp(key_name, "KEY_UP") == 0)
     {
-    case KEY_UP:
         UP_LEFT_CORNER.y--;
-        break;
-    case KEY_DOWN:
-        UP_LEFT_CORNER.y++;
-        break;
-    case KEY_RIGHT:
-        UP_LEFT_CORNER.x++;
-        break;
-    case KEY_LEFT:
-        UP_LEFT_CORNER.x--;
-        break;
-    default:
-        return 0;
     }
-    return 1;
+    else if (strcmp(key_name, "KEY_DOWN") == 0)
+    {
+        UP_LEFT_CORNER.y++;
+    }
+    else if (strcmp(key_name, "KEY_RIGHT") == 0)
+    {
+        UP_LEFT_CORNER.x++;
+    }
+    else if (strcmp(key_name, "KEY_LEFT") == 0)
+    {
+        UP_LEFT_CORNER.x--;
+    }
+    /* If ctrl key is pressed: we move faster. */
+    else if (strcmp(key_name, "kUP5") == 0)
+    {
+        UP_LEFT_CORNER.y -= 5;
+    }
+    else if (strcmp(key_name, "kDN5") == 0)
+    {
+        UP_LEFT_CORNER.y += 5;
+    }
+    else if (strcmp(key_name, "kRIT5") == 0)
+    {
+        UP_LEFT_CORNER.x += 5;
+    }
+    else if (strcmp(key_name, "kLFT5") == 0)
+    {
+        UP_LEFT_CORNER.x -= 5;
+    }
+    else
+    {
+        delta.null = 1;
+        return delta;
+    }
+    delta.null = 0;
+    delta.x = UP_LEFT_CORNER.x - delta.x;
+    delta.y = UP_LEFT_CORNER.y - delta.y;
+    return delta;
 }
 
 int main(int argc, char *argv[])
@@ -417,7 +443,7 @@ int main(int argc, char *argv[])
             }
             else if (MODE == MODE_PUT)
             {
-                if (!move_cursor(c))
+                if (move_cursor(c).null)
                 {
                     if (is_writable(c))
                     {
@@ -428,26 +454,96 @@ int main(int argc, char *argv[])
             }
             else if (MODE == MODE_TEXT)
             {
-                if (!move_cursor(c))
+                if (move_cursor(c).null)
                 {
-                    if (is_writable(c))
+
+                    /* Erasing. */
+                    if (c == 127 || c == KEY_BACKSPACE)
                     {
                         position tmp = get_cursor_pos();
-                        chk_set_char_at(&CURRENT_FILE, tmp, c);
-                        UP_LEFT_CORNER.x++;
+                        position position_of_char_to_remove = get_cursor_pos();
+                        position_of_char_to_remove.x--;
+                        char chr_to_replace = chk_get_char_at(&CURRENT_FILE, position_of_char_to_remove);
+                        if (chr_to_replace != '+' && chr_to_replace != '|' && chr_to_replace != '^' && chr_to_replace != 'v' && chr_to_replace != '>')
+                        {
+                            int x;
+                            char buffer[CURRENT_FILE.cols];
+                            int buffer_index = 0;
+                            for (x = tmp.x; x < CURRENT_FILE.cols; x++)
+                            {
+                                position tmp1 = {x, tmp.y};
+                                char ch = chk_get_char_at(&CURRENT_FILE, tmp1);
+                                if (ch != '+' && ch != '|' && ch != '^' && ch != 'v' && ch != '>')
+                                {
+                                    buffer[buffer_index] = ch;
+                                    buffer_index++;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            int i;
+                            for (i = buffer_index - 1; i >= 0; i--)
+                            {
+                                position tmp1 = {tmp.x + i - 1, tmp.y};
+                                chk_set_char_at(&CURRENT_FILE, tmp1, buffer[i]);
+                            }
+                            position tmp1 = {tmp.x + buffer_index - 1, tmp.y};
+                            chk_set_char_at(&CURRENT_FILE, tmp1, ' ');
+                            UP_LEFT_CORNER.x--;
+                        }
                     }
-                    else if (c == 127)
+                    /* Deleting. */
+                    else if (c == KEY_DC)
                     {
                         position tmp = get_cursor_pos();
-                        chk_set_char_at(&CURRENT_FILE, tmp, ' ');
-                        UP_LEFT_CORNER.x--;
-                        chk_set_char_at(&CURRENT_FILE, get_cursor_pos(), ' ');
+                        position position_of_char_to_remove = get_cursor_pos();
+                        char chr_to_replace = chk_get_char_at(&CURRENT_FILE, position_of_char_to_remove);
+                        if (chr_to_replace != '+' && chr_to_replace != '|' && chr_to_replace != '^' && chr_to_replace != 'v' && chr_to_replace != '>')
+                        {
+                            int x;
+                            char buffer[CURRENT_FILE.cols];
+                            int buffer_index = 0;
+                            for (x = tmp.x; x < CURRENT_FILE.cols; x++)
+                            {
+                                position tmp1 = {x, tmp.y};
+                                char ch = chk_get_char_at(&CURRENT_FILE, tmp1);
+                                if (ch != '+' && ch != '|' && ch != '^' && ch != 'v' && ch != '>')
+                                {
+                                    buffer[buffer_index] = ch;
+                                    buffer_index++;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            int i;
+                            for (i = buffer_index - 1; i > 0; i--)
+                            {
+                                position tmp1 = {tmp.x + i - 1, tmp.y};
+                                chk_set_char_at(&CURRENT_FILE, tmp1, buffer[i]);
+                            }
+                            position tmp1 = {tmp.x + buffer_index - 1, tmp.y};
+                            chk_set_char_at(&CURRENT_FILE, tmp1, ' ');
+                        }
+                    }
+                    else if (is_writable(c))
+                    {
+                        position tmp = get_cursor_pos();
+                        char chr_to_replace = chk_get_char_at(&CURRENT_FILE, tmp);
+                        if (chr_to_replace != '+' && chr_to_replace != '|' && chr_to_replace != '^' && chr_to_replace != 'v' && chr_to_replace != '<')
+                        {
+                            chk_set_char_at(&CURRENT_FILE, tmp, c);
+                            UP_LEFT_CORNER.x++;
+                        }
                     }
                 }
             }
             else if (MODE == MODE_RECT)
             {
-                if (!move_cursor(c))
+                if (move_cursor(c).null)
                 {
                     if (c == ' ')
                     {
@@ -502,7 +598,7 @@ int main(int argc, char *argv[])
                     {
                         chk_blit_chunk(&CURRENT_FILE, &CLIPBOARD, get_cursor_pos());
                     }
-                    if (!move_cursor(c))
+                    if (move_cursor(c).null)
                     {
                         if (c == ' ')
                         {
@@ -574,28 +670,13 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
-                        switch (c)
+                        position delta = move_cursor(c);
+                        if (!delta.null)
                         {
-                        case KEY_UP:
-                            UP_LEFT_CORNER.y--;
-                            P1.y--;
-                            P2.y--;
-                            break;
-                        case KEY_DOWN:
-                            UP_LEFT_CORNER.y++;
-                            P1.y++;
-                            P2.y++;
-                            break;
-                        case KEY_RIGHT:
-                            UP_LEFT_CORNER.x++;
-                            P1.x++;
-                            P2.x++;
-                            break;
-                        case KEY_LEFT:
-                            UP_LEFT_CORNER.x--;
-                            P1.x--;
-                            P2.x--;
-                            break;
+                            P1.y += delta.y;
+                            P1.x += delta.x;
+                            P2.y += delta.y;
+                            P2.x += delta.x;
                         }
                     }
                 }
@@ -603,7 +684,7 @@ int main(int argc, char *argv[])
             else if (MODE == MODE_LINE)
             {
 
-                if (move_cursor(c))
+                if (!move_cursor(c).null)
                 {
                     if (PATH.size != 0)
                     {
@@ -637,7 +718,7 @@ int main(int argc, char *argv[])
             else if (MODE == MODE_ARROW)
             {
 
-                if (move_cursor(c))
+                if (!move_cursor(c).null)
                 {
                     if (PATH.size != 0)
                     {
