@@ -242,35 +242,33 @@ void draw()
 
 int move_cursor(int c)
 {
-    if (c == '\033')
+    switch (c)
     {
-        getch();
-        switch (getch())
-        {
-        case 'A':
-            UP_LEFT_CORNER.y--;
-            break;
-        case 'B':
-            UP_LEFT_CORNER.y++;
-            break;
-        case 'C':
-            UP_LEFT_CORNER.x++;
-            break;
-        case 'D':
-            UP_LEFT_CORNER.x--;
-            break;
-        }
-        return 1;
+    case KEY_UP:
+        UP_LEFT_CORNER.y--;
+        break;
+    case KEY_DOWN:
+        UP_LEFT_CORNER.y++;
+        break;
+    case KEY_RIGHT:
+        UP_LEFT_CORNER.x++;
+        break;
+    case KEY_LEFT:
+        UP_LEFT_CORNER.x--;
+        break;
+    default:
+        return 0;
     }
-    return 0;
+    return 1;
 }
 
 int main(int argc, char *argv[])
 {
-    WINDOW *w = initscr();
+    initscr();
     curs_set(0);
     noecho();
     start_color();
+    keypad(stdscr, TRUE);
     CLIPBOARD.null = 1;
 
     init_pair(COL_CURSOR, COLOR_WHITE, COLOR_RED);
@@ -574,27 +572,26 @@ int main(int argc, char *argv[])
                             }
                         }
                     }
-                    else if (c == '\033')
+                    else
                     {
-                        getch();
-                        switch (getch())
+                        switch (c)
                         {
-                        case 'A':
+                        case KEY_UP:
                             UP_LEFT_CORNER.y--;
                             P1.y--;
                             P2.y--;
                             break;
-                        case 'B':
+                        case KEY_DOWN:
                             UP_LEFT_CORNER.y++;
                             P1.y++;
                             P2.y++;
                             break;
-                        case 'C':
+                        case KEY_RIGHT:
                             UP_LEFT_CORNER.x++;
                             P1.x++;
                             P2.x++;
                             break;
-                        case 'D':
+                        case KEY_LEFT:
                             UP_LEFT_CORNER.x--;
                             P1.x--;
                             P2.x--;
