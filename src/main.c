@@ -7,6 +7,7 @@
 #include "position.h"
 #include "position_list.h"
 #include "ui.h"
+#include "undo_redo.h"
 
 #define COL_SELECTION 1
 #define COL_EMPTY 2
@@ -312,6 +313,7 @@ int main(int argc, char *argv[])
         NAME = argv[1];
     }
     int looping = 1;
+    do_change(&CURRENT_FILE);
     while (looping)
     {
         while (get_cursor_pos().x < 0)
@@ -440,6 +442,16 @@ int main(int argc, char *argv[])
             {
                 PREVIOUS_MODE = MODE;
                 MODE = MODE_NONE;
+                P1.null = 1;
+                P2.null = 1;
+                pl_empty(&PATH);
+            }
+            else if (c == 'u')
+            {
+                P1.null = 1;
+                P2.null = 1;
+                undo_change(&CURRENT_FILE);
+                pl_empty(&PATH);
             }
             else if (MODE == MODE_PUT)
             {
@@ -554,6 +566,7 @@ int main(int argc, char *argv[])
                         }
                         else
                         {
+                            do_change(&CURRENT_FILE);
                             position down_left = pos_min(P1, tmp);
                             position up_right = pos_max(P1, tmp);
                             position up_left = {down_left.x, up_right.y};
@@ -596,6 +609,7 @@ int main(int argc, char *argv[])
                 {
                     if (c == 'p')
                     {
+                        do_change(&CURRENT_FILE);
                         chk_blit_chunk(&CURRENT_FILE, &CLIPBOARD, get_cursor_pos());
                     }
                     if (move_cursor(c).null)
@@ -649,6 +663,22 @@ int main(int argc, char *argv[])
                         P1.null = 1;
                         chk_fill_chunk(&CURRENT_FILE, min, max, ' ');
                     }
+                    else if (c == KEY_DC)
+                    {
+                        do_change(&CURRENT_FILE);
+                        position min = pos_min(P1, P2);
+                        position max = pos_max(P1, P2);
+                        int x;
+                        int y;
+                        for (x = min.x; x <= max.x; x++)
+                        {
+                            for (y = min.y; y <= max.y; y++)
+                            {
+                                position tmp = {x, y};
+                                chk_set_char_at(&CURRENT_FILE, tmp, ' ');
+                            }
+                        }
+                    }
                     else if (c == 'f')
                     {
                         do
@@ -659,6 +689,7 @@ int main(int argc, char *argv[])
                         position max = pos_max(P1, P2);
                         int x;
                         int y;
+                        do_change(&CURRENT_FILE);
                         for (x = min.x; x <= max.x; x++)
                         {
                             for (y = min.y; y <= max.y; y++)
@@ -701,6 +732,7 @@ int main(int argc, char *argv[])
                     if (PATH.size != 0)
                     {
                         int i;
+                        do_change(&CURRENT_FILE);
                         for (i = 0; i < PATH.size; i++)
                         {
 
@@ -735,6 +767,7 @@ int main(int argc, char *argv[])
                     if (PATH.size != 0)
                     {
                         int i;
+                        do_change(&CURRENT_FILE);
                         for (i = 0; i < PATH.size; i++)
                         {
 
@@ -753,6 +786,8 @@ int main(int argc, char *argv[])
     }
     endwin();
     chk_free(&CURRENT_FILE);
+    free_undo_redo();
+    pl_empty(&PATH);
     chk_free(&CLIPBOARD);
     return 0;
 }

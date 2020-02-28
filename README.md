@@ -3,7 +3,8 @@
 
 ## Introduction
 
-A simple and lightweight ascii diagram editor working with ncurses.
+A minimalist and lightweight ascii diagram editor working with ncurses.<br>It
+ features an easy interface for drawing rects, lines, arrows, text, copy-pasting...<br>
 ## Contributing
 
 Any contribution is appreciated to improve the software's capabilities/architecture<br>

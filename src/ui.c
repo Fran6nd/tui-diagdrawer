@@ -39,8 +39,9 @@ void ui_draw_and_fill(position p1, position p2)
 }
 int ui_ask_yes_no(char *question)
 {
+    return 0;
 }
-int ui_show_text(char *text)
+void ui_show_text(char *text)
 {
     int lines = 0;
     int max_line_len = 0;

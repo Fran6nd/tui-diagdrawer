@@ -42,6 +42,21 @@ chunk chk_extract_chunk(chunk *input, position p1, position p2)
     }
     return output;
 }
+chunk chk_copy_chunk(chunk *input)
+{
+    chunk output = chk_new(input->cols, input->lines);
+    int x;
+    int y;
+    for (x = 0; x < input->cols; x++)
+    {
+        for (y = 0; y < input->lines; y++)
+        {
+            position tmp = {x, y, 0};
+            chk_set_char_at(&output, tmp, chk_get_char_at(input, tmp));
+        }
+    }
+    return output;
+}
 void chk_fill_chunk(chunk *input, position p1, position p2, char c)
 {
     p2.x++;

@@ -19,6 +19,7 @@ void chk_free(chunk *f);
 char chk_get_char_at(chunk *f, position);
 void chk_set_char_at(chunk *f, position, char c);
 chunk chk_extract_chunk(chunk *f, position p1, position p2);
+chunk chk_copy_chunk(chunk *input);
 void chk_fill_chunk(chunk *input, position p1, position p2, char c);
 void chk_blit_chunk(chunk *background, chunk *clipboard, position p);
 void chk_add_line_down(chunk *f);
