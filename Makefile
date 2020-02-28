@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := all
+.DEFAULT_GOAL := ascii-drawer
 
 show_keyname.o: src/show_keyname.c
 	gcc -O -c src/show_keyname.c -std=c99 -o show_keyname.o -Incurses
@@ -14,10 +14,11 @@ position_list.o: src/position_list.c
 	gcc -O -c src/position_list.c -std=c99 -o position_list.o -Iinclude
 chunk.o: src/chunk.c position.o position_list.o
 	gcc -O -c src/chunk.c -std=c99 -o chunk.o -Iinclude
-main.o: chunk.o ui.o undo_redo.o
-	gcc -D _DEFAULT_SOURCE -O -c src/main.c -std=c99 -o main.o -Iinclude
-all: main.o
+main.o: chunk.o
+	gcc -D _DEFAULT_SOURCE -O -c src/main.c -std=c99 -o main.o -Iinclude -lncurses
+ascii-drawer: main.o position.o ui.o undo_redo.o position_list.o chunk.o
 	gcc -g main.o undo_redo.o chunk.o position.o position_list.o ui.o -Iinclude -lncurses -o ascii-drawer
+all: main show_keyname
 clean:
 	rm *.o
 	rm ascii-drawer
