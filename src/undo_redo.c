@@ -24,6 +24,7 @@ void do_change(chunk *chk)
         }
         index = 9;
     }
+    chk_free(&history[index]);
     history[index] = chk_copy_chunk(chk);
     index++;
 }
@@ -34,7 +35,7 @@ void undo_change(chunk *chk)
         index--;
         can_redo = 1;
         chk_free(chk);
-;        *chk = history[index];
+;        *chk = chk_copy_chunk(&history[index]);
     }
 }
 void redo_change(chunk *chk)
