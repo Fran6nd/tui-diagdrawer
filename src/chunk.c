@@ -44,7 +44,12 @@ chunk chk_extract_chunk(chunk *input, position p1, position p2)
 }
 chunk chk_copy_chunk(chunk *input)
 {
-    chunk output = chk_new(input->cols, input->lines);
+    chunk output;
+    if(input->null){
+        output.null = 1;
+        return output;
+    }
+    output = chk_new(input->cols, input->lines);
     int x;
     int y;
     for (x = 0; x < input->cols; x++)
