@@ -33,15 +33,16 @@ void undo_change(chunk *chk)
     if (index > 0)
     {
         index--;
-        can_redo = 1;
+        can_redo++;
         chk_free(chk);
-;        *chk = chk_copy_chunk(&history[index]);
+        *chk = chk_copy_chunk(&history[index]);
     }
 }
 void redo_change(chunk *chk)
 {
 }
-void free_undo_redo(){
+void free_undo_redo()
+{
     int i;
     for (i = 0; i < 10; i++)
     {
