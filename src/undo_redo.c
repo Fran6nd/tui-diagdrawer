@@ -16,15 +16,16 @@ void do_change(chunk *chk)
     can_redo = 0;
     if (index == 10)
     {
+        /* We free the first chunk */
         chk_free(&history[0]);
         int i;
         for (i = 0; i < 9; i++)
         {
+            /* Moving reference for high index to low. */
             history[i] = history[i + 1];
         }
         index = 9;
     }
-    chk_free(&history[index]);
     history[index] = chk_copy_chunk(chk);
     index++;
 }
@@ -42,7 +43,7 @@ void undo_change(chunk *chk)
 }
 void redo_change(chunk *chk)
 {
-    if (index < 9 && can_redo > 0)
+    if (can_redo > 0)
     {
         chk_free(chk);
         can_redo--;
