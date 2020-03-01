@@ -453,6 +453,14 @@ int main(int argc, char *argv[])
                 undo_change(&CURRENT_FILE);
                 pl_empty(&PATH);
             }
+            /* [ctrl] + r = REDO */
+            else if (c == 18)
+            {
+                P1.null = 1;
+                P2.null = 1;
+                redo_change(&CURRENT_FILE);
+                pl_empty(&PATH);
+            }
             else if (MODE == MODE_PUT)
             {
                 if (move_cursor(c).null)
