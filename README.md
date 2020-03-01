@@ -11,17 +11,17 @@ A minimalist and lightweight ascii diagram editor working with ncurses.<br>It
 Common operations:
 * `[tab]`: enter/exit the menu.
 * `[u]`: undo.
-* `[ctrl] + [u]`: redo.
+* `[ctrl] + [r]`: redo.
 * `[arrow]`: move the cursor.
 * `[ctrl] + [arrow]`: move the cursor faster.
 
 Menu:
-* `[p]`: put mode.
-* `[t]`: text mode.
-* `[r]`: rect mode.
+* `[p]`: put mode: basically set the char at the cursor position.
+* `[t]`: text mode: allow writing text without destroying rects/arrows.
+* `[r]`: rect mode: allow drawing some rectangles.
 * `[a]`: arrow mode.
 * `[l]`: line mode.
-* `[s]`: select mode.
+* `[s]`: select mode: allow copy `[y]`,  pasting `[p]`, cut `[c]` and fill `[f]`, then the character to use.
 
 ## Contributing
 
