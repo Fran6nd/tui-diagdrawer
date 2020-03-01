@@ -243,7 +243,7 @@ void draw()
 
 position move_cursor(int c)
 {
-    char *key_name = keyname(c);
+    const char *key_name = keyname(c);
     position delta = UP_LEFT_CORNER;
     if (strcmp(key_name, "KEY_UP") == 0)
     {
