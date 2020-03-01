@@ -8,7 +8,7 @@ void init_undo_redo()
     int i;
     for (i = 0; i < 10; i++)
     {
-        history[i].null = 0;
+        history[i].null = 1;
     }
 }
 void do_change(chunk *chk)
@@ -25,6 +25,11 @@ void do_change(chunk *chk)
             history[i] = history[i + 1];
         }
         index = 9;
+    }
+    /* If the chunk is not empty we free it. */
+    if (!history[index].null)
+    {
+        chk_free(&history[index]);
     }
     history[index] = chk_copy_chunk(chk);
     index++;
