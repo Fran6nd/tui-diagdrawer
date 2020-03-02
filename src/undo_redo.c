@@ -25,6 +25,7 @@ void do_change(chunk *chk)
             history[i] = history[i + 1];
         }
         index = 9;
+        history[index].null = 1;
     }
     /* If the chunk is not empty we free it. */
     if (!history[index].null)
