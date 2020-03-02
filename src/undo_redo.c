@@ -25,6 +25,9 @@ void do_change(chunk *chk)
             history[i] = history[i + 1];
         }
         index = 9;
+        /* The last cell is containing same pointers as the previous one.
+         * So we set it to null to do not free the previous one.
+         */
         history[index].null = 1;
     }
     /* If the chunk is not empty we free it. */
