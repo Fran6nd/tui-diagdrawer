@@ -216,13 +216,13 @@ void draw()
         addstr("[TEXT MODE] -> move with arrows and set keys as you wish!");
         break;
     case MODE_RECT:
-        addstr("[RECT MODE] -> move with arrows, use [space] to set p1 and p2, use [tab][tab] to abort.");
+        addstr("[RECT MODE] -> move with arrows, use [space] to set p1 and p2, use [u] to abort.");
         break;
     case MODE_LINE:
-        addstr("[LINE MODE] -> move with arrows, use [space] to start/stop drawing and use [tab][tab] to abort.");
+        addstr("[LINE MODE] -> move with arrows, use [space] to start/stop drawing and use [u] to abort.");
         break;
     case MODE_ARROW:
-        addstr("[ARROW MODE] -> move with arrows, use [space] to start/stop drawing and use [tab][tab] to abort.");
+        addstr("[ARROW MODE] -> move with arrows, use [space] to start/stop drawing and use [u] to abort.");
         break;
     case MODE_SELECT:
         if (!P1.null && !P2.null)
@@ -450,10 +450,18 @@ int main(int argc, char *argv[])
             /* [u] = UNDO */
             else if (c == 'u')
             {
-                P1.null = 1;
-                P2.null = 1;
-                undo_change(&CURRENT_FILE);
-                pl_empty(&PATH);
+                /* If we are doing something, we abort it. */
+                if ((!P1.null) || (!P2.null) || (PATH.size != 0))
+                {
+                    P1.null = 1;
+                    P2.null = 1;
+                    pl_empty(&PATH);
+                }
+                /* Else we undo the last change. */
+                else
+                {
+                    undo_change(&CURRENT_FILE);
+                }
             }
             /* [ctrl] + r = REDO */
             else if (c == 18)
