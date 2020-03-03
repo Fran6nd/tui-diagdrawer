@@ -45,7 +45,8 @@ chunk chk_extract_chunk(chunk *input, position p1, position p2)
 chunk chk_copy_chunk(chunk *input)
 {
     chunk output;
-    if(input->null){
+    if (input->null)
+    {
         output.null = 1;
         return output;
     }
@@ -97,14 +98,14 @@ void chk_blit_chunk(chunk *main, chunk *clipboard, position p)
     }
 }
 
-chunk chk_new_from_file(char *f)
+chunk chk_new_from_file(char *chk)
 {
     int lines = 0;
     int col = 0;
     int max_col = 0;
 
     // Open the file
-    FILE *fp = fopen(f, "r");
+    FILE *fp = fopen(chk, "r");
 
     // Check if file exists
     if (fp == NULL)
@@ -151,20 +152,20 @@ chunk chk_new_from_file(char *f)
     return output;
 }
 
-void chk_save_to_file(chunk *file, char *f)
+void chk_save_to_file(chunk *chk, char *f)
 {
 
     int y;
     int x;
     /* Find empty columns on left. */
     int global_left_indent = 0;
-    for (x = 0; x < file->cols; x++)
+    for (x = 0; x < chk->cols; x++)
     {
         int spaces_only = 1;
-        for (y = 0; y < file->lines; y++)
+        for (y = 0; y < chk->lines; y++)
         {
             position tmp = {x, y};
-            if (file->chunk[y][x] != ' ')
+            if (chk->chunk[y][x] != ' ')
             {
                 spaces_only = 0;
                 break;
@@ -182,9 +183,9 @@ void chk_save_to_file(chunk *file, char *f)
 
     /* Find number of empty lines at the end of the file. */
     int empty_lines_at_eof = 0;
-    for (y = file->lines - 1; y >= 0; y--)
+    for (y = chk->lines - 1; y >= 0; y--)
     {
-        char *line = file->chunk[y];
+        char *line = chk->chunk[y];
         int i;
         int empty = 1;
         for (i = 0; i < strlen(line); i++)
@@ -206,9 +207,9 @@ void chk_save_to_file(chunk *file, char *f)
 
     /* Find number of empty lines at the beginnng of the file. */
     int empty_lines_at_bof = 0;
-    for (y = 0; y < file->lines; y++)
+    for (y = 0; y < chk->lines; y++)
     {
-        char *line = file->chunk[y];
+        char *line = chk->chunk[y];
         int i;
         int empty = 1;
         for (i = 0; i < strlen(line); i++)
@@ -224,15 +225,15 @@ void chk_save_to_file(chunk *file, char *f)
         }
         else
         {
-            y = file->lines;
+            y = chk->lines;
         }
     }
     /* Now write the file. */
 
     FILE *fOut = fopen(f, "w");
-    for (y = empty_lines_at_bof; y < file->lines - empty_lines_at_eof; y++)
+    for (y = empty_lines_at_bof; y < chk->lines - empty_lines_at_eof; y++)
     {
-        char *line = file->chunk[y];
+        char *line = chk->chunk[y];
         char *tmp = malloc((sizeof(char)) * (strlen(line) + 1));
         memcpy(tmp, line, strlen(line) + 1);
         int i;
@@ -258,99 +259,99 @@ void chk_save_to_file(chunk *file, char *f)
     fclose(fOut);
 }
 
-void chk_free(chunk *f)
+void chk_free(chunk *chk)
 {
-    if (!f->null)
+    if (!chk->null)
     {
         int i;
-        for (i = 0; i < f->lines; i++)
+        for (i = 0; i < chk->lines; i++)
         {
-            free(f->chunk[i]);
+            free(chk->chunk[i]);
         }
-        free(f->chunk);
-        f->lines = -1;
-        f->null = 1;
+        free(chk->chunk);
+        chk->lines = -1;
+        chk->null = 1;
     }
 }
 
-char chk_get_char_at(chunk *f, position p)
+char chk_get_char_at(chunk *chk, position p)
 {
-    if (p.y < f->lines && p.y >= 0)
+    if (p.y < chk->lines && p.y >= 0)
     {
-        if (p.x < strlen(f->chunk[p.y]) && p.x >= 0)
+        if (p.x < strlen(chk->chunk[p.y]) && p.x >= 0)
         {
-            return f->chunk[p.y][p.x];
+            return chk->chunk[p.y][p.x];
         }
     }
     return 0;
 }
 
-void chk_set_char_at(chunk *f, position p, char c)
+void chk_set_char_at(chunk *chk, position p, char c)
 {
     while (p.y < 0)
     {
         p.y++;
-        chk_add_line_up(f);
+        chk_add_line_up(chk);
     }
-    while (p.y >= f->lines)
+    while (p.y >= chk->lines)
     {
-        chk_add_line_down(f);
+        chk_add_line_down(chk);
     }
     while (p.x < 0)
     {
         p.x++;
-        chk_add_col_left(f);
+        chk_add_col_left(chk);
     }
-    while (p.x >= f->cols)
+    while (p.x >= chk->cols)
     {
-        chk_add_col_right(f);
+        chk_add_col_right(chk);
     }
-    f->chunk[p.y][p.x] = c;
+    chk->chunk[p.y][p.x] = c;
 }
 
-void chk_add_line_down(chunk *f)
+void chk_add_line_down(chunk *chk)
 {
-    f->lines++;
-    f->chunk = (char **)realloc(f->chunk, f->lines * sizeof(char *));
-    f->chunk[f->lines - 1] = malloc(sizeof(char) * f->cols + 1);
-    memset(f->chunk[f->lines - 1], ' ', f->cols);
-    f->chunk[f->lines - 1][f->cols] = 0;
+    chk->lines++;
+    chk->chunk = (char **)realloc(chk->chunk, chk->lines * sizeof(char *));
+    chk->chunk[chk->lines - 1] = malloc(sizeof(char) * chk->cols + 1);
+    memset(chk->chunk[chk->lines - 1], ' ', chk->cols);
+    chk->chunk[chk->lines - 1][chk->cols] = 0;
 }
 
-void chk_add_line_up(chunk *f)
+void chk_add_line_up(chunk *chk)
 {
-    chk_add_line_down(f);
+    chk_add_line_down(chk);
     int y;
-    for (y = f->lines - 2; y >= 0; y--)
+    for (y = chk->lines - 2; y >= 0; y--)
     {
-        memcpy(f->chunk[y + 1], f->chunk[y], strlen(f->chunk[y]));
+        memcpy(chk->chunk[y + 1], chk->chunk[y], strlen(chk->chunk[y]));
     }
-    memset(f->chunk[0], ' ', strlen(f->chunk[0]));
+    memset(chk->chunk[0], ' ', strlen(chk->chunk[0]));
 }
 
-void chk_add_col_right(chunk *f)
+void chk_add_col_right(chunk *chk)
 {
-    f->cols++;
+    chk->cols++;
     int y;
-    for (y = 0; y < f->lines; y++)
+    for (y = 0; y < chk->lines; y++)
     {
-        f->chunk[y] = (char *)realloc(f->chunk[y], sizeof(char) * f->cols + 1);
-        f->chunk[y][f->cols] = 0;
-        f->chunk[y][f->cols - 1] = ' ';
+        chk->chunk[y] = (char *)realloc(chk->chunk[y], sizeof(char) * chk->cols + 1);
+        chk->chunk[y][chk->cols] = 0;
+        chk->chunk[y][chk->cols - 1] = ' ';
     }
 }
 
-void chk_add_col_left(chunk *f)
+void chk_add_col_left(chunk *chk)
 {
-    chk_add_col_right(f);
+    chk_add_col_right(chk);
     int y;
-    for (y = 0; y < f->lines; y++)
+    for (y = 0; y < chk->lines; y++)
     {
         int x;
-        for (x = f->cols - 2; x >= 0; x--)
+        for (x = chk->cols - 2; x >= 0; x--)
         {
-            f->chunk[y][x + 1] = f->chunk[y][x];
+            chk->chunk[y][x + 1] = chk->chunk[y][x];
         }
-        f->chunk[y][0] = ' ';
+        chk->chunk[y][0] = ' ';
     }
 }
