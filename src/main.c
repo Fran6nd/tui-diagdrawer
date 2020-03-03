@@ -438,6 +438,7 @@ int main(int argc, char *argv[])
         }
         else
         {
+            /* [tab] = MENU */
             if (c == '\t')
             {
                 PREVIOUS_MODE = MODE;
@@ -446,6 +447,7 @@ int main(int argc, char *argv[])
                 P2.null = 1;
                 pl_empty(&PATH);
             }
+            /* [u] = UNDO */
             else if (c == 'u')
             {
                 P1.null = 1;
@@ -461,165 +463,112 @@ int main(int argc, char *argv[])
                 redo_change(&CURRENT_FILE);
                 pl_empty(&PATH);
             }
-            else if (MODE == MODE_PUT)
-            {
-                if (move_cursor(c).null)
-                {
-                    if (is_writable(c))
-                    {
-                        position tmp = get_cursor_pos();
-                        chk_set_char_at(&CURRENT_FILE, tmp, c);
-                    }
-                }
-            }
-            else if (MODE == MODE_TEXT)
-            {
-                if (move_cursor(c).null)
-                {
 
-                    /* Erasing. */
-                    if (c == 127 || c == KEY_BACKSPACE)
+            else
+            {
+                /* If no major key pressed, we now do things depending on selected mod. */
+                if (MODE == MODE_PUT)
+                {
+                    if (move_cursor(c).null)
                     {
-                        position tmp = get_cursor_pos();
-                        position position_of_char_to_remove = get_cursor_pos();
-                        position_of_char_to_remove.x--;
-                        char chr_to_replace = chk_get_char_at(&CURRENT_FILE, position_of_char_to_remove);
-                        if (chr_to_replace != '+' && chr_to_replace != '|' && chr_to_replace != '^' && chr_to_replace != 'v' && chr_to_replace != '>')
+                        if (is_writable(c))
                         {
-                            int x;
-                            char buffer[CURRENT_FILE.cols];
-                            int buffer_index = 0;
-                            for (x = tmp.x; x < CURRENT_FILE.cols; x++)
-                            {
-                                position tmp1 = {x, tmp.y};
-                                char ch = chk_get_char_at(&CURRENT_FILE, tmp1);
-                                if (ch != '+' && ch != '|' && ch != '^' && ch != 'v' && ch != '>')
-                                {
-                                    buffer[buffer_index] = ch;
-                                    buffer_index++;
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-                            int i;
-                            for (i = buffer_index - 1; i >= 0; i--)
-                            {
-                                position tmp1 = {tmp.x + i - 1, tmp.y};
-                                chk_set_char_at(&CURRENT_FILE, tmp1, buffer[i]);
-                            }
-                            position tmp1 = {tmp.x + buffer_index - 1, tmp.y};
-                            chk_set_char_at(&CURRENT_FILE, tmp1, ' ');
-                            UP_LEFT_CORNER.x--;
-                        }
-                    }
-                    /* Deleting. */
-                    else if (c == KEY_DC)
-                    {
-                        position tmp = get_cursor_pos();
-                        position position_of_char_to_remove = get_cursor_pos();
-                        char chr_to_replace = chk_get_char_at(&CURRENT_FILE, position_of_char_to_remove);
-                        if (chr_to_replace != '+' && chr_to_replace != '|' && chr_to_replace != '^' && chr_to_replace != 'v' && chr_to_replace != '>')
-                        {
-                            int x;
-                            char buffer[CURRENT_FILE.cols];
-                            int buffer_index = 0;
-                            for (x = tmp.x; x < CURRENT_FILE.cols; x++)
-                            {
-                                position tmp1 = {x, tmp.y};
-                                char ch = chk_get_char_at(&CURRENT_FILE, tmp1);
-                                if (ch != '+' && ch != '|' && ch != '^' && ch != 'v' && ch != '>')
-                                {
-                                    buffer[buffer_index] = ch;
-                                    buffer_index++;
-                                }
-                                else
-                                {
-                                    break;
-                                }
-                            }
-                            int i;
-                            for (i = buffer_index - 1; i > 0; i--)
-                            {
-                                position tmp1 = {tmp.x + i - 1, tmp.y};
-                                chk_set_char_at(&CURRENT_FILE, tmp1, buffer[i]);
-                            }
-                            position tmp1 = {tmp.x + buffer_index - 1, tmp.y};
-                            chk_set_char_at(&CURRENT_FILE, tmp1, ' ');
-                        }
-                    }
-                    else if (is_writable(c))
-                    {
-                        position tmp = get_cursor_pos();
-                        char chr_to_replace = chk_get_char_at(&CURRENT_FILE, tmp);
-                        if (chr_to_replace != '+' && chr_to_replace != '|' && chr_to_replace != '^' && chr_to_replace != 'v' && chr_to_replace != '<')
-                        {
+                            position tmp = get_cursor_pos();
                             chk_set_char_at(&CURRENT_FILE, tmp, c);
-                            UP_LEFT_CORNER.x++;
                         }
                     }
                 }
-            }
-            else if (MODE == MODE_RECT)
-            {
-                if (move_cursor(c).null)
+                else if (MODE == MODE_TEXT)
                 {
-                    if (c == ' ')
+                    if (move_cursor(c).null)
                     {
-                        position tmp = get_cursor_pos();
-                        if (P1.null)
-                        {
-                            P1 = tmp;
-                        }
-                        else
-                        {
-                            do_change(&CURRENT_FILE);
-                            position down_left = pos_min(P1, tmp);
-                            position up_right = pos_max(P1, tmp);
-                            position up_left = {down_left.x, up_right.y};
-                            position down_right = {up_right.x, down_left.y};
-                            chk_set_char_at(&CURRENT_FILE, down_left, '+');
-                            chk_set_char_at(&CURRENT_FILE, up_right, '+');
-                            chk_set_char_at(&CURRENT_FILE, down_right, '+');
-                            chk_set_char_at(&CURRENT_FILE, up_left, '+');
-                            int x;
-                            for (x = down_left.x + 1; x < down_right.x; x++)
-                            {
-                                position tmp1 = {x, up_right.y};
-                                chk_set_char_at(&CURRENT_FILE, tmp1, '-');
-                            }
-                            for (x = down_left.x + 1; x < down_right.x; x++)
-                            {
-                                position tmp1 = {x, down_right.y};
-                                chk_set_char_at(&CURRENT_FILE, tmp1, '-');
-                            }
-                            int y;
-                            for (y = down_left.y + 1; y < up_left.y; y++)
-                            {
-                                position tmp1 = {up_left.x, y};
-                                chk_set_char_at(&CURRENT_FILE, tmp1, '|');
-                            }
-                            for (y = down_left.y + 1; y < up_left.y; y++)
-                            {
-                                position tmp1 = {up_right.x, y};
-                                chk_set_char_at(&CURRENT_FILE, tmp1, '|');
-                            }
 
-                            P1.null = 1;
+                        /* Erasing. */
+                        if (c == 127 || c == KEY_BACKSPACE)
+                        {
+                            position tmp = get_cursor_pos();
+                            position position_of_char_to_remove = get_cursor_pos();
+                            position_of_char_to_remove.x--;
+                            char chr_to_replace = chk_get_char_at(&CURRENT_FILE, position_of_char_to_remove);
+                            if (chr_to_replace != '+' && chr_to_replace != '|' && chr_to_replace != '^' && chr_to_replace != 'v' && chr_to_replace != '>')
+                            {
+                                int x;
+                                char buffer[CURRENT_FILE.cols];
+                                int buffer_index = 0;
+                                for (x = tmp.x; x < CURRENT_FILE.cols; x++)
+                                {
+                                    position tmp1 = {x, tmp.y};
+                                    char ch = chk_get_char_at(&CURRENT_FILE, tmp1);
+                                    if (ch != '+' && ch != '|' && ch != '^' && ch != 'v' && ch != '>')
+                                    {
+                                        buffer[buffer_index] = ch;
+                                        buffer_index++;
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                                int i;
+                                for (i = buffer_index - 1; i >= 0; i--)
+                                {
+                                    position tmp1 = {tmp.x + i - 1, tmp.y};
+                                    chk_set_char_at(&CURRENT_FILE, tmp1, buffer[i]);
+                                }
+                                position tmp1 = {tmp.x + buffer_index - 1, tmp.y};
+                                chk_set_char_at(&CURRENT_FILE, tmp1, ' ');
+                                UP_LEFT_CORNER.x--;
+                            }
+                        }
+                        /* Deleting. */
+                        else if (c == KEY_DC)
+                        {
+                            position tmp = get_cursor_pos();
+                            position position_of_char_to_remove = get_cursor_pos();
+                            char chr_to_replace = chk_get_char_at(&CURRENT_FILE, position_of_char_to_remove);
+                            if (chr_to_replace != '+' && chr_to_replace != '|' && chr_to_replace != '^' && chr_to_replace != 'v' && chr_to_replace != '>')
+                            {
+                                int x;
+                                char buffer[CURRENT_FILE.cols];
+                                int buffer_index = 0;
+                                for (x = tmp.x; x < CURRENT_FILE.cols; x++)
+                                {
+                                    position tmp1 = {x, tmp.y};
+                                    char ch = chk_get_char_at(&CURRENT_FILE, tmp1);
+                                    if (ch != '+' && ch != '|' && ch != '^' && ch != 'v' && ch != '>')
+                                    {
+                                        buffer[buffer_index] = ch;
+                                        buffer_index++;
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
+                                }
+                                int i;
+                                for (i = buffer_index - 1; i > 0; i--)
+                                {
+                                    position tmp1 = {tmp.x + i - 1, tmp.y};
+                                    chk_set_char_at(&CURRENT_FILE, tmp1, buffer[i]);
+                                }
+                                position tmp1 = {tmp.x + buffer_index - 1, tmp.y};
+                                chk_set_char_at(&CURRENT_FILE, tmp1, ' ');
+                            }
+                        }
+                        else if (is_writable(c))
+                        {
+                            position tmp = get_cursor_pos();
+                            char chr_to_replace = chk_get_char_at(&CURRENT_FILE, tmp);
+                            if (chr_to_replace != '+' && chr_to_replace != '|' && chr_to_replace != '^' && chr_to_replace != 'v' && chr_to_replace != '<')
+                            {
+                                chk_set_char_at(&CURRENT_FILE, tmp, c);
+                                UP_LEFT_CORNER.x++;
+                            }
                         }
                     }
                 }
-            }
-            else if (MODE == MODE_SELECT)
-            {
-                if (P1.null || P2.null)
+                else if (MODE == MODE_RECT)
                 {
-                    if (c == 'p')
-                    {
-                        do_change(&CURRENT_FILE);
-                        chk_blit_chunk(&CURRENT_FILE, &CLIPBOARD, get_cursor_pos());
-                    }
                     if (move_cursor(c).null)
                     {
                         if (c == ' ')
@@ -629,164 +578,222 @@ int main(int argc, char *argv[])
                             {
                                 P1 = tmp;
                             }
-                            else if (P2.null)
-                            {
-                                P2 = tmp;
-                            }
                             else
                             {
+                                do_change(&CURRENT_FILE);
+                                position down_left = pos_min(P1, tmp);
+                                position up_right = pos_max(P1, tmp);
+                                position up_left = {down_left.x, up_right.y};
+                                position down_right = {up_right.x, down_left.y};
+                                chk_set_char_at(&CURRENT_FILE, down_left, '+');
+                                chk_set_char_at(&CURRENT_FILE, up_right, '+');
+                                chk_set_char_at(&CURRENT_FILE, down_right, '+');
+                                chk_set_char_at(&CURRENT_FILE, up_left, '+');
+                                int x;
+                                for (x = down_left.x + 1; x < down_right.x; x++)
+                                {
+                                    position tmp1 = {x, up_right.y};
+                                    chk_set_char_at(&CURRENT_FILE, tmp1, '-');
+                                }
+                                for (x = down_left.x + 1; x < down_right.x; x++)
+                                {
+                                    position tmp1 = {x, down_right.y};
+                                    chk_set_char_at(&CURRENT_FILE, tmp1, '-');
+                                }
+                                int y;
+                                for (y = down_left.y + 1; y < up_left.y; y++)
+                                {
+                                    position tmp1 = {up_left.x, y};
+                                    chk_set_char_at(&CURRENT_FILE, tmp1, '|');
+                                }
+                                for (y = down_left.y + 1; y < up_left.y; y++)
+                                {
+                                    position tmp1 = {up_right.x, y};
+                                    chk_set_char_at(&CURRENT_FILE, tmp1, '|');
+                                }
+
                                 P1.null = 1;
-                                P2.null = 1;
                             }
                         }
                     }
                 }
-                else if (!P2.null)
+                else if (MODE == MODE_SELECT)
                 {
-                    position min = pos_min(P1, P2);
-                    position max = pos_max(P1, P2);
-                    int x;
-                    int y;
-                    if (c == ' ')
+                    if (P1.null || P2.null)
                     {
-                        P2.null = 1;
-                        P1.null = 1;
+                        if (c == 'p')
+                        {
+                            do_change(&CURRENT_FILE);
+                            chk_blit_chunk(&CURRENT_FILE, &CLIPBOARD, get_cursor_pos());
+                        }
+                        if (move_cursor(c).null)
+                        {
+                            if (c == ' ')
+                            {
+                                position tmp = get_cursor_pos();
+                                if (P1.null)
+                                {
+                                    P1 = tmp;
+                                }
+                                else if (P2.null)
+                                {
+                                    P2 = tmp;
+                                }
+                                else
+                                {
+                                    P1.null = 1;
+                                    P2.null = 1;
+                                }
+                            }
+                        }
                     }
-                    else if (c == 'y')
+                    else if (!P2.null)
                     {
-                        chk_free(&CLIPBOARD);
-                        CLIPBOARD = chk_extract_chunk(&CURRENT_FILE, min, max);
-                        P2.null = 1;
-                        P1.null = 1;
-                    }
-                    else if (c == 'd')
-                    {
-                        chk_fill_chunk(&CURRENT_FILE, min, max, ' ');
-                    }
-                    else if (c == 'c')
-                    {
-                        chk_free(&CLIPBOARD);
-                        CLIPBOARD = chk_extract_chunk(&CURRENT_FILE, min, max);
-                        P2.null = 1;
-                        P1.null = 1;
-                        chk_fill_chunk(&CURRENT_FILE, min, max, ' ');
-                    }
-                    else if (c == KEY_DC)
-                    {
-                        do_change(&CURRENT_FILE);
                         position min = pos_min(P1, P2);
                         position max = pos_max(P1, P2);
                         int x;
                         int y;
-                        for (x = min.x; x <= max.x; x++)
+                        if (c == ' ')
                         {
-                            for (y = min.y; y <= max.y; y++)
+                            P2.null = 1;
+                            P1.null = 1;
+                        }
+                        else if (c == 'y')
+                        {
+                            chk_free(&CLIPBOARD);
+                            CLIPBOARD = chk_extract_chunk(&CURRENT_FILE, min, max);
+                            P2.null = 1;
+                            P1.null = 1;
+                        }
+                        else if (c == 'd')
+                        {
+                            chk_fill_chunk(&CURRENT_FILE, min, max, ' ');
+                        }
+                        else if (c == 'c')
+                        {
+                            chk_free(&CLIPBOARD);
+                            CLIPBOARD = chk_extract_chunk(&CURRENT_FILE, min, max);
+                            P2.null = 1;
+                            P1.null = 1;
+                            chk_fill_chunk(&CURRENT_FILE, min, max, ' ');
+                        }
+                        else if (c == KEY_DC)
+                        {
+                            do_change(&CURRENT_FILE);
+                            position min = pos_min(P1, P2);
+                            position max = pos_max(P1, P2);
+                            int x;
+                            int y;
+                            for (x = min.x; x <= max.x; x++)
                             {
-                                position tmp = {x, y};
-                                chk_set_char_at(&CURRENT_FILE, tmp, ' ');
+                                for (y = min.y; y <= max.y; y++)
+                                {
+                                    position tmp = {x, y};
+                                    chk_set_char_at(&CURRENT_FILE, tmp, ' ');
+                                }
+                            }
+                        }
+                        else if (c == 'f')
+                        {
+                            do
+                            {
+                                c = getch();
+                            } while (!is_writable(c));
+                            position min = pos_min(P1, P2);
+                            position max = pos_max(P1, P2);
+                            int x;
+                            int y;
+                            do_change(&CURRENT_FILE);
+                            for (x = min.x; x <= max.x; x++)
+                            {
+                                for (y = min.y; y <= max.y; y++)
+                                {
+                                    position tmp = {x, y};
+                                    chk_set_char_at(&CURRENT_FILE, tmp, c);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            position delta = move_cursor(c);
+                            if (!delta.null)
+                            {
+                                P1.y += delta.y;
+                                P1.x += delta.x;
+                                P2.y += delta.y;
+                                P2.x += delta.x;
                             }
                         }
                     }
-                    else if (c == 'f')
+                }
+                else if (MODE == MODE_LINE)
+                {
+
+                    if (!move_cursor(c).null)
                     {
-                        do
+                        if (PATH.size != 0)
                         {
-                            c = getch();
-                        } while (!is_writable(c));
-                        position min = pos_min(P1, P2);
-                        position max = pos_max(P1, P2);
-                        int x;
-                        int y;
-                        do_change(&CURRENT_FILE);
-                        for (x = min.x; x <= max.x; x++)
-                        {
-                            for (y = min.y; y <= max.y; y++)
+                            position tmp = get_cursor_pos();
+                            while (pl_is_inside(&PATH, tmp) != -1)
                             {
-                                position tmp = {x, y};
-                                chk_set_char_at(&CURRENT_FILE, tmp, c);
+                                pl_remove_last(&PATH);
                             }
+                            pl_add(&PATH, tmp);
                         }
                     }
-                    else
+                    else if (c == ' ')
                     {
-                        position delta = move_cursor(c);
-                        if (!delta.null)
+                        if (PATH.size != 0)
                         {
-                            P1.y += delta.y;
-                            P1.x += delta.x;
-                            P2.y += delta.y;
-                            P2.x += delta.x;
+                            int i;
+                            do_change(&CURRENT_FILE);
+                            for (i = 0; i < PATH.size; i++)
+                            {
+
+                                chk_set_char_at(&CURRENT_FILE, PATH.list[i], pl_get_line_char(&PATH, i));
+                            }
+                            pl_empty(&PATH);
+                            PATH = pl_new();
+                        }
+                        else
+                        {
+                            pl_add(&PATH, get_cursor_pos());
                         }
                     }
                 }
-            }
-            else if (MODE == MODE_LINE)
-            {
-
-                if (!move_cursor(c).null)
+                else if (MODE == MODE_ARROW)
                 {
-                    if (PATH.size != 0)
-                    {
-                        position tmp = get_cursor_pos();
-                        while (pl_is_inside(&PATH, tmp) != -1)
-                        {
-                            pl_remove_last(&PATH);
-                        }
-                        pl_add(&PATH, tmp);
-                    }
-                }
-                else if (c == ' ')
-                {
-                    if (PATH.size != 0)
-                    {
-                        int i;
-                        do_change(&CURRENT_FILE);
-                        for (i = 0; i < PATH.size; i++)
-                        {
 
-                            chk_set_char_at(&CURRENT_FILE, PATH.list[i], pl_get_line_char(&PATH, i));
-                        }
-                        pl_empty(&PATH);
-                        PATH = pl_new();
-                    }
-                    else
+                    if (!move_cursor(c).null)
                     {
-                        pl_add(&PATH, get_cursor_pos());
-                    }
-                }
-            }
-            else if (MODE == MODE_ARROW)
-            {
-
-                if (!move_cursor(c).null)
-                {
-                    if (PATH.size != 0)
-                    {
-                        position tmp = get_cursor_pos();
-                        while (pl_is_inside(&PATH, tmp) != -1)
+                        if (PATH.size != 0)
                         {
-                            pl_remove_last(&PATH);
+                            position tmp = get_cursor_pos();
+                            while (pl_is_inside(&PATH, tmp) != -1)
+                            {
+                                pl_remove_last(&PATH);
+                            }
+                            pl_add(&PATH, tmp);
                         }
-                        pl_add(&PATH, tmp);
                     }
-                }
-                else if (c == ' ')
-                {
-                    if (PATH.size != 0)
+                    else if (c == ' ')
                     {
-                        int i;
-                        do_change(&CURRENT_FILE);
-                        for (i = 0; i < PATH.size; i++)
+                        if (PATH.size != 0)
                         {
+                            int i;
+                            do_change(&CURRENT_FILE);
+                            for (i = 0; i < PATH.size; i++)
+                            {
 
-                            chk_set_char_at(&CURRENT_FILE, PATH.list[i], pl_get_arrow_char(&PATH, i));
+                                chk_set_char_at(&CURRENT_FILE, PATH.list[i], pl_get_arrow_char(&PATH, i));
+                            }
+                            pl_empty(&PATH);
+                            PATH = pl_new();
                         }
-                        pl_empty(&PATH);
-                        PATH = pl_new();
-                    }
-                    else
-                    {
-                        pl_add(&PATH, get_cursor_pos());
+                        else
+                        {
+                            pl_add(&PATH, get_cursor_pos());
+                        }
                     }
                 }
             }
