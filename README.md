@@ -1,6 +1,8 @@
 # A TUI software to create basics ASCII diagrams.
 ### BIG REFACTO NEEDED, UGLY CODE!
 
+![alt text](showcase.gif)
+
 ## Introduction
 
 A minimalist and lightweight ascii diagram editor working with ncurses.<br>It
