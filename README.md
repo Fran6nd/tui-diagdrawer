@@ -23,7 +23,7 @@ Menu:
 * `[r]`: rect mode: allow drawing some rectangles.
 * `[a]`: arrow mode.
 * `[l]`: line mode.
-* `[s]`: select mode: allow copy `[y]`,  pasting `[p]`, cut `[c]` and fill `[f]`, then the character to use.
+* `[s]`: select mode: allow copy `[y]`,  pasting `[p]`, cut `[c]` and fill `[f]` or replace `[r]`, then the character to use.
 
 ## Contributing
 
