@@ -227,7 +227,7 @@ void draw()
     case MODE_SELECT:
         if (!P1.null && !P2.null)
         {
-            addstr("[SELECT MODE] -> press [space] to select, [m] to move selection or [f] to fill then give a character to fill with!");
+            addstr("[SELECT MODE] -> press [space] to select, [m] to move selection, [f] to fill or [r] to replace then give a character to fill/replace with!");
         }
         else
         {
