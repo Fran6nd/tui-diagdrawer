@@ -22,6 +22,13 @@
 #define MODE_LINE 5
 #define MODE_ARROW 6
 
+/* [Ctrl] + h for help. */
+#define K_HELP 8
+/* [Ctrl] + u for undo. */
+#define K_UNDO 21
+/* [Ctrl] + r for redo. */
+#define K_REDO 18
+
 position UP_LEFT_CORNER = {0, 0};
 position P1, P2;
 chunk CURRENT_FILE;
@@ -115,7 +122,7 @@ void draw_file()
     for (x = 0; x < COLS; x++)
     {
         int y;
-        for (y = 2; y < LINES; y++)
+        for (y = 1; y < LINES; y++)
         {
             position pos_on_screen = {x, y};
             position p = {x, y - 2};
@@ -195,10 +202,7 @@ void draw()
     refresh();
     move(0, 2);
     addstr("ASCII-Drawer by Fran6nd (press [tab] to swith mode)");
-    move(1, 2);
-    switch (MODE)
-    {
-    case MODE_NONE:
+    if (MODE == MODE_NONE)
         ui_show_text("Press [q] to exit\n"
                      "      [p] to enter PUT mode\n"
                      "      [t] to enter TEXT mode\n"
@@ -207,38 +211,10 @@ void draw()
                      "      [l] to enter LINE mode\n"
                      "      [a] to enter ARROW mode\n"
                      "      [w] to write to file\n"
-                     "      [x] to write to file and exit");
-        break;
-    case MODE_PUT:
-        addstr("[PUT MODE] -> move with arrows and set keys as you wish!");
-        break;
-    case MODE_TEXT:
-        addstr("[TEXT MODE] -> move with arrows and set keys as you wish!");
-        break;
-    case MODE_RECT:
-        addstr("[RECT MODE] -> move with arrows, use [space] to set p1 and p2, use [u] to abort.");
-        break;
-    case MODE_LINE:
-        addstr("[LINE MODE] -> move with arrows, use [space] to start/stop drawing and use [u] to abort.");
-        break;
-    case MODE_ARROW:
-        addstr("[ARROW MODE] -> move with arrows, use [space] to start/stop drawing and use [u] to abort.");
-        break;
-    case MODE_SELECT:
-        if (!P1.null && !P2.null)
-        {
-            addstr("[SELECT MODE] -> press [space] to select, [m] to move selection, [f] to fill or [r] to replace then give a character to fill/replace with!");
-        }
-        else
-        {
-            addstr("[SELECT MODE] -> move with arrows, use [space] to set p1 and p2 or unselect.");
-        }
-
-        break;
-    default:
-        addstr("Current mode not implemented yet.");
-        break;
-    }
+                     "      [x] to write to file and exit\n"
+                     "      [Ctrl] + [r] to redo changes\n"
+                     "      [Ctrl] + [u] to undo changes\n"
+                     "      [Ctrl] + [h] to show help for the current mode");
 }
 
 position move_cursor(int c)
@@ -447,8 +423,8 @@ int main(int argc, char *argv[])
                 P2.null = 1;
                 pl_empty(&PATH);
             }
-            /* [u] = UNDO */
-            else if (c == 'u')
+            /*[Ctrl] + [u] = UNDO */
+            else if (c == K_UNDO)
             {
                 /* If we are doing something, we abort it. */
                 if ((!P1.null) || (!P2.null) || (PATH.size != 0))
@@ -464,7 +440,7 @@ int main(int argc, char *argv[])
                 }
             }
             /* [ctrl] + r = REDO */
-            else if (c == 18)
+            else if (c == K_REDO)
             {
                 P1.null = 1;
                 P2.null = 1;
@@ -479,7 +455,16 @@ int main(int argc, char *argv[])
                 {
                     if (move_cursor(c).null)
                     {
-                        if (is_writable(c))
+                        /* If [Ctrl] + [h] */
+                        if (c == K_HELP)
+                        {
+                            ui_show_text("You are in the PUT mode.\n"
+                                         "Press a key and it will fill the selected character.\n"
+                                         "\n"
+                                         "Press any key to continue.");
+                            getch();
+                        }
+                        else if (is_writable(c))
                         {
                             position tmp = get_cursor_pos();
                             chk_set_char_at(&CURRENT_FILE, tmp, c);
@@ -490,9 +475,16 @@ int main(int argc, char *argv[])
                 {
                     if (move_cursor(c).null)
                     {
-
+                        if (c == K_HELP)
+                        {
+                            ui_show_text("You are in the TEXT mode.\n"
+                                         "Just enter any text here.\n"
+                                         "\n"
+                                         "Press any key to continue.");
+                            getch();
+                        }
                         /* Erasing. */
-                        if (c == 127 || c == KEY_BACKSPACE)
+                        else if (c == 127 || c == KEY_BACKSPACE)
                         {
                             position tmp = get_cursor_pos();
                             position position_of_char_to_remove = get_cursor_pos();
@@ -577,7 +569,16 @@ int main(int argc, char *argv[])
                 }
                 else if (MODE == MODE_RECT)
                 {
-                    if (move_cursor(c).null)
+                    if (c == K_HELP)
+                    {
+                        ui_show_text("You are in the RECT mode.\n"
+                                     "You can draw any rect by using [space] to select the first point\n"
+                                     "and [space] again to select the second one.\n"
+                                     "\n"
+                                     "Press any key to continue.");
+                        getch();
+                    }
+                    else if (move_cursor(c).null)
                     {
                         if (c == ' ')
                         {
@@ -629,7 +630,16 @@ int main(int argc, char *argv[])
                 {
                     if (P1.null || P2.null)
                     {
-                        if (c == 'p')
+                        if (c == K_HELP)
+                        {
+                            ui_show_text("You are in the SELECT mode.\n"
+                                         "You have not two points selected.\n"
+                                         "Use [space] to select another one.\n"
+                                         "\n"
+                                         "Press any key to continue.");
+                            getch();
+                        }
+                        else if (c == 'p')
                         {
                             do_change(&CURRENT_FILE);
                             chk_blit_chunk(&CURRENT_FILE, &CLIPBOARD, get_cursor_pos());
@@ -661,7 +671,21 @@ int main(int argc, char *argv[])
                         position max = pos_max(P1, P2);
                         int x;
                         int y;
-                        if (c == ' ')
+                        if (c == K_HELP)
+                        {
+                            ui_show_text("You are in the SELECT mode.\n"
+                                         "You have selected one rect. Here is what you can do:\n"
+                                         "      [space] to deselect.\n"
+                                         "      [y] to copy to the clipboard.\n"
+                                         "      [c] to cut to the clipboard.\n"
+                                         "      [del] to delete the selection.\n"
+                                         "      [f] then [x] to fill the selection with x.\n"
+                                         "      [r] then [x] to replace non-spaces in the selection with x.\n"
+                                         "\n"
+                                         "Press any key to continue.");
+                            getch();
+                        }
+                        else if (c == ' ')
                         {
                             P2.null = 1;
                             P1.null = 1;
@@ -710,6 +734,7 @@ int main(int argc, char *argv[])
                             do
                             {
                                 c = getch();
+
                             } while (!is_writable(c));
                             position min = pos_min(P1, P2);
                             position max = pos_max(P1, P2);
@@ -765,8 +790,17 @@ int main(int argc, char *argv[])
                 }
                 else if (MODE == MODE_LINE)
                 {
-
-                    if (!move_cursor(c).null)
+                    if (c == K_HELP)
+                    {
+                        ui_show_text("You are in the LINE mode.\n"
+                                     "You can use [space] to select the first point\n"
+                                     "and then [space] again to select the second point\n"
+                                     "and draw the line!\n"
+                                     "\n"
+                                     "Press any key to continue.");
+                        getch();
+                    }
+                    else if (!move_cursor(c).null)
                     {
                         if (PATH.size != 0)
                         {
@@ -800,8 +834,17 @@ int main(int argc, char *argv[])
                 }
                 else if (MODE == MODE_ARROW)
                 {
-
-                    if (!move_cursor(c).null)
+                    if (c == K_HELP)
+                    {
+                        ui_show_text("You are in the ARROW mode.\n"
+                                     "You can use [space] to select the starting point\n"
+                                     "and then [space] again to select the ending point\n"
+                                     "and draw the arrow!\n"
+                                     "\n"
+                                     "Press any key to continue.");
+                        getch();
+                    }
+                    else if (!move_cursor(c).null)
                     {
                         if (PATH.size != 0)
                         {
