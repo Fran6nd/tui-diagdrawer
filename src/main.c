@@ -701,6 +701,10 @@ int main(int argc, char *argv[])
                                 }
                             }
                         }
+                        /*
+                        Here we enter into the fill mode.
+                        Basically we replace all characters in the selection by the specified one.
+                        */
                         else if (c == 'f')
                         {
                             do
@@ -718,6 +722,31 @@ int main(int argc, char *argv[])
                                 {
                                     position tmp = {x, y};
                                     chk_set_char_at(&CURRENT_FILE, tmp, c);
+                                }
+                            }
+                        }
+                        /*
+                        Here we enter into the replace mode.
+                        Basically we replace all characters in the selection that are not spaces by the specified one.
+                        */
+                        else if (c == 'r')
+                        {
+                            do
+                            {
+                                c = getch();
+                            } while (!is_writable(c));
+                            position min = pos_min(P1, P2);
+                            position max = pos_max(P1, P2);
+                            int x;
+                            int y;
+                            do_change(&CURRENT_FILE);
+                            for (x = min.x; x <= max.x; x++)
+                            {
+                                for (y = min.y; y <= max.y; y++)
+                                {
+                                    position tmp = {x, y};
+                                    if (chk_get_char_at(&CURRENT_FILE, tmp) != ' ')
+                                        chk_set_char_at(&CURRENT_FILE, tmp, c);
                                 }
                             }
                         }
