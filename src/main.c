@@ -664,7 +664,16 @@ int main(int argc, char *argv[])
                 {
                     if (P1.null || P2.null)
                     {
-                        if (c == 'p')
+                        if (c == K_HELP)
+                        {
+                            ui_show_text("You are in the SELECT mode.\n"
+                                         "You have not two points selected.\n"
+                                         "Use [space] to select another one.\n"
+                                         "\n"
+                                         "Press any key to continue.");
+                            getch();
+                        }
+                        else if (c == 'p')
                         {
                             do_change(&CURRENT_FILE);
                             chk_blit_chunk(&CURRENT_FILE, &CLIPBOARD, get_cursor_pos());
@@ -696,7 +705,21 @@ int main(int argc, char *argv[])
                         position max = pos_max(P1, P2);
                         int x;
                         int y;
-                        if (c == ' ')
+                        if (c == K_HELP)
+                        {
+                            ui_show_text("You are in the SELECT mode.\n"
+                                         "You have selected one rect. Here is what you can do:\n"
+                                         "      [space] to deselect.\n"
+                                         "      [y] to copy to the clipboard.\n"
+                                         "      [c] to cut to the clipboard.\n"
+                                         "      [del] to delete the selection.\n"
+                                         "      [f] then [x] to fill the selection with x.\n"
+                                         "      [r] then [x] to replace non-spaces in the selection with x.\n"
+                                         "\n"
+                                         "Press any key to continue.");
+                            getch();
+                        }
+                        else if (c == ' ')
                         {
                             P2.null = 1;
                             P1.null = 1;
@@ -745,6 +768,7 @@ int main(int argc, char *argv[])
                             do
                             {
                                 c = getch();
+
                             } while (!is_writable(c));
                             position min = pos_min(P1, P2);
                             position max = pos_max(P1, P2);
