@@ -1,12 +1,11 @@
 # A TUI software to create basics ASCII diagrams.
-### BIG REFACTO NEEDED, UGLY CODE!
-
 ![alt text](showcase.gif)
 
 ## Introduction
 
 A minimalist and lightweight ascii diagram editor working with ncurses.<br>It
  features an easy interface for drawing rects, lines, arrows, text, copy-pasting...<br>
+ <br>It's written in C because first I like C and it compiles fast.
 
 ## How to use
 
