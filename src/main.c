@@ -824,8 +824,17 @@ int main(int argc, char *argv[])
                 }
                 else if (MODE == MODE_LINE)
                 {
-
-                    if (!move_cursor(c).null)
+                    if (c == K_HELP)
+                    {
+                        ui_show_text("You are in the LINE mode.\n"
+                                     "You can use [space] to select the first point\n"
+                                     "and then [space] again to select the second point\n"
+                                     "and draw the line!\n"
+                                     "\n"
+                                     "Press any key to continue.");
+                        getch();
+                    }
+                    else if (!move_cursor(c).null)
                     {
                         if (PATH.size != 0)
                         {
@@ -859,7 +868,17 @@ int main(int argc, char *argv[])
                 }
                 else if (MODE == MODE_ARROW)
                 {
-
+                    if (c == K_HELP)
+                    {
+                        ui_show_text("You are in the ARROW mode.\n"
+                                     "You can use [space] to select the starting point\n"
+                                     "and then [space] again to select the ending point\n"
+                                     "and draw the arrow!\n"
+                                     "\n"
+                                     "Press any key to continue.");
+                        getch();
+                    }
+                    else 
                     if (!move_cursor(c).null)
                     {
                         if (PATH.size != 0)
