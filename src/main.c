@@ -122,7 +122,7 @@ void draw_file()
     for (x = 0; x < COLS; x++)
     {
         int y;
-        for (y = 2; y < LINES; y++)
+        for (y = 1; y < LINES; y++)
         {
             position pos_on_screen = {x, y};
             position p = {x, y - 2};
@@ -202,10 +202,7 @@ void draw()
     refresh();
     move(0, 2);
     addstr("ASCII-Drawer by Fran6nd (press [tab] to swith mode)");
-    move(1, 2);
-    switch (MODE)
-    {
-    case MODE_NONE:
+    if (MODE == MODE_NONE)
         ui_show_text("Press [q] to exit\n"
                      "      [p] to enter PUT mode\n"
                      "      [t] to enter TEXT mode\n"
@@ -218,37 +215,6 @@ void draw()
                      "      [Ctrl] + [r] to redo changes\n"
                      "      [Ctrl] + [u] to undo changes\n"
                      "      [Ctrl] + [h] to show help for the current mode");
-        break;
-    case MODE_PUT:
-        addstr("[PUT MODE] -> move with arrows and set keys as you wish!");
-        break;
-    case MODE_TEXT:
-        addstr("[TEXT MODE] -> move with arrows and set keys as you wish!");
-        break;
-    case MODE_RECT:
-        addstr("[RECT MODE] -> move with arrows, use [space] to set p1 and p2, use [u] to abort.");
-        break;
-    case MODE_LINE:
-        addstr("[LINE MODE] -> move with arrows, use [space] to start/stop drawing and use [u] to abort.");
-        break;
-    case MODE_ARROW:
-        addstr("[ARROW MODE] -> move with arrows, use [space] to start/stop drawing and use [u] to abort.");
-        break;
-    case MODE_SELECT:
-        if (!P1.null && !P2.null)
-        {
-            addstr("[SELECT MODE] -> press [space] to select, [m] to move selection, [f] to fill or [r] to replace then give a character to fill/replace with!");
-        }
-        else
-        {
-            addstr("[SELECT MODE] -> move with arrows, use [space] to set p1 and p2 or unselect.");
-        }
-
-        break;
-    default:
-        addstr("Current mode not implemented yet.");
-        break;
-    }
 }
 
 position move_cursor(int c)
@@ -878,8 +844,7 @@ int main(int argc, char *argv[])
                                      "Press any key to continue.");
                         getch();
                     }
-                    else 
-                    if (!move_cursor(c).null)
+                    else if (!move_cursor(c).null)
                     {
                         if (PATH.size != 0)
                         {
