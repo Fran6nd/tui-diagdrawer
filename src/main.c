@@ -22,6 +22,13 @@
 #define MODE_LINE 5
 #define MODE_ARROW 6
 
+/* [Ctrl] + h for help. */
+#define K_HELP 8
+/* [Ctrl] + u for undo. */
+#define K_UNDO 21
+/* [Ctrl] + r for redo. */
+#define K_REDO 18
+
 position UP_LEFT_CORNER = {0, 0};
 position P1, P2;
 chunk CURRENT_FILE;
@@ -207,7 +214,10 @@ void draw()
                      "      [l] to enter LINE mode\n"
                      "      [a] to enter ARROW mode\n"
                      "      [w] to write to file\n"
-                     "      [x] to write to file and exit");
+                     "      [x] to write to file and exit\n"
+                     "      [Ctrl] + [r] to redo changes\n"
+                     "      [Ctrl] + [u] to undo changes\n"
+                     "      [Ctrl] + [h] to show help for the current mode");
         break;
     case MODE_PUT:
         addstr("[PUT MODE] -> move with arrows and set keys as you wish!");
@@ -447,8 +457,8 @@ int main(int argc, char *argv[])
                 P2.null = 1;
                 pl_empty(&PATH);
             }
-            /* [u] = UNDO */
-            else if (c == 'u')
+            /*[Ctrl] + [u] = UNDO */
+            else if (c == K_UNDO)
             {
                 /* If we are doing something, we abort it. */
                 if ((!P1.null) || (!P2.null) || (PATH.size != 0))
@@ -464,7 +474,7 @@ int main(int argc, char *argv[])
                 }
             }
             /* [ctrl] + r = REDO */
-            else if (c == 18)
+            else if (c == K_REDO)
             {
                 P1.null = 1;
                 P2.null = 1;
@@ -479,7 +489,16 @@ int main(int argc, char *argv[])
                 {
                     if (move_cursor(c).null)
                     {
-                        if (is_writable(c))
+                        /* If [Ctrl] + [h] */
+                        if (c == K_HELP)
+                        {
+                            ui_show_text("You are in the PUT mode.\n"
+                                         "Press a key and it will fill the selected character.\n"
+                                         "\n"
+                                         "Press any key to continue.");
+                            getch();
+                        }
+                        else if (is_writable(c))
                         {
                             position tmp = get_cursor_pos();
                             chk_set_char_at(&CURRENT_FILE, tmp, c);
@@ -490,9 +509,16 @@ int main(int argc, char *argv[])
                 {
                     if (move_cursor(c).null)
                     {
-
+                        if (c == K_HELP)
+                        {
+                            ui_show_text("You are in the TEXT mode.\n"
+                                         "Just enter any text here.\n"
+                                         "\n"
+                                         "Press any key to continue.");
+                            getch();
+                        }
                         /* Erasing. */
-                        if (c == 127 || c == KEY_BACKSPACE)
+                        else if (c == 127 || c == KEY_BACKSPACE)
                         {
                             position tmp = get_cursor_pos();
                             position position_of_char_to_remove = get_cursor_pos();
@@ -577,7 +603,16 @@ int main(int argc, char *argv[])
                 }
                 else if (MODE == MODE_RECT)
                 {
-                    if (move_cursor(c).null)
+                    if (c == K_HELP)
+                    {
+                        ui_show_text("You are in the RECT mode.\n"
+                                     "You can draw any rect by using [space] to select the first point\n"
+                                     "and [space] again to select the second one.\n"
+                                     "\n"
+                                     "Press any key to continue.");
+                        getch();
+                    }
+                    else if (move_cursor(c).null)
                     {
                         if (c == ' ')
                         {
