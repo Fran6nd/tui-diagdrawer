@@ -23,6 +23,7 @@ clean:
 	rm *.o
 	rm ascii-drawer
 	rm show_keyname
+rebuild: clean all
 
 #PREFIX is environment variable, but if it is not set, then set default value
 ifeq ($(PREFIX),)
