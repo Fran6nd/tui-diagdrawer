@@ -572,8 +572,11 @@ int main(int argc, char *argv[])
                                 {
 
                                     if (UP_LEFT_CORNER.x != starting_x - 1)
+                                    {
                                         /* We compensate the 2 spaces found. */
                                         UP_LEFT_CORNER.x += 2;
+                                        do_change(&CURRENT_FILE);
+                                    }
                                     else
                                         /* The line is empty. */
                                         UP_LEFT_CORNER.x++;
@@ -583,6 +586,7 @@ int main(int argc, char *argv[])
                                 {
                                     /* We compensate the character found. */
                                     UP_LEFT_CORNER.x += 1;
+                                    do_change(&CURRENT_FILE);
                                     break;
                                 }
                             }
