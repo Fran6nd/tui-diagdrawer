@@ -577,7 +577,7 @@ int main(int argc, char *argv[])
                                         UP_LEFT_CORNER.x++;
                                     break;
                                 }
-                                else if (current_key == '|' || current_key == '+' || current_key == '-' || current_key == '<' || current_key == '>' || current_key == '^' || current_key == 'v')
+                                else if ((current_key == '|' || current_key == '+' || current_key == '-' || current_key == '<' || current_key == '>' || current_key == '^' || current_key == 'v') && UP_LEFT_CORNER.x != starting_x)
                                 {
                                     /* We compensate the 2 spaces found. */
                                     UP_LEFT_CORNER.x += 1;
