@@ -8,6 +8,9 @@ It features an easy to use interface for drawing rects, lines, arrows, text...<b
 and doing things such as copy-pasting, filling selection...<br>
 It's written in C because first I like C, C is beautiful, C is simple,<br>
 C's memmory management is challenging and it compiles fast.<br>
+<br>
+This project is not intended to be a good text editor but a good ascii diagram drawer.<br>
+Even if I'm trying to improve the `TEXT` mode as possible :)<br>
 
 ## How to use
 
