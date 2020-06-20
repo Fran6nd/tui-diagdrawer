@@ -563,18 +563,28 @@ int main(int argc, char *argv[])
                             /* Let's find a [tab] or more than 2 [spaces] to find the indentation. */
                             char current_key = -1;
                             char previous_key = chk_get_char_at(&CURRENT_FILE, get_cursor_pos());
-                            for(; get_cursor_pos().x >= -1; UP_LEFT_CORNER.x --)
+                            int starting_x = UP_LEFT_CORNER.x;
+                            for (; get_cursor_pos().x >= -1; UP_LEFT_CORNER.x--)
                             {
                                 previous_key = current_key;
                                 current_key = chk_get_char_at(&CURRENT_FILE, get_cursor_pos());
-                                if(previous_key == ' ' && current_key == ' '){
+                                if (previous_key == ' ' && current_key == ' ')
+                                {
+                                    /* We compensate the 2 spaces found. */
+                                    if (UP_LEFT_CORNER.x != starting_x - 1)
+                                        UP_LEFT_CORNER.x += 2;
+                                    else
+                                        UP_LEFT_CORNER.x++;
+                                    break;
+                                }
+                                else if (current_key == '|' || current_key == '+' || current_key == '-' || current_key == '<' || current_key == '>' || current_key == '^' || current_key == 'v')
+                                {
+                                    /* We compensate the 2 spaces found. */
+                                    UP_LEFT_CORNER.x += 1;
                                     break;
                                 }
                             }
-                            UP_LEFT_CORNER.x += 2;
-                            UP_LEFT_CORNER.y ++;
-
-
+                            UP_LEFT_CORNER.y++;
                         }
                         else if (is_writable(c))
                         {
