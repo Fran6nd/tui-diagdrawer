@@ -1,4 +1,4 @@
-# A TUI software to create basics ASCII diagrams.
+# A TUI software to draw basics ASCII diagrams.
 ![alt text](showcase.gif)
 
 ## Introduction
