@@ -570,16 +570,18 @@ int main(int argc, char *argv[])
                                 current_key = chk_get_char_at(&CURRENT_FILE, get_cursor_pos());
                                 if (previous_key == ' ' && current_key == ' ')
                                 {
-                                    /* We compensate the 2 spaces found. */
+
                                     if (UP_LEFT_CORNER.x != starting_x - 1)
+                                        /* We compensate the 2 spaces found. */
                                         UP_LEFT_CORNER.x += 2;
                                     else
+                                        /* The line is empty. */
                                         UP_LEFT_CORNER.x++;
                                     break;
                                 }
                                 else if ((current_key == '|' || current_key == '+' || current_key == '-' || current_key == '<' || current_key == '>' || current_key == '^' || current_key == 'v') && UP_LEFT_CORNER.x != starting_x)
                                 {
-                                    /* We compensate the 2 spaces found. */
+                                    /* We compensate the character found. */
                                     UP_LEFT_CORNER.x += 1;
                                     break;
                                 }
