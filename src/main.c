@@ -203,7 +203,7 @@ void draw()
     ui_draw_rect(ui_zero, ui_max);
     refresh();
     move(0, 2);
-    addstr("ASCII-Drawer by Fran6nd (press [tab] to swith mode)");
+    addstr("ASCII-DiagDrawer by Fran6nd (press [tab] to swith mode)");
     if (MODE == MODE_NONE)
         ui_show_text("Press [q] to exit\n"
                      "      [p] to enter PUT mode\n"
