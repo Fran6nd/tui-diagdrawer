@@ -28,6 +28,8 @@
 #define K_UNDO 21
 /* [Ctrl] + r for redo. */
 #define K_REDO 18
+/* [return] / [enter] */
+#define K_ENTER 10
 
 position UP_LEFT_CORNER = {0, 0};
 position P1, P2;
@@ -554,6 +556,25 @@ int main(int argc, char *argv[])
                                 position tmp1 = {tmp.x + buffer_index - 1, tmp.y};
                                 chk_set_char_at(&CURRENT_FILE, tmp1, ' ');
                             }
+                        }
+                        /* New line. */
+                        else if (c == K_ENTER)
+                        {
+                            /* Let's find a [tab] or more than 2 [spaces] to find the indentation. */
+                            char current_key = -1;
+                            char previous_key = chk_get_char_at(&CURRENT_FILE, get_cursor_pos());
+                            for(; get_cursor_pos().x >= -1; UP_LEFT_CORNER.x --)
+                            {
+                                previous_key = current_key;
+                                current_key = chk_get_char_at(&CURRENT_FILE, get_cursor_pos());
+                                if(previous_key == ' ' && current_key == ' '){
+                                    break;
+                                }
+                            }
+                            UP_LEFT_CORNER.x += 2;
+                            UP_LEFT_CORNER.y ++;
+
+
                         }
                         else if (is_writable(c))
                         {
