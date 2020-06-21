@@ -2,9 +2,8 @@
 #define POSITION_H
 
 typedef struct position position;
-struct position
-{
-    int x, y, null;
+struct position {
+  int x, y, null;
 };
 
 position pos_min(position p1, position p2);

@@ -4,10 +4,9 @@
 #include "position.h"
 
 typedef struct position_list position_list;
-struct position_list
-{
-    int size;
-    position *list;
+struct position_list {
+  int size;
+  position *list;
 };
 
 position_list pl_new();

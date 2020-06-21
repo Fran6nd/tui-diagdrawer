@@ -4,8 +4,8 @@
 
 /*
  * This file is intended to allow performing undo/redo operations.
- * This is maybe the most sensitive part of the software because of the risk of memmory leaks.
- * Feel free to improve it :)
+ * This is maybe the most sensitive part of the software because of the risk of
+ * memmory leaks. Feel free to improve it :)
  */
 
 void init_undo_redo();

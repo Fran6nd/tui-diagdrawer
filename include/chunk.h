@@ -4,12 +4,11 @@
 #include "position.h"
 
 typedef struct chunk chunk;
-struct chunk
-{
-    char **chunk;
-    int lines;
-    int cols;
-    int null;
+struct chunk {
+  char **chunk;
+  int lines;
+  int cols;
+  int null;
 };
 
 chunk chk_new(int x, int y);
