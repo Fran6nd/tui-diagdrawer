@@ -3,6 +3,13 @@
 
 #include "position.h"
 
+/*
+ * A chunk is a square of text.
+ * This is how we manage everything here.
+ * They are used to load text from a file,
+ * to extract a chunk from another...
+ */
+
 typedef struct chunk chunk;
 struct chunk {
   char **chunk;
