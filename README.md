@@ -10,7 +10,7 @@ It's written in C because first I like C, C is beautiful, C is simple,<br>
 C's memmory management is challenging and it compiles fast.<br>
 <br>
 This project is not intended to be a good text editor but a good ascii diagram drawer.<br>
-Even if I'm trying to improve the `TEXT` mode as possible :)<br>
+Even if I'm trying to improve the `TEXT` mode as much as possible :)<br>
 
 ## How to use
 
@@ -30,7 +30,7 @@ In case af style changes, of course it's welcome but do not forget to explain wh
 
 * Multiple files editing.
 * Finding words, chunk...
-* Improvethe text editor.
+* Improve the text editor.
 
 # Here is what we can do:
 
