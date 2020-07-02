@@ -500,6 +500,21 @@ int main(int argc, char *argv[]) {
                 }
               }
               UP_LEFT_CORNER.y++;
+              /* Now if we are on a rect border or en arrow we skip it. */
+              int loop = 1;
+              while (loop) {
+                current_key = chk_get_char_at(&CURRENT_FILE, get_cursor_pos());
+                if (current_key == '|' || current_key == '+' ||
+                    current_key == '-' || current_key == '<' ||
+                    current_key == '>' || current_key == '^' ||
+                    current_key == 'v') {
+                  UP_LEFT_CORNER.x++;
+                }
+                else{
+                  loop = 0;
+                }
+              }
+
             } else if (is_writable(c)) {
               position tmp = get_cursor_pos();
               char chr_to_replace = chk_get_char_at(&CURRENT_FILE, tmp);
