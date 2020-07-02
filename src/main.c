@@ -69,6 +69,15 @@ int is_writable(char c) {
   return 0;
 }
 
+/* To know whether or not if a char is par of a diagram. */
+int is_diag_char(char c) {
+  if (c == '|' || c == '+' || c == '-' || c == '<' || c == '>' || c == '^' ||
+      c == 'v') {
+    return 1;
+  }
+  return 0;
+}
+
 void draw_char(position p, char c, int col) {
   attron(COLOR_PAIR(col));
   move(p.y, p.x);
@@ -441,17 +450,14 @@ int main(int argc, char *argv[]) {
               position position_of_char_to_remove = get_cursor_pos();
               char chr_to_replace =
                   chk_get_char_at(&CURRENT_FILE, position_of_char_to_remove);
-              if (chr_to_replace != '+' && chr_to_replace != '|' &&
-                  chr_to_replace != '^' && chr_to_replace != 'v' &&
-                  chr_to_replace != '>') {
+              if (!is_diag_char(chr_to_replace)) {
                 int x;
                 char buffer[CURRENT_FILE.cols];
                 int buffer_index = 0;
                 for (x = tmp.x; x < CURRENT_FILE.cols; x++) {
                   position tmp1 = {x, tmp.y};
                   char ch = chk_get_char_at(&CURRENT_FILE, tmp1);
-                  if (ch != '+' && ch != '|' && ch != '^' && ch != 'v' &&
-                      ch != '>') {
+                  if (!is_diag_char(ch)) {
                     buffer[buffer_index] = ch;
                     buffer_index++;
                   } else {
@@ -488,10 +494,7 @@ int main(int argc, char *argv[]) {
                     /* The line is empty. */
                     UP_LEFT_CORNER.x++;
                   break;
-                } else if ((current_key == '|' || current_key == '+' ||
-                            current_key == '-' || current_key == '<' ||
-                            current_key == '>' || current_key == '^' ||
-                            current_key == 'v') &&
+                } else if ((is_diag_char(current_key)) &&
                            UP_LEFT_CORNER.x != starting_x) {
                   /* We compensate the character found. */
                   UP_LEFT_CORNER.x += 1;
@@ -504,13 +507,9 @@ int main(int argc, char *argv[]) {
               int loop = 1;
               while (loop) {
                 current_key = chk_get_char_at(&CURRENT_FILE, get_cursor_pos());
-                if (current_key == '|' || current_key == '+' ||
-                    current_key == '-' || current_key == '<' ||
-                    current_key == '>' || current_key == '^' ||
-                    current_key == 'v') {
+                if (is_diag_char(current_key)) {
                   UP_LEFT_CORNER.x++;
-                }
-                else{
+                } else {
                   loop = 0;
                 }
               }
@@ -518,9 +517,7 @@ int main(int argc, char *argv[]) {
             } else if (is_writable(c)) {
               position tmp = get_cursor_pos();
               char chr_to_replace = chk_get_char_at(&CURRENT_FILE, tmp);
-              if (chr_to_replace != '+' && chr_to_replace != '|' &&
-                  chr_to_replace != '^' && chr_to_replace != 'v' &&
-                  chr_to_replace != '<') {
+              if (!is_diag_char(chr_to_replace)) {
                 chk_set_char_at(&CURRENT_FILE, tmp, c);
                 UP_LEFT_CORNER.x++;
               }
