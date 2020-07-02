@@ -60,7 +60,7 @@ void clear_screen() {
 int is_writable(char c) {
   char *charset =
       "azertyuiopqsdfghjklmwxcvbn?,.;/"
-      ":§!\\`_-'+*#=()[]{}^$&1234567890AZERTYUIOPQSDFGHJKLMWXCVBN <>";
+      ":§!\\`_-'+*#=()[]{}^$&1234567890AZERTYUIOPQSDFGHJKLMWXCVBN <>éèç&$@\"";
   int i;
   for (i = 0; i < strlen(charset); i++) {
     if (charset[i] == c)
