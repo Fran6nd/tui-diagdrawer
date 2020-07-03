@@ -11,7 +11,10 @@ struct plugin {
   lua_State *plugin;
   char *name;
 };
-
+const char *plugin_get_name(lua_State *L) {
+  int t = lua_getglobal(L, "NAME");
+  return lua_tostring(L, 1);
+}
 int plugin_load(char *path) {
   if (plugins.loaded == 0) {
     plugins.loaded++;
@@ -24,21 +27,23 @@ int plugin_load(char *path) {
   int status, result, i;
   double sum;
 
-  plugins.plugins[plugins.loaded-1] = luaL_newstate();
+  plugins.plugins[plugins.loaded - 1] = luaL_newstate();
 
-  luaL_openlibs(plugins.plugins[plugins.loaded-1]);
+  luaL_openlibs(plugins.plugins[plugins.loaded - 1]);
 
-  status = luaL_loadfile(plugins.plugins[plugins.loaded-1], path);
+  status = luaL_loadfile(plugins.plugins[plugins.loaded - 1], path);
   if (status) {
-    fprintf(stderr, "Couldn't load file: %s\n", lua_tostring(plugins.plugins[plugins.loaded-1], -1));
-    exit(1);
-  }
-
-  /* Ask Lua to run our little script */
-  result = lua_pcall(plugins.plugins[plugins.loaded-1], 0, LUA_MULTRET, 0);
-  if (result) {
-    fprintf(stderr, "Failed to run script: %s\n", lua_tostring(plugins.plugins[plugins.loaded-1], -1));
-    exit(1);
+    fprintf(stderr, "Couldn't load file: %s\n",
+            lua_tostring(plugins.plugins[plugins.loaded - 1], -1));
+  } else { /* Ask Lua to run our little script */
+    result = lua_pcall(plugins.plugins[plugins.loaded - 1], 0, LUA_MULTRET, 0);
+    if (result) {
+      fprintf(stderr, "Failed to run script: %s\n",
+              lua_tostring(plugins.plugins[plugins.loaded - 1], -1));
+    } else {
+      printf("Successfully loaded %s!\n",
+             plugin_get_name(plugins.plugins[plugins.loaded - 1]));
+    }
   }
 }
 void plugins_load() {
@@ -53,8 +58,4 @@ void plugins_free() {
     }
     free(plugins.plugins);
   }
-}
-const char *plugin_get_name(lua_State *L) {
-  int t = lua_getglobal(L, "NAME");
-  return lua_tostring(L, 1);
 }
