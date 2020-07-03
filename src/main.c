@@ -4,41 +4,22 @@
 #include <string.h>
 
 #include "chunk.h"
+#include "edit_mode.h"
+#include "main.h"
 #include "position.h"
 #include "position_list.h"
 #include "ui.h"
 #include "undo_redo.h"
 
-#define COL_SELECTION 1
-#define COL_EMPTY 2
-#define COL_CURSOR 3
-#define COL_NORMAL 4
-
-#define MODE_NONE 0
-#define MODE_SELECT 1
-#define MODE_PUT 2
-#define MODE_TEXT 3
-#define MODE_RECT 4
-#define MODE_LINE 5
-#define MODE_ARROW 6
-
-/* [Ctrl] + h for help. */
-#define K_HELP 8
-/* [Ctrl] + u for undo. */
-#define K_UNDO 21
-/* [Ctrl] + r for redo. */
-#define K_REDO 18
-/* [return] / [enter] */
-#define K_ENTER 10
-
-position UP_LEFT_CORNER = {0, 0};
 position P1, P2;
-chunk CURRENT_FILE;
 chunk CLIPBOARD;
 position_list PATH;
 int MODE = MODE_PUT;
 int PREVIOUS_MODE = 0;
 char *NAME = "Untitled.txt";
+position UP_LEFT_CORNER = {0, 0};
+chunk CURRENT_FILE;
+edit_mode *EDIT_MODE;
 
 position get_cursor_pos() {
   position tmp = {UP_LEFT_CORNER.x + COLS / 2,
@@ -85,38 +66,12 @@ void draw_char(position p, char c, int col) {
   attroff(COLOR_PAIR(col));
 }
 
-int is_on_rect_border(position r1, position r2, position p) {
-  position min = pos_min(r1, r2);
-  position max = pos_max(r1, r2);
-  if (p.x > min.x && p.x < max.x)
-    if (p.y == max.y || p.y == min.y)
-      return 1;
-  if (p.y > min.y && p.y < max.y)
-    if (p.x == max.x || p.x == min.x)
-      return 1;
-  return 0;
-}
 int is_in_rect(position r1, position r2, position p) {
   position min = pos_min(r1, r2);
   position max = pos_max(r1, r2);
   if (p.x >= min.x && p.x <= max.x)
     if (p.y <= max.y && p.y >= min.y)
       return 1;
-  return 0;
-}
-int is_on_rect_corner(position r1, position r2, position p) {
-  position down_left = pos_min(r1, r2);
-  position up_right = pos_max(r1, r2);
-  position up_left = {down_left.x, up_right.y};
-  position down_right = {up_right.x, down_left.y};
-  if (p.x == down_left.x && p.y == down_left.y)
-    return 1;
-  if (p.x == up_right.x && p.y == up_right.y)
-    return 1;
-  if (p.x == up_left.x && p.y == up_left.y)
-    return 1;
-  if (p.x == down_right.x && p.y == down_right.y)
-    return 1;
   return 0;
 }
 
@@ -131,19 +86,10 @@ void draw_file() {
       p.y += UP_LEFT_CORNER.y;
       char c = chk_get_char_at(&CURRENT_FILE, p);
       if (c != 0) {
-        if (MODE == MODE_RECT) {
-          if (P1.null == 0) {
-            if (is_on_rect_corner(P1, get_cursor_pos(), p)) {
-              c = '+';
-            } else if (is_on_rect_border(P1, get_cursor_pos(), p)) {
-              if (p.y == P1.y || p.y == get_cursor_pos().y) {
-                c = '-';
-              }
-              if (p.x == P1.x || p.x == get_cursor_pos().x) {
-                c = '|';
-              }
-            }
-          }
+        if (EDIT_MODE) {
+          if (EDIT_MODE->on_draw)
+            c = EDIT_MODE->on_draw(p, c);
+
         } else if (MODE == MODE_LINE) {
           int i = pl_is_inside(&PATH, p);
           if (i != -1) {
@@ -180,19 +126,6 @@ void draw() {
   refresh();
   move(0, 2);
   addstr("ASCII-DiagDrawer by Fran6nd (press [tab] to swith mode)");
-  if (MODE == MODE_NONE)
-    ui_show_text("Press [q] to exit\n"
-                 "      [p] to enter PUT mode\n"
-                 "      [t] to enter TEXT mode\n"
-                 "      [s] to enter SELECT mode\n"
-                 "      [r] to enter RECT mode\n"
-                 "      [l] to enter LINE mode\n"
-                 "      [a] to enter ARROW mode\n"
-                 "      [w] to write to file\n"
-                 "      [x] to write to file and exit\n"
-                 "      [Ctrl] + [r] to redo changes\n"
-                 "      [Ctrl] + [u] to undo changes\n"
-                 "      [Ctrl] + [h] to show help for the current mode");
 }
 
 position move_cursor(int c) {
@@ -232,6 +165,7 @@ int main(int argc, char *argv[]) {
   noecho();
   start_color();
   keypad(stdscr, TRUE);
+  register_modes();
   CLIPBOARD.null = 1;
 
   init_pair(COL_CURSOR, COLOR_WHITE, COLOR_RED);
@@ -310,54 +244,72 @@ int main(int argc, char *argv[]) {
     }
     draw();
     int c = getch();
-    if (MODE == MODE_NONE) {
-      P1.null = 1;
-      pl_empty(&PATH);
-      switch ((char)c) {
-      case 's':
-        MODE = MODE_SELECT;
-        break;
-      case 'p':
-        MODE = MODE_PUT;
-        break;
-      case 'q':
-        looping = 0;
-        break;
-      case 't':
-        MODE = MODE_TEXT;
-        break;
-      case 'a':
-        MODE = MODE_ARROW;
-        break;
-      case 'w':
-        chk_save_to_file(&CURRENT_FILE, NAME);
-        MODE = PREVIOUS_MODE;
-        break;
-      case 'x':
-        chk_save_to_file(&CURRENT_FILE, NAME);
-        looping = 0;
-        break;
-      case 'l':
-        MODE = MODE_LINE;
-        break;
-      case '\t':
-        MODE = PREVIOUS_MODE;
-        break;
-      case 'r':
-        MODE = MODE_RECT;
-        break;
-      case '\033':
-        getch();
-        getch();
-        break;
-      default:
-        break;
-      }
-    } else {
+    {
       /* [tab] = MENU */
       if (c == '\t') {
+        ui_show_text("Press [q] to exit\n"
+                     "      [p] to enter PUT mode\n"
+                     "      [t] to enter TEXT mode\n"
+                     "      [s] to enter SELECT mode\n"
+                     "      [r] to enter RECT mode\n"
+                     "      [l] to enter LINE mode\n"
+                     "      [a] to enter ARROW mode\n"
+                     "      [w] to write to file\n"
+                     "      [x] to write to file and exit\n"
+                     "      [Ctrl] + [r] to redo changes\n"
+                     "      [Ctrl] + [u] to undo changes\n"
+                     "      [Ctrl] + [h] to show help for the current mode");
         PREVIOUS_MODE = MODE;
-        MODE = MODE_NONE;
+
+        P1.null = 1;
+        pl_empty(&PATH);
+        EDIT_MODE = NULL;
+        c = getch();
+        EDIT_MODE = get_edit_mode(c);
+        if (EDIT_MODE != NULL) {
+        } else {
+
+          switch ((char)c) {
+          case 's':
+            MODE = MODE_SELECT;
+            break;
+          case 'p':
+            MODE = MODE_PUT;
+            break;
+          case 'q':
+            looping = 0;
+            break;
+          case 't':
+            MODE = MODE_TEXT;
+            break;
+          case 'a':
+            MODE = MODE_ARROW;
+            break;
+          case 'w':
+            chk_save_to_file(&CURRENT_FILE, NAME);
+            MODE = PREVIOUS_MODE;
+            break;
+          case 'x':
+            chk_save_to_file(&CURRENT_FILE, NAME);
+            looping = 0;
+            break;
+          case 'l':
+            MODE = MODE_LINE;
+            break;
+          case '\t':
+            MODE = PREVIOUS_MODE;
+            break;
+          case 'r':
+            MODE = MODE_RECT;
+            break;
+          case '\033':
+            getch();
+            getch();
+            break;
+          default:
+            break;
+          }
+        }
         P1.null = 1;
         P2.null = 1;
         pl_empty(&PATH);
@@ -386,21 +338,9 @@ int main(int argc, char *argv[]) {
       else {
         /* If no major key pressed, we now do things depending on selected mod.
          */
-        if (MODE == MODE_PUT) {
-          if (move_cursor(c).null) {
-            /* If [Ctrl] + [h] */
-            if (c == K_HELP) {
-              ui_show_text(
-                  "You are in the PUT mode.\n"
-                  "Press a key and it will fill the selected character.\n"
-                  "\n"
-                  "Press any key to continue.");
-              getch();
-            } else if (is_writable(c)) {
-              position tmp = get_cursor_pos();
-              chk_set_char_at(&CURRENT_FILE, tmp, c);
-            }
-          }
+        if (EDIT_MODE != NULL) {
+          if (EDIT_MODE->on_key_event != NULL)
+            EDIT_MODE->on_key_event(c);
         } else if (MODE == MODE_TEXT) {
           if (move_cursor(c).null) {
             if (c == K_HELP) {
@@ -523,53 +463,7 @@ int main(int argc, char *argv[]) {
               }
             }
           }
-        } else if (MODE == MODE_RECT) {
-          if (c == K_HELP) {
-            ui_show_text("You are in the RECT mode.\n"
-                         "You can draw any rect by using [space] to select the "
-                         "first point\n"
-                         "and [space] again to select the second one.\n"
-                         "\n"
-                         "Press any key to continue.");
-            getch();
-          } else if (move_cursor(c).null) {
-            if (c == ' ') {
-              position tmp = get_cursor_pos();
-              if (P1.null) {
-                P1 = tmp;
-              } else {
-                do_change(&CURRENT_FILE);
-                position down_left = pos_min(P1, tmp);
-                position up_right = pos_max(P1, tmp);
-                position up_left = {down_left.x, up_right.y};
-                position down_right = {up_right.x, down_left.y};
-                chk_set_char_at(&CURRENT_FILE, down_left, '+');
-                chk_set_char_at(&CURRENT_FILE, up_right, '+');
-                chk_set_char_at(&CURRENT_FILE, down_right, '+');
-                chk_set_char_at(&CURRENT_FILE, up_left, '+');
-                int x;
-                for (x = down_left.x + 1; x < down_right.x; x++) {
-                  position tmp1 = {x, up_right.y};
-                  chk_set_char_at(&CURRENT_FILE, tmp1, '-');
-                }
-                for (x = down_left.x + 1; x < down_right.x; x++) {
-                  position tmp1 = {x, down_right.y};
-                  chk_set_char_at(&CURRENT_FILE, tmp1, '-');
-                }
-                int y;
-                for (y = down_left.y + 1; y < up_left.y; y++) {
-                  position tmp1 = {up_left.x, y};
-                  chk_set_char_at(&CURRENT_FILE, tmp1, '|');
-                }
-                for (y = down_left.y + 1; y < up_left.y; y++) {
-                  position tmp1 = {up_right.x, y};
-                  chk_set_char_at(&CURRENT_FILE, tmp1, '|');
-                }
 
-                P1.null = 1;
-              }
-            }
-          }
         } else if (MODE == MODE_SELECT) {
           if (P1.null || P2.null) {
             if (c == K_HELP) {
@@ -602,18 +496,7 @@ int main(int argc, char *argv[]) {
             int x;
             int y;
             if (c == K_HELP) {
-              ui_show_text(
-                  "You are in the SELECT mode.\n"
-                  "You have selected one rect. Here is what you can do:\n"
-                  "      [space] to deselect.\n"
-                  "      [y] to copy to the clipboard.\n"
-                  "      [c] to cut to the clipboard.\n"
-                  "      [del] to delete the selection.\n"
-                  "      [f] then [x] to fill the selection with x.\n"
-                  "      [r] then [x] to replace non-spaces in the selection "
-                  "with x.\n"
-                  "\n"
-                  "Press any key to continue.");
+              ui_show_text(get_menu());
               getch();
             } else if (c == ' ') {
               P2.null = 1;
@@ -769,6 +652,7 @@ int main(int argc, char *argv[]) {
   chk_free(&CURRENT_FILE);
   free_undo_redo();
   pl_empty(&PATH);
+  edit_mode_free();
   chk_free(&CLIPBOARD);
   return 0;
 }
