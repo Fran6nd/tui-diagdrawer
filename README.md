@@ -31,6 +31,7 @@ In case af style changes, of course it's welcome but do not forget to explain wh
 * Multiple files editing.
 * Finding words, chunk...
 * Improve the text editor.
+* Enable LUA scripting.
 
 # Here is what we can do:
 
