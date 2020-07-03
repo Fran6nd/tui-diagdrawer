@@ -8,6 +8,7 @@
 #include "position_list.h"
 #include "ui.h"
 #include "undo_redo.h"
+#include "plugin.h"
 
 #define COL_SELECTION 1
 #define COL_EMPTY 2
@@ -227,6 +228,7 @@ position move_cursor(int c) {
 }
 
 int main(int argc, char *argv[]) {
+  plugins_load();
   initscr();
   curs_set(0);
   noecho();
@@ -770,5 +772,6 @@ int main(int argc, char *argv[]) {
   free_undo_redo();
   pl_empty(&PATH);
   chk_free(&CLIPBOARD);
+  plugins_free();
   return 0;
 }

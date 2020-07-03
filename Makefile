@@ -10,14 +10,16 @@ undo_redo.o: src/undo_redo.c
 	gcc -O -c src/undo_redo.c -std=c99 -o undo_redo.o -Iinclude
 position.o: src/position.c
 	gcc -O -c src/position.c -std=c99 -o position.o -Iinclude
+plugin.o: src/plugin.c
+	gcc -O -c src/plugin.c  -llua -lm -ldl -Iinclude -o plugin.o
 position_list.o: src/position_list.c
 	gcc -O -c src/position_list.c -std=c99 -o position_list.o -Iinclude
 chunk.o: src/chunk.c position.o position_list.o
 	gcc -O -c src/chunk.c -std=c99 -o chunk.o -Iinclude
 main.o: chunk.o
 	gcc -D _DEFAULT_SOURCE -O -c src/main.c -std=c99 -o main.o -Iinclude -lncurses
-ascii-diagdrawer: main.o position.o ui.o undo_redo.o position_list.o chunk.o
-	gcc -g main.o undo_redo.o chunk.o position.o position_list.o ui.o -Iinclude -lncurses -o ascii-diagdrawer
+ascii-diagdrawer: main.o position.o ui.o undo_redo.o position_list.o chunk.o plugin.o
+	gcc -g main.o undo_redo.o chunk.o position.o position_list.o plugin.o ui.o -Iinclude -lncurses -llua -lm -ldl -o ascii-diagdrawer
 all:ascii-diagdrawer show_keyname
 clean:
 	rm *.o
