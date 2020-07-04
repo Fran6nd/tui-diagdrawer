@@ -9,14 +9,14 @@
 position P1, P2;
 
 static void on_key_event(int c) {
-  
+
   if (c == K_HELP) {
     ui_show_text_info("You are in the RECT mode.\n"
-                 "You can draw any rect by using [space] to select the "
-                 "first point\n"
-                 "and [space] again to select the second one.\n"
-                 "\n"
-                 "Press any key to continue.");
+                      "You can draw any rect by using [space] to select the "
+                      "first point\n"
+                      "and [space] again to select the second one.\n"
+                      "\n"
+                      "Press any key to continue.");
   } else if (move_cursor(c).null) {
     if (c == (int)' ') {
       position tmp = get_cursor_pos();
@@ -62,7 +62,7 @@ static void on_exit() {
   P2.null = 1;
 }
 
- static int is_on_rect_corner(position r1, position r2, position p) {
+static int is_on_rect_corner(position r1, position r2, position p) {
   position down_left = pos_min(r1, r2);
   position up_right = pos_max(r1, r2);
   position up_left = {down_left.x, up_right.y};
@@ -105,12 +105,25 @@ static character on_draw(position p, character c) {
   return c;
 }
 
+static void on_top_line_add() {
+  if (!P1.null) {
+    P1.y++;
+  }
+}
+static void on_left_column_add() {
+  if (!P1.null) {
+    P1.x++;
+  }
+}
+
 edit_mode rect_mode() {
   edit_mode EDIT_MODE_RECT = {.name = "RECT",
                               .key = 114,
                               .on_key_event = on_key_event,
                               .null = 0,
                               .on_exit = on_exit,
-                              .on_draw = on_draw};
+                              .on_draw = on_draw,
+                              .on_top_line_add = on_top_line_add,
+                              .on_left_column_add = on_left_column_add};
   return EDIT_MODE_RECT;
 }

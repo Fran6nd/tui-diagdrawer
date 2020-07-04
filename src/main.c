@@ -184,8 +184,6 @@ int main(int argc, char *argv[]) {
         }
       }
       UP_LEFT_CORNER.x++;
-      P1.x++;
-      P2.x++;
     }
     while (get_cursor_pos().y < 0) {
       int i;
@@ -196,8 +194,6 @@ int main(int argc, char *argv[]) {
         }
       }
       UP_LEFT_CORNER.y++;
-      P1.y++;
-      P2.y++;
     }
     while (get_cursor_pos().y >= CURRENT_FILE.lines) {
       chk_add_line_down(&CURRENT_FILE);
