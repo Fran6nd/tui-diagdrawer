@@ -11,12 +11,11 @@
 #include "ui.h"
 #include "undo_redo.h"
 
-int MODE = MODE_PUT;
-int PREVIOUS_MODE = 0;
 char *NAME = "Untitled.txt";
 position UP_LEFT_CORNER = {0, 0};
 chunk CURRENT_FILE;
 edit_mode *EDIT_MODE;
+edit_mode *PREVIOUS_EDIT_MODE;
 
 position get_cursor_pos() {
   position tmp = {UP_LEFT_CORNER.x + COLS / 2,
@@ -139,6 +138,8 @@ int main(int argc, char *argv[]) {
   start_color();
   keypad(stdscr, TRUE);
   register_modes();
+  EDIT_MODE = &modes[0];
+  PREVIOUS_EDIT_MODE = EDIT_MODE;
 
   init_pair(COL_CURSOR, COLOR_WHITE, COLOR_RED);
   init_pair(COL_NORMAL, COLOR_WHITE, COLOR_BLACK);
@@ -197,12 +198,10 @@ int main(int argc, char *argv[]) {
                      "      [Ctrl] + [r] to redo changes\n"
                      "      [Ctrl] + [u] to undo changes\n"
                      "      [Ctrl] + [h] to show help for the current mode");
-        PREVIOUS_MODE = MODE;
+        PREVIOUS_EDIT_MODE = EDIT_MODE;
         EDIT_MODE = NULL;
-        c = getch();
-        EDIT_MODE = get_edit_mode(c);
-        if (EDIT_MODE != NULL) {
-        } else {
+        do {
+          c = getch();
 
           switch ((char)c) {
           case 'q':
@@ -210,23 +209,24 @@ int main(int argc, char *argv[]) {
             break;
           case 'w':
             chk_save_to_file(&CURRENT_FILE, NAME);
-            MODE = PREVIOUS_MODE;
             break;
           case 'x':
             chk_save_to_file(&CURRENT_FILE, NAME);
             looping = 0;
             break;
           case '\t':
-            MODE = PREVIOUS_MODE;
+            EDIT_MODE = PREVIOUS_EDIT_MODE;
             break;
           case '\033':
             getch();
             getch();
             break;
           default:
+            EDIT_MODE = get_edit_mode(c);
             break;
           }
-        }
+        } while (EDIT_MODE == NULL && looping == 1);
+
       }
       /*[Ctrl] + [u] = UNDO */
       else if (c == K_UNDO) {
@@ -236,7 +236,7 @@ int main(int argc, char *argv[]) {
           aborted = EDIT_MODE->on_abort();
         }
         /* Else we undo the last change. */
-        if(!aborted) {
+        if (!aborted) {
           undo_change(&CURRENT_FILE);
         }
       }
