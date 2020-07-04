@@ -1,10 +1,21 @@
 #include <stdlib.h>
+#include <curses.h>
 
 #include "edit_mode.h"
+#include "ui.h"
+
 
 struct edit_mode *modes;
 int edit_mode_counter;
 void register_mode(edit_mode em) {
+  int i;
+  for(i = 0; i < edit_mode_counter; i++){
+    if(modes[i].key == em.key){
+      ui_show_text("Error\nTrying to register an edit mode\n using an already used key.");
+      getch();
+      return;
+    }
+  }
   if (edit_mode_counter == 0) {
     modes = malloc(1 * sizeof(edit_mode));
     modes[0] = em;
@@ -15,13 +26,16 @@ void register_mode(edit_mode em) {
   }
   edit_mode_counter++;
 }
+
 int register_modes() {
   register_mode(rect_mode());
   register_mode(put_mode());
   register_mode(line_mode());
   register_mode(arrow_mode());
+  register_mode(text_mode());
   return 1;
 }
+
 char *get_menu() {
   return ("You are in the SELECT mode.\n"
           "You have selected one rect. Here is what you can do:\n"

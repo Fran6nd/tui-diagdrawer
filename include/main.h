@@ -29,6 +29,7 @@
 position get_cursor_pos();
 position move_cursor();
 int is_writable(char);
+int is_diag_char(char);
 extern chunk CURRENT_FILE;
 extern position UP_LEFT_CORNER;
 
