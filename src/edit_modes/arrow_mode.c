@@ -11,10 +11,10 @@ position_list PATH;
 
 static void on_key_event(int c) {
   if (c == K_HELP) {
-    ui_show_text("You are in the LINE mode.\n"
-                 "You can use [space] to select the first point\n"
-                 "and then [space] again to select the second point\n"
-                 "and draw the line!\n"
+    ui_show_text("You are in the ARROW mode.\n"
+                 "You can use [space] to select the starting point\n"
+                 "and then [space] again to select the ending point\n"
+                 "and draw the arrow!\n"
                  "\n"
                  "Press any key to continue.");
     getch();
@@ -33,7 +33,7 @@ static void on_key_event(int c) {
       for (i = 0; i < PATH.size; i++) {
 
         chk_set_char_at(&CURRENT_FILE, PATH.list[i],
-                        pl_get_line_char(&PATH, i));
+                        pl_get_arrow_char(&PATH, i));
       }
       pl_empty(&PATH);
       PATH = pl_new();
@@ -43,21 +43,19 @@ static void on_key_event(int c) {
   }
 }
 
-static void on_exit() {
-  pl_empty(&PATH);
-}
+static void on_exit() { pl_empty(&PATH); }
 
 static char on_draw(position p, char c) {
   int i = pl_is_inside(&PATH, p);
   if (i != -1) {
-    c = pl_get_line_char(&PATH, i);
+    c = pl_get_arrow_char(&PATH, i);
   }
   return c;
 }
 
-edit_mode line_mode() {
-  edit_mode EDIT_MODE_RECT = {.name = "LINE",
-                              .key = (int)'l',
+edit_mode arrow_mode() {
+  edit_mode EDIT_MODE_RECT = {.name = "ARROW",
+                              .key = (int)'a',
                               .on_key_event = on_key_event,
                               .null = 0,
                               .on_exit = on_exit,

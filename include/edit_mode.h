@@ -21,6 +21,7 @@ char *get_menu();
 edit_mode *get_edit_mode(int key);
 void edit_mode_free();
 
+/* Functions returning all natives edit modes. */
 edit_mode put_mode();
 edit_mode rect_mode();
 edit_mode arrow_mode();

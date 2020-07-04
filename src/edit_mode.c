@@ -19,6 +19,7 @@ int register_modes() {
   register_mode(rect_mode());
   register_mode(put_mode());
   register_mode(line_mode());
+  register_mode(arrow_mode());
   return 1;
 }
 char *get_menu() {

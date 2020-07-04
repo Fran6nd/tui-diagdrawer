@@ -19,10 +19,11 @@ edit_mode.o: src/edit_mode.c
 	gcc -O -c src/edit_modes/rect_mode.c -std=c99 -o rect_mode.o -Iinclude
 	gcc -O -c src/edit_modes/put_mode.c -std=c99 -o put_mode.o -Iinclude
 	gcc -O -c src/edit_modes/line_mode.c -std=c99 -o line_mode.o -Iinclude
+	gcc -O -c src/edit_modes/arrow_mode.c -std=c99 -o arrow_mode.o -Iinclude
 main.o: chunk.o
 	gcc -D _DEFAULT_SOURCE -O -c src/main.c -std=c99 -o main.o -Iinclude -lncurses
 ascii-diagdrawer: main.o position.o ui.o undo_redo.o position_list.o chunk.o edit_mode.o
-	gcc -g main.o undo_redo.o chunk.o position.o position_list.o edit_mode.o ui.o -Iinclude -lncurses -o ascii-diagdrawer rect_mode.o put_mode.o line_mode.o
+	gcc -g main.o undo_redo.o chunk.o position.o position_list.o edit_mode.o ui.o -Iinclude -lncurses -o ascii-diagdrawer rect_mode.o put_mode.o line_mode.o arrow_mode.o
 all:ascii-diagdrawer show_keyname
 clean:
 	rm *.o
