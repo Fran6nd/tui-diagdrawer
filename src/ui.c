@@ -67,3 +67,8 @@ void ui_show_text(char *text) {
     }
   }
 }
+
+void ui_show_text_info(char *text) {
+  ui_show_text(text);
+  getch();
+}
