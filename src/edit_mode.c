@@ -33,6 +33,7 @@ int register_modes() {
   register_mode(line_mode());
   register_mode(arrow_mode());
   register_mode(text_mode());
+  register_mode(select_mode());
   return 1;
 }
 

@@ -66,15 +66,6 @@ void draw_char(position p, char c, int col) {
   attroff(COLOR_PAIR(col));
 }
 
-int is_in_rect(position r1, position r2, position p) {
-  position min = pos_min(r1, r2);
-  position max = pos_max(r1, r2);
-  if (p.x >= min.x && p.x <= max.x)
-    if (p.y <= max.y && p.y >= min.y)
-      return 1;
-  return 0;
-}
-
 void draw_file() {
   int x;
   for (x = 0; x < COLS; x++) {
@@ -93,14 +84,8 @@ void draw_file() {
         }
         if (pos_on_screen.x == COLS / 2 && pos_on_screen.y == (LINES + 2) / 2) {
           c.color = COL_CURSOR;
-        } else {
-          position tmp = P2.null == 0 ? P2 : get_cursor_pos();
-          if (MODE == MODE_SELECT && P1.null == 0 && is_in_rect(P1, tmp, p)) {
-            c.color = COL_SELECTION;
-          } else {
-            c.color = COL_NORMAL;
-          }
         }
+
         draw_char(pos_on_screen, c.c, c.color);
       } else {
         draw_char(pos_on_screen, ' ', COL_EMPTY);
@@ -300,122 +285,6 @@ int main(int argc, char *argv[]) {
         if (EDIT_MODE != NULL) {
           if (EDIT_MODE->on_key_event != NULL)
             EDIT_MODE->on_key_event(c);
-        } else if (MODE == MODE_SELECT) {
-          if (P1.null || P2.null) {
-            if (c == K_HELP) {
-              ui_show_text("You are in the SELECT mode.\n"
-                           "You have not two points selected.\n"
-                           "Use [space] to select another one.\n"
-                           "\n"
-                           "Press any key to continue.");
-              getch();
-            } else if (c == 'p') {
-              do_change(&CURRENT_FILE);
-              chk_blit_chunk(&CURRENT_FILE, &CLIPBOARD, get_cursor_pos());
-            }
-            if (move_cursor(c).null) {
-              if (c == ' ') {
-                position tmp = get_cursor_pos();
-                if (P1.null) {
-                  P1 = tmp;
-                } else if (P2.null) {
-                  P2 = tmp;
-                } else {
-                  P1.null = 1;
-                  P2.null = 1;
-                }
-              }
-            }
-          } else if (!P2.null) {
-            position min = pos_min(P1, P2);
-            position max = pos_max(P1, P2);
-            int x;
-            int y;
-            if (c == K_HELP) {
-              ui_show_text(get_menu());
-              getch();
-            } else if (c == ' ') {
-              P2.null = 1;
-              P1.null = 1;
-            } else if (c == 'y') {
-              chk_free(&CLIPBOARD);
-              CLIPBOARD = chk_extract_chunk(&CURRENT_FILE, min, max);
-              P2.null = 1;
-              P1.null = 1;
-            } else if (c == 'd') {
-              chk_fill_chunk(&CURRENT_FILE, min, max, ' ');
-            } else if (c == 'c') {
-              chk_free(&CLIPBOARD);
-              CLIPBOARD = chk_extract_chunk(&CURRENT_FILE, min, max);
-              P2.null = 1;
-              P1.null = 1;
-              chk_fill_chunk(&CURRENT_FILE, min, max, ' ');
-            } else if (c == KEY_DC) {
-              do_change(&CURRENT_FILE);
-              position min = pos_min(P1, P2);
-              position max = pos_max(P1, P2);
-              int x;
-              int y;
-              for (x = min.x; x <= max.x; x++) {
-                for (y = min.y; y <= max.y; y++) {
-                  position tmp = {x, y};
-                  chk_set_char_at(&CURRENT_FILE, tmp, ' ');
-                }
-              }
-            }
-            /*
-            Here we enter into the fill mode.
-            Basically we replace all characters in the selection by the
-            specified one.
-            */
-            else if (c == 'f') {
-              do {
-                c = getch();
-
-              } while (!is_writable(c));
-              position min = pos_min(P1, P2);
-              position max = pos_max(P1, P2);
-              int x;
-              int y;
-              do_change(&CURRENT_FILE);
-              for (x = min.x; x <= max.x; x++) {
-                for (y = min.y; y <= max.y; y++) {
-                  position tmp = {x, y};
-                  chk_set_char_at(&CURRENT_FILE, tmp, c);
-                }
-              }
-            }
-            /*
-            Here we enter into the replace mode.
-            Basically we replace all characters in the selection that are not
-            spaces by the specified one.
-            */
-            else if (c == 'r') {
-              do {
-                c = getch();
-              } while (!is_writable(c));
-              position min = pos_min(P1, P2);
-              position max = pos_max(P1, P2);
-              int x;
-              int y;
-              do_change(&CURRENT_FILE);
-              for (x = min.x; x <= max.x; x++) {
-                for (y = min.y; y <= max.y; y++) {
-                  position tmp = {x, y};
-                  if (chk_get_char_at(&CURRENT_FILE, tmp) != ' ')
-                    chk_set_char_at(&CURRENT_FILE, tmp, c);
-                }
-              }
-            } else {
-              position delta = move_cursor(c);
-              if (!delta.null) {
-                P1.y += delta.y;
-                P1.x += delta.x;
-                P2.y += delta.y;
-                P2.x += delta.x;
-              }
-            }
-          }
         }
       }
     }

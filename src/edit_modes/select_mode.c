@@ -144,8 +144,9 @@ static void on_exit() {
 }
 
 static character on_draw(position p, character c) {
+  position tmp = P2.null == 0 ? P2 : get_cursor_pos();
   if (P1.null != 1) {
-    if (is_in_rect(P1, P2, p)) {
+    if (is_in_rect(P1, tmp, p)) {
       c.color = COL_SELECTION;
     }
   }
@@ -153,6 +154,23 @@ static character on_draw(position p, character c) {
 }
 
 static void on_free() { chk_free(&CLIPBOARD); }
+
+static void on_top_line_add() {
+  if (!P1.null) {
+    P1.y++;
+  }
+  if (!P2.null) {
+    P2.y++;
+  }
+}
+static void on_left_column_add() {
+  if (!P1.null) {
+    P1.x++;
+  }
+  if (!P2.null) {
+    P2.x++;
+  }
+}
 
 edit_mode select_mode() {
   CLIPBOARD.null = 1;
