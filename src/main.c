@@ -199,6 +199,8 @@ int main(int argc, char *argv[]) {
                      "      [Ctrl] + [u] to undo changes\n"
                      "      [Ctrl] + [h] to show help for the current mode");
         PREVIOUS_EDIT_MODE = EDIT_MODE;
+        if (EDIT_MODE->on_abort)
+          EDIT_MODE->on_abort();
         EDIT_MODE = NULL;
         do {
           c = getch();
