@@ -12,11 +12,11 @@ position_list PATH;
 static void on_key_event(int c) {
   if (c == K_HELP) {
     ui_show_text_info("You are in the LINE mode.\n"
-                 "You can use [space] to select the first point\n"
-                 "and then [space] again to select the second point\n"
-                 "and draw the line!\n"
-                 "\n"
-                 "Press any key to continue.");
+                      "You can use [space] to select the first point\n"
+                      "and then [space] again to select the second point\n"
+                      "and draw the line!\n"
+                      "\n"
+                      "Press any key to continue.");
   } else if (!move_cursor(c).null) {
     if (PATH.size != 0) {
       position tmp = get_cursor_pos();
@@ -42,9 +42,7 @@ static void on_key_event(int c) {
   }
 }
 
-static void on_exit() {
-  pl_empty(&PATH);
-}
+static void on_free() { pl_empty(&PATH); }
 
 static character on_draw(position p, character c) {
   int i = pl_is_inside(&PATH, p);
@@ -54,12 +52,31 @@ static character on_draw(position p, character c) {
   return c;
 }
 
+static void on_left_column_add() {
+
+  int i = 0;
+  for (i = 0; i < PATH.size; i++) {
+    PATH.list[i].x++;
+  }
+  if (PATH.size != 0)
+    pl_add(&PATH, get_cursor_pos());
+}
+static void on_top_line_add() {
+  int i = 0;
+  for (i = 0; i < PATH.size; i++) {
+    PATH.list[i].y++;
+  }
+  if (PATH.size != 0)
+    pl_add(&PATH, get_cursor_pos());
+}
 edit_mode line_mode() {
   edit_mode EDIT_MODE_RECT = {.name = "LINE",
                               .key = (int)'l',
                               .on_key_event = on_key_event,
                               .null = 0,
-                              .on_exit = on_exit,
-                              .on_draw = on_draw};
+                              .on_free = on_free,
+                              .on_draw = on_draw,
+                              .on_top_line_add = on_top_line_add,
+                              .on_left_column_add = on_left_column_add};
   return EDIT_MODE_RECT;
 }

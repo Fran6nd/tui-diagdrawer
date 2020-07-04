@@ -7,6 +7,8 @@
 typedef struct edit_mode {
   void (*on_key_event)(int);
   character (*on_draw)(position, character);
+  void (*on_top_line_add)();
+  void (*on_left_column_add)();
   void (*on_exit)();
   void (*on_free)();
   char *name;

@@ -177,12 +177,24 @@ int main(int argc, char *argv[]) {
   while (looping) {
     while (get_cursor_pos().x < 0) {
       chk_add_col_left(&CURRENT_FILE);
+      int i;
+      for (i = 0; i < edit_mode_counter; i++) {
+        if (modes[i].on_left_column_add != NULL) {
+          modes[i].on_left_column_add();
+        }
+      }
       UP_LEFT_CORNER.x++;
       P1.x++;
       P2.x++;
     }
     while (get_cursor_pos().y < 0) {
+      int i;
       chk_add_line_up(&CURRENT_FILE);
+      for (i = 0; i < edit_mode_counter; i++) {
+        if (modes[i].on_top_line_add != NULL) {
+          modes[i].on_top_line_add();
+        }
+      }
       UP_LEFT_CORNER.y++;
       P1.y++;
       P2.y++;
@@ -192,46 +204,6 @@ int main(int argc, char *argv[]) {
     }
     while (get_cursor_pos().x >= CURRENT_FILE.cols) {
       chk_add_col_right(&CURRENT_FILE);
-    }
-    if (!P1.null) {
-      while (P1.x < 0) {
-        chk_add_col_left(&CURRENT_FILE);
-        UP_LEFT_CORNER.x++;
-        P1.x++;
-        P2.x++;
-      }
-      while (P1.y < 0) {
-        chk_add_line_up(&CURRENT_FILE);
-        UP_LEFT_CORNER.y++;
-        P1.y++;
-        P2.y++;
-      }
-      while (P1.y >= CURRENT_FILE.lines) {
-        chk_add_line_down(&CURRENT_FILE);
-      }
-      while (P1.x >= CURRENT_FILE.cols) {
-        chk_add_col_right(&CURRENT_FILE);
-      }
-    }
-    if (!P2.null) {
-      while (P2.x < 0) {
-        chk_add_col_left(&CURRENT_FILE);
-        UP_LEFT_CORNER.x++;
-        P1.x++;
-        P2.x++;
-      }
-      while (P2.y < 0) {
-        chk_add_col_left(&CURRENT_FILE);
-        UP_LEFT_CORNER.y++;
-        P1.y++;
-        P2.y++;
-      }
-      while (P2.y >= CURRENT_FILE.lines) {
-        chk_add_line_down(&CURRENT_FILE);
-      }
-      while (P2.x >= CURRENT_FILE.cols) {
-        chk_add_col_right(&CURRENT_FILE);
-      }
     }
     draw();
     int c = getch();

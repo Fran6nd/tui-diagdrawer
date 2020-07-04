@@ -42,7 +42,7 @@ static void on_key_event(int c) {
   }
 }
 
-static void on_exit() { pl_empty(&PATH); }
+static void on_free() { pl_empty(&PATH); }
 
 static character on_draw(position p, character c) {
   int i = pl_is_inside(&PATH, p);
@@ -52,12 +52,27 @@ static character on_draw(position p, character c) {
   return c;
 }
 
+static void on_left_column_add(){
+  int i = 0;
+  for(i = 0; i < PATH.size; i++){
+    PATH.list[i].x++;
+  }
+}
+static void on_top_line_add(){
+  int i = 0;
+  for(i = 0; i < PATH.size; i++){
+    PATH.list[i].y++;
+  }
+}
+
 edit_mode arrow_mode() {
   edit_mode EDIT_MODE_RECT = {.name = "ARROW",
                               .key = (int)'a',
                               .on_key_event = on_key_event,
                               .null = 0,
-                              .on_exit = on_exit,
-                              .on_draw = on_draw};
+                              .on_free = on_free,
+                              .on_draw = on_draw,
+                              .on_left_column_add = on_left_column_add,
+                              .on_top_line_add = on_top_line_add};
   return EDIT_MODE_RECT;
 }
