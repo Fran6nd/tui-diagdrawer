@@ -90,11 +90,6 @@ void draw_file() {
           if (EDIT_MODE->on_draw)
             c = EDIT_MODE->on_draw(p, c);
 
-        } else if (MODE == MODE_LINE) {
-          int i = pl_is_inside(&PATH, p);
-          if (i != -1) {
-            c = pl_get_line_char(&PATH, i);
-          }
         } else if (MODE == MODE_ARROW) {
           int i = pl_is_inside(&PATH, p);
           if (i != -1) {
@@ -580,38 +575,7 @@ int main(int argc, char *argv[]) {
               }
             }
           }
-        } else if (MODE == MODE_LINE) {
-          if (c == K_HELP) {
-            ui_show_text("You are in the LINE mode.\n"
-                         "You can use [space] to select the first point\n"
-                         "and then [space] again to select the second point\n"
-                         "and draw the line!\n"
-                         "\n"
-                         "Press any key to continue.");
-            getch();
-          } else if (!move_cursor(c).null) {
-            if (PATH.size != 0) {
-              position tmp = get_cursor_pos();
-              while (pl_is_inside(&PATH, tmp) != -1) {
-                pl_remove_last(&PATH);
-              }
-              pl_add(&PATH, tmp);
-            }
-          } else if (c == ' ') {
-            if (PATH.size != 0) {
-              int i;
-              do_change(&CURRENT_FILE);
-              for (i = 0; i < PATH.size; i++) {
-
-                chk_set_char_at(&CURRENT_FILE, PATH.list[i],
-                                pl_get_line_char(&PATH, i));
-              }
-              pl_empty(&PATH);
-              PATH = pl_new();
-            } else {
-              pl_add(&PATH, get_cursor_pos());
-            }
-          }
+        
         } else if (MODE == MODE_ARROW) {
           if (c == K_HELP) {
             ui_show_text("You are in the ARROW mode.\n"

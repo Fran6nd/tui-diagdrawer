@@ -18,6 +18,7 @@ void register_mode(edit_mode em) {
 int register_modes() {
   register_mode(rect_mode());
   register_mode(put_mode());
+  register_mode(line_mode());
   return 1;
 }
 char *get_menu() {
