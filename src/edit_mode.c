@@ -1,8 +1,6 @@
 #include <stdlib.h>
 
 #include "edit_mode.h"
-#include "put_mode.h"
-#include "rect_mode.h"
 
 struct edit_mode *modes;
 int edit_mode_counter;
