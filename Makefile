@@ -16,9 +16,9 @@ chunk.o: src/chunk.c position.o position_list.o
 	gcc -O -c src/chunk.c -std=c99 -o chunk.o -Iinclude
 edit_mode.o: src/edit_mode.c
 	gcc -O -c src/edit_mode.c -std=c99 -o edit_mode.o -Iinclude
-	gcc -O -c src/rect_mode.c -std=c99 -o rect_mode.o -Iinclude
-	gcc -O -c src/put_mode.c -std=c99 -o put_mode.o -Iinclude
-	gcc -O -c src/line_mode.c -std=c99 -o line_mode.o -Iinclude
+	gcc -O -c src/edit_modes/rect_mode.c -std=c99 -o rect_mode.o -Iinclude
+	gcc -O -c src/edit_modes/put_mode.c -std=c99 -o put_mode.o -Iinclude
+	gcc -O -c src/edit_modes/line_mode.c -std=c99 -o line_mode.o -Iinclude
 main.o: chunk.o
 	gcc -D _DEFAULT_SOURCE -O -c src/main.c -std=c99 -o main.o -Iinclude -lncurses
 ascii-diagdrawer: main.o position.o ui.o undo_redo.o position_list.o chunk.o edit_mode.o
