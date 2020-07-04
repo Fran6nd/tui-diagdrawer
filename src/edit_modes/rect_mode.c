@@ -131,7 +131,6 @@ edit_mode rect_mode() {
   edit_mode EDIT_MODE_RECT = {.name = "RECT",
                               .key = 114,
                               .on_key_event = on_key_event,
-                              .null = 0,
                               .on_exit = on_exit,
                               .on_draw = on_draw,
                               .on_top_line_add = on_top_line_add,

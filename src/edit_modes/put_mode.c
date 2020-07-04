@@ -23,6 +23,6 @@ static void on_key_event(int c) {
 
 edit_mode put_mode() {
   edit_mode EDIT_MODE_PUT = {
-      .name = "PUT", .key = (int)'p', .on_key_event = on_key_event, .null = 0};
+      .name = "PUT", .key = (int)'p', .on_key_event = on_key_event};
   return EDIT_MODE_PUT;
 }

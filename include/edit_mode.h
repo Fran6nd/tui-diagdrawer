@@ -15,7 +15,6 @@ typedef struct edit_mode {
   char *name;
   int key;
   char *help;
-  int null;
 } edit_mode;
 
 extern struct edit_mode *modes;

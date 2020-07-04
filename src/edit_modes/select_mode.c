@@ -186,7 +186,6 @@ edit_mode select_mode() {
   edit_mode EDIT_MODE_RECT = {.name = "SELECT",
                               .key = (int)'s',
                               .on_key_event = on_key_event,
-                              .null = 0,
                               .on_exit = on_exit,
                               .on_draw = on_draw,
                               .on_free = on_free,

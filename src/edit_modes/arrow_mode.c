@@ -77,7 +77,6 @@ edit_mode arrow_mode() {
   edit_mode EDIT_MODE_RECT = {.name = "ARROW",
                               .key = (int)'a',
                               .on_key_event = on_key_event,
-                              .null = 0,
                               .on_free = on_free,
                               .on_draw = on_draw,
                               .on_left_column_add = on_left_column_add,

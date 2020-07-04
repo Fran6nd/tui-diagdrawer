@@ -129,6 +129,6 @@ static void on_key_event(int c) {
 
 edit_mode text_mode() {
   edit_mode ed = {
-      .name = "TEXT", .key = (int)'t', .on_key_event = on_key_event, .null = 0};
+      .name = "TEXT", .key = (int)'t', .on_key_event = on_key_event};
   return ed;
 }

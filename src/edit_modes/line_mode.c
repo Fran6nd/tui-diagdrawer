@@ -82,7 +82,6 @@ edit_mode line_mode() {
   edit_mode EDIT_MODE_RECT = {.name = "LINE",
                               .key = (int)'l',
                               .on_key_event = on_key_event,
-                              .null = 0,
                               .on_free = on_free,
                               .on_draw = on_draw,
                               .on_top_line_add = on_top_line_add,
