@@ -9,14 +9,14 @@
 position P1, P2;
 
 static void on_key_event(int c) {
+  
   if (c == K_HELP) {
-    ui_show_text("You are in the RECT mode.\n"
+    ui_show_text_info("You are in the RECT mode.\n"
                  "You can draw any rect by using [space] to select the "
                  "first point\n"
                  "and [space] again to select the second one.\n"
                  "\n"
                  "Press any key to continue.");
-    getch();
   } else if (move_cursor(c).null) {
     if (c == (int)' ') {
       position tmp = get_cursor_pos();
@@ -89,16 +89,16 @@ static int is_on_rect_border(position r1, position r2, position p) {
   return 0;
 }
 
-static char on_draw(position p, char c) {
+static character on_draw(position p, character c) {
   if (P1.null == 0) {
     if (is_on_rect_corner(P1, get_cursor_pos(), p)) {
-      c = '+';
+      c.c = '+';
     } else if (is_on_rect_border(P1, get_cursor_pos(), p)) {
       if (p.y == P1.y || p.y == get_cursor_pos().y) {
-        c = '-';
+        c.c = '-';
       }
       if (p.x == P1.x || p.x == get_cursor_pos().x) {
-        c = '|';
+        c.c = '|';
       }
     }
   }

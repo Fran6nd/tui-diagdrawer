@@ -10,11 +10,10 @@ static void on_key_event(int c) {
   if (move_cursor(c).null) {
     /* If [Ctrl] + [h] */
     if (c == K_HELP) {
-      ui_show_text("You are in the PUT mode.\n"
+      ui_show_text_info("You are in the PUT mode.\n"
                    "Press a key and it will fill the selected character.\n"
                    "\n"
                    "Press any key to continue.");
-      getch();
     } else if (is_writable(c)) {
       position tmp = get_cursor_pos();
       chk_set_char_at(&CURRENT_FILE, tmp, c);

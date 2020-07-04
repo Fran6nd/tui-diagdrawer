@@ -2,11 +2,13 @@
 #define EDIT_MODE_H
 
 #include "chunk.h"
+#include "main.h"
 
 typedef struct edit_mode {
   void (*on_key_event)(int);
-  char (*on_draw)(position, char);
+  character (*on_draw)(position, character);
   void (*on_exit)();
+  void (*on_free)();
   char *name;
   int key;
   char *help;

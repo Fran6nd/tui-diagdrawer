@@ -11,13 +11,12 @@ position_list PATH;
 
 static void on_key_event(int c) {
   if (c == K_HELP) {
-    ui_show_text("You are in the ARROW mode.\n"
+    ui_show_text_info("You are in the ARROW mode.\n"
                  "You can use [space] to select the starting point\n"
                  "and then [space] again to select the ending point\n"
                  "and draw the arrow!\n"
                  "\n"
                  "Press any key to continue.");
-    getch();
   } else if (!move_cursor(c).null) {
     if (PATH.size != 0) {
       position tmp = get_cursor_pos();
@@ -45,10 +44,10 @@ static void on_key_event(int c) {
 
 static void on_exit() { pl_empty(&PATH); }
 
-static char on_draw(position p, char c) {
+static character on_draw(position p, character c) {
   int i = pl_is_inside(&PATH, p);
   if (i != -1) {
-    c = pl_get_arrow_char(&PATH, i);
+    c.c = pl_get_arrow_char(&PATH, i);
   }
   return c;
 }

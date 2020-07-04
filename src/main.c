@@ -84,23 +84,24 @@ void draw_file() {
       position p = {x, y - 2};
       p.x += UP_LEFT_CORNER.x;
       p.y += UP_LEFT_CORNER.y;
-      char c = chk_get_char_at(&CURRENT_FILE, p);
-      if (c != 0) {
+      character c = {.c = chk_get_char_at(&CURRENT_FILE, p),
+                     .color = COL_NORMAL};
+      if (c.c != 0) {
         if (EDIT_MODE) {
           if (EDIT_MODE->on_draw)
             c = EDIT_MODE->on_draw(p, c);
-
         }
         if (pos_on_screen.x == COLS / 2 && pos_on_screen.y == (LINES + 2) / 2) {
-          draw_char(pos_on_screen, c, COL_CURSOR);
+          c.color = COL_CURSOR;
         } else {
           position tmp = P2.null == 0 ? P2 : get_cursor_pos();
           if (MODE == MODE_SELECT && P1.null == 0 && is_in_rect(P1, tmp, p)) {
-            draw_char(pos_on_screen, c, COL_SELECTION);
+            c.color = COL_SELECTION;
           } else {
-            draw_char(pos_on_screen, c, COL_NORMAL);
+            c.color = COL_NORMAL;
           }
         }
+        draw_char(pos_on_screen, c.c, c.color);
       } else {
         draw_char(pos_on_screen, ' ', COL_EMPTY);
       }
@@ -447,7 +448,6 @@ int main(int argc, char *argv[]) {
               }
             }
           }
-        
         }
       }
     }

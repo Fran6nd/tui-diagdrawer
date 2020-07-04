@@ -9,11 +9,10 @@
 static void on_key_event(int c) {
   if (move_cursor(c).null) {
     if (c == K_HELP) {
-      ui_show_text("You are in the TEXT mode.\n"
+      ui_show_text_info("You are in the TEXT mode.\n"
                    "Just enter any text here.\n"
                    "\n"
                    "Press any key to continue.");
-      getch();
     }
     /* Erasing. */
     else if (c == 127 || c == KEY_BACKSPACE) {

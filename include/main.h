@@ -26,6 +26,11 @@
 /* [return] / [enter] */
 #define K_ENTER 10
 
+typedef struct character {
+  char c;
+  int color;
+} character;
+
 position get_cursor_pos();
 position move_cursor();
 int is_writable(char);
