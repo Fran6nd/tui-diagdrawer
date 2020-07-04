@@ -172,6 +172,15 @@ static void on_left_column_add() {
   }
 }
 
+static int on_abort() {
+  if (!P1.null) {
+    P1.null = 1;
+    P2.null = 1;
+    return 1;
+  }
+  return 0;
+}
+
 edit_mode select_mode() {
   CLIPBOARD.null = 1;
   edit_mode EDIT_MODE_RECT = {.name = "SELECT",
@@ -180,6 +189,7 @@ edit_mode select_mode() {
                               .null = 0,
                               .on_exit = on_exit,
                               .on_draw = on_draw,
-                              .on_free = on_free};
+                              .on_free = on_free,
+                              .on_abort = on_abort};
   return EDIT_MODE_RECT;
 }

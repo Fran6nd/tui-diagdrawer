@@ -60,4 +60,11 @@ edit_mode *get_edit_mode(int key) {
   return NULL;
 }
 
-void edit_mode_free() { free(modes); }
+void edit_mode_free() { 
+  int i;
+  for(i = 0; i < edit_mode_counter; i++){
+    if(modes[i].on_free != NULL){
+      modes[i].on_free();
+    }
+  }
+  free(modes); }

@@ -65,6 +65,14 @@ static void on_top_line_add(){
   }
 }
 
+static int on_abort(){
+  if(PATH.size != 0){
+    pl_empty(&PATH);
+    return 1;
+  }
+  return 0;
+}
+
 edit_mode arrow_mode() {
   edit_mode EDIT_MODE_RECT = {.name = "ARROW",
                               .key = (int)'a',
@@ -73,6 +81,7 @@ edit_mode arrow_mode() {
                               .on_free = on_free,
                               .on_draw = on_draw,
                               .on_left_column_add = on_left_column_add,
-                              .on_top_line_add = on_top_line_add};
+                              .on_top_line_add = on_top_line_add,
+                              .on_abort = on_abort};
   return EDIT_MODE_RECT;
 }

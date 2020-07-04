@@ -116,7 +116,18 @@ static void on_left_column_add() {
   }
 }
 
+static int on_abort(){
+  if(!P1.null){
+    P1.null = 1;
+    P2.null = 1;
+    return 1;
+  }
+  return 0;
+}
+
 edit_mode rect_mode() {
+  P1.null = 1;
+  P2.null = 1;
   edit_mode EDIT_MODE_RECT = {.name = "RECT",
                               .key = 114,
                               .on_key_event = on_key_event,
@@ -124,6 +135,7 @@ edit_mode rect_mode() {
                               .on_exit = on_exit,
                               .on_draw = on_draw,
                               .on_top_line_add = on_top_line_add,
-                              .on_left_column_add = on_left_column_add};
+                              .on_left_column_add = on_left_column_add,
+                              .on_abort = on_abort};
   return EDIT_MODE_RECT;
 }

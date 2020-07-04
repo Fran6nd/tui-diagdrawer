@@ -69,6 +69,15 @@ static void on_top_line_add() {
   if (PATH.size != 0)
     pl_add(&PATH, get_cursor_pos());
 }
+
+static int on_abort(){
+  if(PATH.size != 0){
+    pl_empty(&PATH);
+    return 1;
+  }
+  return 0;
+}
+
 edit_mode line_mode() {
   edit_mode EDIT_MODE_RECT = {.name = "LINE",
                               .key = (int)'l',
@@ -77,6 +86,7 @@ edit_mode line_mode() {
                               .on_free = on_free,
                               .on_draw = on_draw,
                               .on_top_line_add = on_top_line_add,
-                              .on_left_column_add = on_left_column_add};
+                              .on_left_column_add = on_left_column_add,
+                              .on_abort = on_abort};
   return EDIT_MODE_RECT;
 }

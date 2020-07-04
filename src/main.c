@@ -11,9 +11,6 @@
 #include "ui.h"
 #include "undo_redo.h"
 
-position P1, P2;
-chunk CLIPBOARD;
-position_list PATH;
 int MODE = MODE_PUT;
 int PREVIOUS_MODE = 0;
 char *NAME = "Untitled.txt";
@@ -142,15 +139,12 @@ int main(int argc, char *argv[]) {
   start_color();
   keypad(stdscr, TRUE);
   register_modes();
-  CLIPBOARD.null = 1;
 
   init_pair(COL_CURSOR, COLOR_WHITE, COLOR_RED);
   init_pair(COL_NORMAL, COLOR_WHITE, COLOR_BLACK);
   init_pair(COL_EMPTY, COLOR_BLACK, COLOR_BLUE);
   init_pair(COL_SELECTION, COLOR_BLACK, COLOR_CYAN);
 
-  P1.null = 1;
-  P2.null = 1;
   if (argc != 2)
     CURRENT_FILE = chk_new(COLS - 2, LINES - 2);
   else {
@@ -204,9 +198,6 @@ int main(int argc, char *argv[]) {
                      "      [Ctrl] + [u] to undo changes\n"
                      "      [Ctrl] + [h] to show help for the current mode");
         PREVIOUS_MODE = MODE;
-
-        P1.null = 1;
-        pl_empty(&PATH);
         EDIT_MODE = NULL;
         c = getch();
         EDIT_MODE = get_edit_mode(c);
@@ -214,20 +205,8 @@ int main(int argc, char *argv[]) {
         } else {
 
           switch ((char)c) {
-          case 's':
-            MODE = MODE_SELECT;
-            break;
-          case 'p':
-            MODE = MODE_PUT;
-            break;
           case 'q':
             looping = 0;
-            break;
-          case 't':
-            MODE = MODE_TEXT;
-            break;
-          case 'a':
-            MODE = MODE_ARROW;
             break;
           case 'w':
             chk_save_to_file(&CURRENT_FILE, NAME);
@@ -237,14 +216,8 @@ int main(int argc, char *argv[]) {
             chk_save_to_file(&CURRENT_FILE, NAME);
             looping = 0;
             break;
-          case 'l':
-            MODE = MODE_LINE;
-            break;
           case '\t':
             MODE = PREVIOUS_MODE;
-            break;
-          case 'r':
-            MODE = MODE_RECT;
             break;
           case '\033':
             getch();
@@ -254,29 +227,25 @@ int main(int argc, char *argv[]) {
             break;
           }
         }
-        P1.null = 1;
-        P2.null = 1;
-        pl_empty(&PATH);
       }
       /*[Ctrl] + [u] = UNDO */
       else if (c == K_UNDO) {
         /* If we are doing something, we abort it. */
-        if ((!P1.null) || (!P2.null) || (PATH.size != 0)) {
-          P1.null = 1;
-          P2.null = 1;
-          pl_empty(&PATH);
+        int aborted = 0;
+        if (EDIT_MODE->on_abort) {
+          aborted = EDIT_MODE->on_abort();
         }
         /* Else we undo the last change. */
-        else {
+        if(!aborted) {
           undo_change(&CURRENT_FILE);
         }
       }
       /* [ctrl] + r = REDO */
       else if (c == K_REDO) {
-        P1.null = 1;
-        P2.null = 1;
+        if (EDIT_MODE->on_abort) {
+          EDIT_MODE->on_abort();
+        }
         redo_change(&CURRENT_FILE);
-        pl_empty(&PATH);
       }
 
       else {
@@ -292,8 +261,6 @@ int main(int argc, char *argv[]) {
   endwin();
   chk_free(&CURRENT_FILE);
   free_undo_redo();
-  pl_empty(&PATH);
   edit_mode_free();
-  chk_free(&CLIPBOARD);
   return 0;
 }

@@ -11,6 +11,7 @@ typedef struct edit_mode {
   void (*on_left_column_add)();
   void (*on_exit)();
   void (*on_free)();
+  int (*on_abort)();
   char *name;
   int key;
   char *help;
