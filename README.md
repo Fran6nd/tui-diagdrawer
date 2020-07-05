@@ -32,7 +32,8 @@ In case af style changes, of course it's welcome but do not forget to explain wh
 * Finding words, chunk...
 * Display strings bigger than screen in help viewport.
 * Improve the text editor.
-* Enable LUA scripting.
+* Enable LUA scripting
+* Enable the user to chang ethe name of the outpout file.
 
 # Here is what we can do:
 
