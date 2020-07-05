@@ -22,14 +22,7 @@ static void on_key_event(int c) {
   {
     if (move_cursor(c).null == 1) {
       if (P1.null || P2.null) {
-        if (c == K_HELP) {
-          ui_show_text("You are in the SELECT mode.\n"
-                       "You have not two points selected.\n"
-                       "Use [space] to select another one.\n"
-                       "\n"
-                       "Press any key to continue.");
-          getch();
-        } else if (c == 'p') {
+        if (c == 'p') {
           do_change(&CURRENT_FILE);
           chk_blit_chunk(&CURRENT_FILE, &CLIPBOARD, get_cursor_pos());
         }
@@ -88,19 +81,29 @@ static void on_key_event(int c) {
         specified one.
         */
         else if (c == 'f') {
+          ui_show_text("You are in SELECT/FILL mode.\n"
+                       "Type the character you wanna\n"
+                       "set instead of the selection\n"
+                       "or [ctrl] + [u] to abort.");
+          int abort = 0;
           do {
             c = getch();
-
+            if (c == K_UNDO || c == K_REDO) {
+              abort = 1;
+              break;
+            }
           } while (!is_writable(c));
-          position min = pos_min(P1, P2);
-          position max = pos_max(P1, P2);
-          int x;
-          int y;
-          do_change(&CURRENT_FILE);
-          for (x = min.x; x <= max.x; x++) {
-            for (y = min.y; y <= max.y; y++) {
-              position tmp = {x, y};
-              chk_set_char_at(&CURRENT_FILE, tmp, c);
+          if (!abort) {
+            position min = pos_min(P1, P2);
+            position max = pos_max(P1, P2);
+            int x;
+            int y;
+            do_change(&CURRENT_FILE);
+            for (x = min.x; x <= max.x; x++) {
+              for (y = min.y; y <= max.y; y++) {
+                position tmp = {x, y};
+                chk_set_char_at(&CURRENT_FILE, tmp, c);
+              }
             }
           }
         }
@@ -110,19 +113,31 @@ static void on_key_event(int c) {
         spaces by the specified one.
         */
         else if (c == 'r') {
+          ui_show_text("You are in SELECT/REPLACE mode.\n"
+                       "Type the character you wanna\n"
+                       "set instead of the characters\n"
+                       "in the selection or press\n"
+                       "[ctrl] + [u] to abort.");
+          int abort = 0;
           do {
             c = getch();
+            if (c == K_UNDO || c == K_REDO) {
+              abort = 1;
+              break;
+            }
           } while (!is_writable(c));
-          position min = pos_min(P1, P2);
-          position max = pos_max(P1, P2);
-          int x;
-          int y;
-          do_change(&CURRENT_FILE);
-          for (x = min.x; x <= max.x; x++) {
-            for (y = min.y; y <= max.y; y++) {
-              position tmp = {x, y};
-              if (chk_get_char_at(&CURRENT_FILE, tmp) != ' ')
-                chk_set_char_at(&CURRENT_FILE, tmp, c);
+          if (!abort) {
+            position min = pos_min(P1, P2);
+            position max = pos_max(P1, P2);
+            int x;
+            int y;
+            do_change(&CURRENT_FILE);
+            for (x = min.x; x <= max.x; x++) {
+              for (y = min.y; y <= max.y; y++) {
+                position tmp = {x, y};
+                if (chk_get_char_at(&CURRENT_FILE, tmp) != ' ')
+                  chk_set_char_at(&CURRENT_FILE, tmp, c);
+              }
             }
           }
         } else {
@@ -181,6 +196,27 @@ static int on_abort() {
   return 0;
 }
 
+static char *get_help() {
+  if (P1.null || P2.null) {
+    return "You are in the SELECT mode.\n"
+           "You have not two points selected.\n"
+           "Use [space] to select another one.\n"
+           "\n"
+           "Press any key to continue.";
+  } else {
+    return "You are in the SELECT mode.\n"
+           "You have selected an area (in blue).\n"
+           "Use [space] to select another one.\n"
+           "Use [c] to cut.\n"
+           "Use [y] to copy.\n"
+           "Use [p] to past.\n"
+           "Use [f] to fill.\n"
+           "Use [r] to replace.\n"
+           "\n"
+           "Press any key to continue.";
+  }
+}
+
 edit_mode select_mode() {
   CLIPBOARD.null = 1;
   edit_mode EDIT_MODE_RECT = {.name = "SELECT",
@@ -189,6 +225,7 @@ edit_mode select_mode() {
                               .on_exit = on_exit,
                               .on_draw = on_draw,
                               .on_free = on_free,
-                              .on_abort = on_abort};
+                              .on_abort = on_abort,
+                              .get_help = get_help};
   return EDIT_MODE_RECT;
 }

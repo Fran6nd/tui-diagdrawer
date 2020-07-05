@@ -10,14 +10,7 @@ position P1, P2;
 
 static void on_key_event(int c) {
 
-  if (c == K_HELP) {
-    ui_show_text_info("You are in the RECT mode.\n"
-                      "You can draw any rect by using [space] to select the "
-                      "first point\n"
-                      "and [space] again to select the second one.\n"
-                      "\n"
-                      "Press any key to continue.");
-  } else if (move_cursor(c).null) {
+  if (move_cursor(c).null) {
     if (c == (int)' ') {
       position tmp = get_cursor_pos();
       if (P1.null) {
@@ -116,13 +109,22 @@ static void on_left_column_add() {
   }
 }
 
-static int on_abort(){
-  if(!P1.null){
+static int on_abort() {
+  if (!P1.null) {
     P1.null = 1;
     P2.null = 1;
     return 1;
   }
   return 0;
+}
+
+static char *get_help() {
+  return "You are in the RECT mode.\n"
+         "You can draw any rect by using [space] to select the "
+         "first point\n"
+         "and [space] again to select the second one.\n"
+         "\n"
+         "Press any key to continue.";
 }
 
 edit_mode rect_mode() {
@@ -135,6 +137,7 @@ edit_mode rect_mode() {
                               .on_draw = on_draw,
                               .on_top_line_add = on_top_line_add,
                               .on_left_column_add = on_left_column_add,
-                              .on_abort = on_abort};
+                              .on_abort = on_abort,
+                              .get_help = get_help};
   return EDIT_MODE_RECT;
 }

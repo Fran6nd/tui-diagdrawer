@@ -8,14 +8,8 @@
 
 static void on_key_event(int c) {
   if (move_cursor(c).null) {
-    if (c == K_HELP) {
-      ui_show_text_info("You are in the TEXT mode.\n"
-                   "Just enter any text here.\n"
-                   "\n"
-                   "Press any key to continue.");
-    }
     /* Erasing. */
-    else if (c == 127 || c == KEY_BACKSPACE) {
+    if (c == 127 || c == KEY_BACKSPACE) {
       position tmp = get_cursor_pos();
       position position_of_char_to_remove = get_cursor_pos();
       position_of_char_to_remove.x--;
@@ -127,8 +121,17 @@ static void on_key_event(int c) {
   }
 }
 
+static char* get_help(){
+  return "You are in the TEXT mode.\n"
+                        "Just enter any text here.\n"
+                        "\n"
+                        "Press any key to continue.";
+}
+
 edit_mode text_mode() {
-  edit_mode ed = {
-      .name = "TEXT", .key = (int)'t', .on_key_event = on_key_event};
+  edit_mode ed = {.name = "TEXT",
+                  .key = (int)'t',
+                  .on_key_event = on_key_event,
+                  .get_help = get_help};
   return ed;
 }
