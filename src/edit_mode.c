@@ -43,17 +43,19 @@ int register_modes() {
 
 char *get_menu() {
   /* #TODO: build the menu dynamically from registered edit modes. */
-  return ("You are in the SELECT mode.\n"
-          "You have selected one rect. Here is what you can do:\n"
-          "      [space] to deselect.\n"
-          "      [y] to copy to the clipboard.\n"
-          "      [c] to cut to the clipboard.\n"
-          "      [del] to delete the selection.\n"
-          "      [f] then [x] to fill the selection with x.\n"
-          "      [r] then [x] to replace non-spaces in the selection "
-          "with x.\n"
-          "\n"
-          "Press any key to continue.");
+  char * common_line = "";
+  return ("Press [q] to exit\n"
+                 "      [p] to enter PUT mode\n"
+                 "      [t] to enter TEXT mode\n"
+                 "      [s] to enter SELECT mode\n"
+                 "      [r] to enter RECT mode\n"
+                 "      [l] to enter LINE mode\n"
+                 "      [a] to enter ARROW mode\n"
+                 "      [w] to write to file\n"
+                 "      [x] to write to file and exit\n"
+                 "      [Ctrl] + [r] to redo changes\n"
+                 "      [Ctrl] + [u] to undo changes\n"
+                 "      [Ctrl] + [h] to show help for the current mode");
 }
 
 /* Return if found the edit mode using the key given as parameter. */

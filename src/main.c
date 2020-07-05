@@ -186,18 +186,7 @@ int main(int argc, char *argv[]) {
     {
       /* [tab] = MENU */
       if (c == '\t') {
-        ui_show_text("Press [q] to exit\n"
-                     "      [p] to enter PUT mode\n"
-                     "      [t] to enter TEXT mode\n"
-                     "      [s] to enter SELECT mode\n"
-                     "      [r] to enter RECT mode\n"
-                     "      [l] to enter LINE mode\n"
-                     "      [a] to enter ARROW mode\n"
-                     "      [w] to write to file\n"
-                     "      [x] to write to file and exit\n"
-                     "      [Ctrl] + [r] to redo changes\n"
-                     "      [Ctrl] + [u] to undo changes\n"
-                     "      [Ctrl] + [h] to show help for the current mode");
+        ui_show_text(get_menu());
         PREVIOUS_EDIT_MODE = EDIT_MODE;
         if (EDIT_MODE->on_abort)
           EDIT_MODE->on_abort();
