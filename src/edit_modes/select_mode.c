@@ -81,19 +81,29 @@ static void on_key_event(int c) {
         specified one.
         */
         else if (c == 'f') {
+          ui_show_text("You are in SELECT/FILL mode.\n"
+                       "Type the character you wanna\n"
+                       "set instead of the selection\n"
+                       "or [ctrl] + [u] to abort.");
+          int abort = 0;
           do {
             c = getch();
-
+            if (c == K_UNDO || c == K_REDO) {
+              abort = 1;
+              break;
+            }
           } while (!is_writable(c));
-          position min = pos_min(P1, P2);
-          position max = pos_max(P1, P2);
-          int x;
-          int y;
-          do_change(&CURRENT_FILE);
-          for (x = min.x; x <= max.x; x++) {
-            for (y = min.y; y <= max.y; y++) {
-              position tmp = {x, y};
-              chk_set_char_at(&CURRENT_FILE, tmp, c);
+          if (!abort) {
+            position min = pos_min(P1, P2);
+            position max = pos_max(P1, P2);
+            int x;
+            int y;
+            do_change(&CURRENT_FILE);
+            for (x = min.x; x <= max.x; x++) {
+              for (y = min.y; y <= max.y; y++) {
+                position tmp = {x, y};
+                chk_set_char_at(&CURRENT_FILE, tmp, c);
+              }
             }
           }
         }
@@ -103,19 +113,31 @@ static void on_key_event(int c) {
         spaces by the specified one.
         */
         else if (c == 'r') {
+          ui_show_text("You are in SELECT/REPLACE mode.\n"
+                       "Type the character you wanna\n"
+                       "set instead of the characters\n"
+                       "in the selection or press\n"
+                       "[ctrl] + [u] to abort.");
+          int abort = 0;
           do {
             c = getch();
+            if (c == K_UNDO || c == K_REDO) {
+              abort = 1;
+              break;
+            }
           } while (!is_writable(c));
-          position min = pos_min(P1, P2);
-          position max = pos_max(P1, P2);
-          int x;
-          int y;
-          do_change(&CURRENT_FILE);
-          for (x = min.x; x <= max.x; x++) {
-            for (y = min.y; y <= max.y; y++) {
-              position tmp = {x, y};
-              if (chk_get_char_at(&CURRENT_FILE, tmp) != ' ')
-                chk_set_char_at(&CURRENT_FILE, tmp, c);
+          if (!abort) {
+            position min = pos_min(P1, P2);
+            position max = pos_max(P1, P2);
+            int x;
+            int y;
+            do_change(&CURRENT_FILE);
+            for (x = min.x; x <= max.x; x++) {
+              for (y = min.y; y <= max.y; y++) {
+                position tmp = {x, y};
+                if (chk_get_char_at(&CURRENT_FILE, tmp) != ' ')
+                  chk_set_char_at(&CURRENT_FILE, tmp, c);
+              }
             }
           }
         } else {
