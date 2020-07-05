@@ -67,7 +67,7 @@ void ui_show_text(char *text) {
     }
   }
 }
-
+/* #TODO: enable viewing strings bigger than the screen. */
 void ui_show_text_info(char *text) {
   ui_show_text(text);
   getch();
