@@ -10,14 +10,7 @@
 position_list PATH;
 
 static void on_key_event(int c) {
-  if (c == K_HELP) {
-    ui_show_text_info("You are in the ARROW mode.\n"
-                 "You can use [space] to select the starting point\n"
-                 "and then [space] again to select the ending point\n"
-                 "and draw the arrow!\n"
-                 "\n"
-                 "Press any key to continue.");
-  } else if (!move_cursor(c).null) {
+  if (!move_cursor(c).null) {
     if (PATH.size != 0) {
       position tmp = get_cursor_pos();
       while (pl_is_inside(&PATH, tmp) != -1) {
@@ -42,6 +35,15 @@ static void on_key_event(int c) {
   }
 }
 
+static char *get_help() {
+  return "You are in the ARROW mode.\n"
+         "You can use [space] to select the starting point\n"
+         "and then [space] again to select the ending point\n"
+         "and draw the arrow!\n"
+         "\n"
+         "Press any key to continue.";
+}
+
 static void on_free() { pl_empty(&PATH); }
 
 static character on_draw(position p, character c) {
@@ -52,21 +54,21 @@ static character on_draw(position p, character c) {
   return c;
 }
 
-static void on_left_column_add(){
+static void on_left_column_add() {
   int i = 0;
-  for(i = 0; i < PATH.size; i++){
+  for (i = 0; i < PATH.size; i++) {
     PATH.list[i].x++;
   }
 }
-static void on_top_line_add(){
+static void on_top_line_add() {
   int i = 0;
-  for(i = 0; i < PATH.size; i++){
+  for (i = 0; i < PATH.size; i++) {
     PATH.list[i].y++;
   }
 }
 
-static int on_abort(){
-  if(PATH.size != 0){
+static int on_abort() {
+  if (PATH.size != 0) {
     pl_empty(&PATH);
     return 1;
   }
@@ -81,6 +83,7 @@ edit_mode arrow_mode() {
                               .on_draw = on_draw,
                               .on_left_column_add = on_left_column_add,
                               .on_top_line_add = on_top_line_add,
-                              .on_abort = on_abort};
+                              .on_abort = on_abort,
+                              .get_help = get_help};
   return EDIT_MODE_RECT;
 }

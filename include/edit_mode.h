@@ -13,6 +13,8 @@ typedef struct edit_mode {
   void (*on_key_event)(int);
   /* Function used to hook character drawing. */
   character (*on_draw)(position, character);
+  /* Function used to get the help to display on [ctrl] + [h]. */
+  char *(*get_help)();
   /* These two functions are called when we move all characters to left or down
    * by adding a line on top or a column on the left side.
    * They are used to tell the edit_mode that everything moved. */

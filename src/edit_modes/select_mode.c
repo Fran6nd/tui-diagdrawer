@@ -22,14 +22,7 @@ static void on_key_event(int c) {
   {
     if (move_cursor(c).null == 1) {
       if (P1.null || P2.null) {
-        if (c == K_HELP) {
-          ui_show_text("You are in the SELECT mode.\n"
-                       "You have not two points selected.\n"
-                       "Use [space] to select another one.\n"
-                       "\n"
-                       "Press any key to continue.");
-          getch();
-        } else if (c == 'p') {
+        if (c == 'p') {
           do_change(&CURRENT_FILE);
           chk_blit_chunk(&CURRENT_FILE, &CLIPBOARD, get_cursor_pos());
         }
@@ -181,6 +174,27 @@ static int on_abort() {
   return 0;
 }
 
+static char *get_help() {
+  if (P1.null || P2.null) {
+    return "You are in the SELECT mode.\n"
+           "You have not two points selected.\n"
+           "Use [space] to select another one.\n"
+           "\n"
+           "Press any key to continue.";
+  } else {
+    return "You are in the SELECT mode.\n"
+           "You have selected an area (in blue).\n"
+           "Use [space] to select another one.\n"
+           "Use [c] to cut.\n"
+           "Use [y] to copy.\n"
+           "Use [p] to past.\n"
+           "Use [f] to fill.\n"
+           "Use [r] to replace.\n"
+           "\n"
+           "Press any key to continue.";
+  }
+}
+
 edit_mode select_mode() {
   CLIPBOARD.null = 1;
   edit_mode EDIT_MODE_RECT = {.name = "SELECT",
@@ -189,6 +203,7 @@ edit_mode select_mode() {
                               .on_exit = on_exit,
                               .on_draw = on_draw,
                               .on_free = on_free,
-                              .on_abort = on_abort};
+                              .on_abort = on_abort,
+                              .get_help = get_help};
   return EDIT_MODE_RECT;
 }
