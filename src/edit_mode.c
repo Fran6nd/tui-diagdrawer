@@ -1,11 +1,13 @@
 #include <curses.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "edit_mode.h"
 #include "ui.h"
 
 struct edit_mode *modes;
 int edit_mode_counter;
+char menu_buffer[10000] = {0};
 
 /* Here we add an edit_mode after checking if there is no conflicts with the key
  * used. */
@@ -31,31 +33,38 @@ void register_mode(edit_mode em) {
 }
 
 /* Here we register all edit modes that are gonna be availables. */
-int register_modes() {
+void register_modes() {
+  /* Let's register all edit_modes. */
   register_mode(rect_mode());
   register_mode(put_mode());
   register_mode(line_mode());
   register_mode(arrow_mode());
   register_mode(text_mode());
   register_mode(select_mode());
-  return 1;
+
+  /* Here we build the menu dynamically from registered edit modes. */
+  char *common_line = "      [%c] to enter %s mode\n";
+  char mode_help[1000] = {0};
+  int i;
+  for (i = 0; i < edit_mode_counter; i++) {
+    char buf[100];
+    memset(buf, 0, 100);
+    strcpy(buf, common_line);
+    sprintf(buf, common_line, modes[i].key, modes[i].name);
+    strcat(mode_help, buf);
+  }
+  char *help = "Press [q] to exit\n"
+               "%s"
+               "      [Ctrl] + [r] to redo changes\n"
+               "      [Ctrl] + [u] to undo changes\n"
+               "      [Ctrl] + [h] to show help for the current mode";
+  memset(menu_buffer, 0, 10000);
+  sprintf(menu_buffer, help, mode_help);
 }
 
 char *get_menu() {
-  /* #TODO: build the menu dynamically from registered edit modes. */
-  char * common_line = "";
-  return ("Press [q] to exit\n"
-                 "      [p] to enter PUT mode\n"
-                 "      [t] to enter TEXT mode\n"
-                 "      [s] to enter SELECT mode\n"
-                 "      [r] to enter RECT mode\n"
-                 "      [l] to enter LINE mode\n"
-                 "      [a] to enter ARROW mode\n"
-                 "      [w] to write to file\n"
-                 "      [x] to write to file and exit\n"
-                 "      [Ctrl] + [r] to redo changes\n"
-                 "      [Ctrl] + [u] to undo changes\n"
-                 "      [Ctrl] + [h] to show help for the current mode");
+  /* Return the string of the menu built from registered edit_modes. */
+  return menu_buffer;
 }
 
 /* Return if found the edit mode using the key given as parameter. */
