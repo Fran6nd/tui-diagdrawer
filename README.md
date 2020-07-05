@@ -30,6 +30,7 @@ In case af style changes, of course it's welcome but do not forget to explain wh
 
 * Multiple files editing.
 * Finding words, chunk...
+* Display strings bigger than screen in help viewport.
 * Improve the text editor.
 * Enable LUA scripting.
 
