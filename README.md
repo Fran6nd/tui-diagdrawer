@@ -11,10 +11,30 @@ C's memmory management is challenging and it compiles fast.<br>
 <br>
 This project is not intended to be a good text editor but a good ascii diagram drawer.<br>
 Even if I'm trying to improve the `TEXT` mode as much as possible :)<br>
+The main purpose of this project is to help writing documentation for devs<br>
+but it can also be used to draw a tui videogame map!<br>
 
 ## How to use
 
-Common operations:
+### How to setup
+
+To install dependancies:
+
+* `sudo apt-get install libncurses5-dev libncursesw5-dev`
+
+To build the project:
+
+* `git clone git@github.com:Fran6nd/tui-diagdrawer.git`
+* `cd tui-diagdrawer`
+* `make`
+* `./tui-diagdrawer myfile`
+
+To install:
+
+* `sudo make install`
+
+### Common operations
+
 * `[tab]`: enter/exit the menu.
 * `[u]`: undo.
 * `[ctrl] + [r]`: redo.
