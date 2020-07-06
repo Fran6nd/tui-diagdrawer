@@ -97,7 +97,7 @@ void draw() {
   ui_draw_rect(ui_zero, ui_max);
   refresh();
   move(0, 2);
-  addstr("ASCII-DiagDrawer by Fran6nd (press [tab] to swith mode)");
+  addstr("ASCII-DiagDrawer by Fran6nd (press [tab] to switch mode)");
 }
 
 position move_cursor(int c) {
