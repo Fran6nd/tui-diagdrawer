@@ -38,7 +38,7 @@ ifeq ($(PREFIX),)
     PREFIX := /usr
 endif
 
-install: all
+install: tui-diagdrawer
 	sudo cp tui-diagdrawer /usr/local/bin
-uninstall: all
+uninstall:
 	sudo rm /usr/local/bin/tui-diagdrawer
