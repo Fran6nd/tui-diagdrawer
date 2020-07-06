@@ -54,6 +54,8 @@ void register_modes() {
     strcat(mode_help, buf);
   }
   char *help = "Press [q] to exit\n"
+               "      [w] to write to file\n"
+               "      [x] to write to file and exit\n"
                "%s"
                "      [Ctrl] + [r] to redo changes\n"
                "      [Ctrl] + [u] to undo changes\n"
