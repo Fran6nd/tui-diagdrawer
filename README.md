@@ -27,6 +27,7 @@ To build the project:
 * `git clone git@github.com:Fran6nd/tui-diagdrawer.git`
 * `cd tui-diagdrawer`
 * `make`
+* `./tui-diagdrawer myfile`
 
 To install:
 
