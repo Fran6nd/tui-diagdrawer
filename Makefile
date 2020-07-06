@@ -1,4 +1,4 @@
-.DEFAULT_GOAL := ascii-diagdrawer
+.DEFAULT_GOAL := tui-diagdrawer
 
 show_keyname.o: src/show_keyname.c
 	gcc -O -c src/show_keyname.c -std=c99 -o show_keyname.o -Incurses
@@ -24,12 +24,12 @@ edit_mode.o: src/edit_mode.c
 	gcc -O -c src/edit_modes/select_mode.c -std=c99 -o select_mode.o -Iinclude
 main.o: chunk.o
 	gcc -D _DEFAULT_SOURCE -O -c src/main.c -std=c99 -o main.o -Iinclude -lncurses
-ascii-diagdrawer: main.o position.o ui.o undo_redo.o position_list.o chunk.o edit_mode.o
-	gcc -g main.o undo_redo.o chunk.o position.o position_list.o edit_mode.o ui.o -Iinclude -lncurses -o ascii-diagdrawer rect_mode.o put_mode.o line_mode.o arrow_mode.o text_mode.o select_mode.o
-all:ascii-diagdrawer show_keyname
+tui-diagdrawer: main.o position.o ui.o undo_redo.o position_list.o chunk.o edit_mode.o
+	gcc -g main.o undo_redo.o chunk.o position.o position_list.o edit_mode.o ui.o -Iinclude -lncurses -o tui-diagdrawer rect_mode.o put_mode.o line_mode.o arrow_mode.o text_mode.o select_mode.o
+all:tui-diagdrawer show_keyname
 clean:
 	rm *.o
-	rm ascii-diagdrawer
+	rm tui-diagdrawer
 	rm show_keyname
 rebuild: clean all
 
@@ -39,6 +39,6 @@ ifeq ($(PREFIX),)
 endif
 
 install: all
-	sudo cp ascii-diagdrawer /usr/local/bin
+	sudo cp tui-diagdrawer /usr/local/bin
 uninstall: all
-	sudo rm /usr/local/bin/ascii-diagdrawer
+	sudo rm /usr/local/bin/tui-diagdrawer
