@@ -238,6 +238,12 @@ int main(int argc, char *argv[]) {
         }
         redo_change(&CURRENT_FILE);
       }
+      /* [ctrl] + h = HELP */
+      else if (c == K_HELP) {
+        if (EDIT_MODE->get_help) {
+          ui_show_text_info(EDIT_MODE->get_help(EDIT_MODE));
+        }
+      }
 
       else {
         /* If no major key pressed, we now do things depending on selected mod.
