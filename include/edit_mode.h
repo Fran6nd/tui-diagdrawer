@@ -4,30 +4,31 @@
 #include "chunk.h"
 #include "main.h"
 
-typedef struct edit_mode {
+typedef struct edit_mode edit_mode;
+struct edit_mode {
   /* The name of the edit_mode. */
   char *name;
   /* The key used to access the edit_mode. */
   int key;
   /* Function used to manage events. */
-  void (*on_key_event)(int);
+  void (*on_key_event)(edit_mode *, int);
   /* Function used to hook character drawing. */
-  character (*on_draw)(position, character);
+  character (*on_draw)(edit_mode *, position, character);
   /* Function used to get the help to display on [ctrl] + [h]. */
-  char *(*get_help)();
+  char *(*get_help)(edit_mode *);
   /* These two functions are called when we move all characters to left or down
    * by adding a line on top or a column on the left side.
    * They are used to tell the edit_mode that everything moved. */
-  void (*on_top_line_add)();
-  void (*on_left_column_add)();
+  void (*on_top_line_add)(edit_mode *);
+  void (*on_left_column_add)(edit_mode *);
   /* Called when exiting the current mode. */
-  void (*on_exit)();
+  void (*on_exit)(edit_mode *);
   /* Called when the app is closing. */
-  void (*on_free)();
+  void (*on_free)(edit_mode *);
   /* Used to abort the current task.
    * Return 1 if a task has been aborted, else 0. */
-  int (*on_abort)();
-} edit_mode;
+  int (*on_abort)(edit_mode *);
+};
 
 extern struct edit_mode *modes;
 extern int edit_mode_counter;

@@ -9,7 +9,7 @@
 
 position_list PATH;
 
-static void on_key_event(int c) {
+static void on_key_event(edit_mode * self, int c) {
   if (!move_cursor(c).null) {
     if (PATH.size != 0) {
       position tmp = get_cursor_pos();
@@ -35,7 +35,7 @@ static void on_key_event(int c) {
   }
 }
 
-static char *get_help() {
+static char *get_help(edit_mode * self) {
   return "You are in the LINE mode.\n"
          "You can use [space] to select the first point\n"
          "and then [space] again to select the second point\n"
@@ -44,9 +44,9 @@ static char *get_help() {
          "Press any key to continue.";
 }
 
-static void on_free() { pl_empty(&PATH); }
+static void on_free(edit_mode * self) { pl_empty(&PATH); }
 
-static character on_draw(position p, character c) {
+static character on_draw(edit_mode * self, position p, character c) {
   int i = pl_is_inside(&PATH, p);
   if (i != -1) {
     c.c = pl_get_line_char(&PATH, i);
@@ -54,7 +54,7 @@ static character on_draw(position p, character c) {
   return c;
 }
 
-static void on_left_column_add() {
+static void on_left_column_add(edit_mode * self) {
 
   int i = 0;
   for (i = 0; i < PATH.size; i++) {
@@ -63,7 +63,7 @@ static void on_left_column_add() {
   if (PATH.size != 0)
     pl_add(&PATH, get_cursor_pos());
 }
-static void on_top_line_add() {
+static void on_top_line_add(edit_mode * self) {
   int i = 0;
   for (i = 0; i < PATH.size; i++) {
     PATH.list[i].y++;
@@ -72,7 +72,7 @@ static void on_top_line_add() {
     pl_add(&PATH, get_cursor_pos());
 }
 
-static int on_abort() {
+static int on_abort(edit_mode * self) {
   if (PATH.size != 0) {
     pl_empty(&PATH);
     return 1;

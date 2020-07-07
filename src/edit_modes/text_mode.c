@@ -6,7 +6,7 @@
 #include "ui.h"
 #include "undo_redo.h"
 
-static void on_key_event(int c) {
+static void on_key_event(edit_mode * self, int c) {
   if (move_cursor(c).null) {
     /* Erasing. */
     if (c == 127 || c == KEY_BACKSPACE) {
@@ -121,7 +121,7 @@ static void on_key_event(int c) {
   }
 }
 
-static char* get_help(){
+static char* get_help(edit_mode * self){
   return "You are in the TEXT mode.\n"
                         "Just enter any text here.\n"
                         "\n"

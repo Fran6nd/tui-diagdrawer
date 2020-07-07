@@ -9,7 +9,7 @@
 
 position_list PATH;
 
-static void on_key_event(int c) {
+static void on_key_event(edit_mode *em, int c) {
   if (!move_cursor(c).null) {
     if (PATH.size != 0) {
       position tmp = get_cursor_pos();
@@ -35,7 +35,7 @@ static void on_key_event(int c) {
   }
 }
 
-static char *get_help() {
+static char *get_help(edit_mode *em) {
   return "You are in the ARROW mode.\n"
          "You can use [space] to select the starting point\n"
          "and then [space] again to select the ending point\n"
@@ -44,9 +44,9 @@ static char *get_help() {
          "Press any key to continue.";
 }
 
-static void on_free() { pl_empty(&PATH); }
+static void on_free(edit_mode *em) { pl_empty(&PATH); }
 
-static character on_draw(position p, character c) {
+static character on_draw(edit_mode *em, position p, character c) {
   int i = pl_is_inside(&PATH, p);
   if (i != -1) {
     c.c = pl_get_arrow_char(&PATH, i);
@@ -54,20 +54,20 @@ static character on_draw(position p, character c) {
   return c;
 }
 
-static void on_left_column_add() {
+static void on_left_column_add(edit_mode *em) {
   int i = 0;
   for (i = 0; i < PATH.size; i++) {
     PATH.list[i].x++;
   }
 }
-static void on_top_line_add() {
+static void on_top_line_add(edit_mode *em) {
   int i = 0;
   for (i = 0; i < PATH.size; i++) {
     PATH.list[i].y++;
   }
 }
 
-static int on_abort() {
+static int on_abort(edit_mode *em) {
   if (PATH.size != 0) {
     pl_empty(&PATH);
     return 1;
