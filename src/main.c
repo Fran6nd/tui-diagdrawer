@@ -76,7 +76,7 @@ void draw_file() {
       if (c.c != 0) {
         if (EDIT_MODE) {
           if (EDIT_MODE->on_draw)
-            c = EDIT_MODE->on_draw(p, c);
+            c = EDIT_MODE->on_draw(EDIT_MODE, p, c);
         }
         if (pos_on_screen.x == COLS / 2 && pos_on_screen.y == (LINES + 2) / 2) {
           c.color = COL_CURSOR;
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
       int i;
       for (i = 0; i < edit_mode_counter; i++) {
         if (modes[i].on_left_column_add != NULL) {
-          modes[i].on_left_column_add();
+          modes[i].on_left_column_add(&modes[i]);
         }
       }
       UP_LEFT_CORNER.x++;
@@ -170,7 +170,7 @@ int main(int argc, char *argv[]) {
       chk_add_line_up(&CURRENT_FILE);
       for (i = 0; i < edit_mode_counter; i++) {
         if (modes[i].on_top_line_add != NULL) {
-          modes[i].on_top_line_add();
+          modes[i].on_top_line_add(&modes[i]);
         }
       }
       UP_LEFT_CORNER.y++;
@@ -189,7 +189,7 @@ int main(int argc, char *argv[]) {
         ui_show_text(get_menu());
         PREVIOUS_EDIT_MODE = EDIT_MODE;
         if (EDIT_MODE->on_abort)
-          EDIT_MODE->on_abort();
+          EDIT_MODE->on_abort(EDIT_MODE);
         EDIT_MODE = NULL;
         do {
           c = getch();
@@ -224,7 +224,7 @@ int main(int argc, char *argv[]) {
         /* If we are doing something, we abort it. */
         int aborted = 0;
         if (EDIT_MODE->on_abort) {
-          aborted = EDIT_MODE->on_abort();
+          aborted = EDIT_MODE->on_abort(EDIT_MODE);
         }
         /* Else we undo the last change. */
         if (!aborted) {
@@ -234,7 +234,7 @@ int main(int argc, char *argv[]) {
       /* [ctrl] + r = REDO */
       else if (c == K_REDO) {
         if (EDIT_MODE->on_abort) {
-          EDIT_MODE->on_abort();
+          EDIT_MODE->on_abort(EDIT_MODE);
         }
         redo_change(&CURRENT_FILE);
       }
@@ -244,7 +244,7 @@ int main(int argc, char *argv[]) {
          */
         if (EDIT_MODE != NULL) {
           if (EDIT_MODE->on_key_event != NULL)
-            EDIT_MODE->on_key_event(c);
+            EDIT_MODE->on_key_event(EDIT_MODE, c);
         }
       }
     }

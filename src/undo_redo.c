@@ -39,9 +39,9 @@ void do_change(chunk *chk) {
   index++;
 }
 void undo_change(chunk *chk) {
+  if (index == 10)
+    index--;
   if (index > 0) {
-    chk_free(&history[index]);
-    history[index] = chk_copy_chunk(chk);
     index--;
     can_redo++;
     chk_free(chk);
@@ -59,6 +59,7 @@ void redo_change(chunk *chk) {
 void free_undo_redo() {
   int i;
   for (i = 0; i < 10; i++) {
-    chk_free(&history[i]);
+    if (!history[i].null)
+      chk_free(&history[i]);
   }
 }

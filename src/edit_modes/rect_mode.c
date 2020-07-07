@@ -8,7 +8,7 @@
 
 position P1, P2;
 
-static void on_key_event(int c) {
+static void on_key_event(edit_mode *self, int c) {
 
   if (move_cursor(c).null) {
     if (c == (int)' ') {
@@ -50,7 +50,7 @@ static void on_key_event(int c) {
   }
 }
 
-static void on_exit() {
+static void on_exit(edit_mode *self) {
   P1.null = 1;
   P2.null = 1;
 }
@@ -82,7 +82,7 @@ static int is_on_rect_border(position r1, position r2, position p) {
   return 0;
 }
 
-static character on_draw(position p, character c) {
+static character on_draw(edit_mode *self, position p, character c) {
   if (P1.null == 0) {
     if (is_on_rect_corner(P1, get_cursor_pos(), p)) {
       c.c = '+';
@@ -98,18 +98,18 @@ static character on_draw(position p, character c) {
   return c;
 }
 
-static void on_top_line_add() {
+static void on_top_line_add(edit_mode *self) {
   if (!P1.null) {
     P1.y++;
   }
 }
-static void on_left_column_add() {
+static void on_left_column_add(edit_mode *self) {
   if (!P1.null) {
     P1.x++;
   }
 }
 
-static int on_abort() {
+static int on_abort(edit_mode *self) {
   if (!P1.null) {
     P1.null = 1;
     P2.null = 1;
@@ -118,7 +118,7 @@ static int on_abort() {
   return 0;
 }
 
-static char *get_help() {
+static char *get_help(edit_mode *self) {
   return "You are in the RECT mode.\n"
          "You can draw any rect by using [space] to select the "
          "first point\n"

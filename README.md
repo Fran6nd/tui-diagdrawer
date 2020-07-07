@@ -36,7 +36,7 @@ To install:
 ### Common operations
 
 * `[tab]`: enter/exit the menu.
-* `[u]`: undo.
+* `[ctrl] + [u]`: undo.
 * `[ctrl] + [r]`: redo.
 * `[arrow]`: move the cursor.
 * `[ctrl] + [arrow]`: move the cursor faster.
@@ -80,3 +80,19 @@ In case af style changes, of course it's welcome but do not forget to explain wh
  |  ********** ********** **********
  +-----------------------------------+
  ```
+
+ # And an example diagram I made for another project.
+
+ ```
+                      +-----B-West to A----+   +---A-East to B-------+
+                      |                    |   |                     |
+               |      V      |             |   |              |      V      | 
+  edge  0  <---| +---------+ |--->edge 0-------+  edge  0 <---| +---------+ |--->edge  0
+  edge ... <---|-| BRICK A |-|--->edge ... |      edge ...<---|-| BRICK B |-|--->edge ...
+  edge  n  <---| +---------+ |--->edge n   +------edge  n <---| +---------+ |--->edge  n
+               |             |                                |             |
+               |             |                                |             |
+               |             |                                |             |
+               |             |                                |             |
+           WEST SIDE     EAST SIDE                        WEST SIDE     EAST SIDE
+```

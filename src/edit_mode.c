@@ -85,7 +85,7 @@ void edit_mode_free() {
   int i;
   for (i = 0; i < edit_mode_counter; i++) {
     if (modes[i].on_free != NULL) {
-      modes[i].on_free();
+      modes[i].on_free(&modes[i]);
     }
   }
   free(modes);

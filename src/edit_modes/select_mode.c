@@ -18,7 +18,7 @@ int is_in_rect(position r1, position r2, position p) {
   return 0;
 }
 
-static void on_key_event(int c) {
+static void on_key_event(edit_mode * self, int c) {
   {
     if (move_cursor(c).null == 1) {
       if (P1.null || P2.null) {
@@ -26,7 +26,7 @@ static void on_key_event(int c) {
           do_change(&CURRENT_FILE);
           chk_blit_chunk(&CURRENT_FILE, &CLIPBOARD, get_cursor_pos());
         }
-        if (move_cursor(c).null) {
+
           if (c == ' ') {
             position tmp = get_cursor_pos();
             if (P1.null) {
@@ -37,7 +37,7 @@ static void on_key_event(int c) {
               P1.null = 1;
               P2.null = 1;
             }
-          }
+          
         }
       } else if (!P2.null) {
         position min = pos_min(P1, P2);
@@ -153,12 +153,12 @@ static void on_key_event(int c) {
     }
   }
 }
-static void on_exit() {
+static void on_exit(edit_mode * self) {
   P1.null = 1;
   P2.null = 1;
 }
 
-static character on_draw(position p, character c) {
+static character on_draw(edit_mode * self, position p, character c) {
   position tmp = P2.null == 0 ? P2 : get_cursor_pos();
   if (P1.null != 1) {
     if (is_in_rect(P1, tmp, p)) {
@@ -168,9 +168,9 @@ static character on_draw(position p, character c) {
   return c;
 }
 
-static void on_free() { chk_free(&CLIPBOARD); }
+static void on_free(edit_mode * self) { chk_free(&CLIPBOARD); }
 
-static void on_top_line_add() {
+static void on_top_line_add(edit_mode * self) {
   if (!P1.null) {
     P1.y++;
   }
@@ -178,7 +178,7 @@ static void on_top_line_add() {
     P2.y++;
   }
 }
-static void on_left_column_add() {
+static void on_left_column_add(edit_mode * self) {
   if (!P1.null) {
     P1.x++;
   }
@@ -187,7 +187,7 @@ static void on_left_column_add() {
   }
 }
 
-static int on_abort() {
+static int on_abort(edit_mode * self) {
   if (!P1.null) {
     P1.null = 1;
     P2.null = 1;
@@ -196,7 +196,7 @@ static int on_abort() {
   return 0;
 }
 
-static char *get_help() {
+static char *get_help(edit_mode * self) {
   if (P1.null || P2.null) {
     return "You are in the SELECT mode.\n"
            "You have not two points selected.\n"

@@ -6,7 +6,7 @@
 #include "ui.h"
 #include "undo_redo.h"
 
-static void on_key_event(int c) {
+static void on_key_event(edit_mode * self, int c) {
   if (move_cursor(c).null) {
     if (is_writable(c)) {
       position tmp = get_cursor_pos();
@@ -15,7 +15,7 @@ static void on_key_event(int c) {
   }
 }
 
-static char *get_help() {
+static char *get_help(edit_mode * self) {
   return "You are in the PUT mode.\n"
          "Press a key and it will fill the selected character.\n"
          "\n"
