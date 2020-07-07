@@ -26,7 +26,7 @@ static void on_key_event(edit_mode * self, int c) {
           do_change(&CURRENT_FILE);
           chk_blit_chunk(&CURRENT_FILE, &CLIPBOARD, get_cursor_pos());
         }
-        if (move_cursor(c).null) {
+
           if (c == ' ') {
             position tmp = get_cursor_pos();
             if (P1.null) {
@@ -37,7 +37,7 @@ static void on_key_event(edit_mode * self, int c) {
               P1.null = 1;
               P2.null = 1;
             }
-          }
+          
         }
       } else if (!P2.null) {
         position min = pos_min(P1, P2);
