@@ -31,11 +31,21 @@ static int l_get_char_at(lua_State *L) {
   luaL_checktype(L, 1, LUA_TTABLE);
   position p;
   lua_getfield(L, 1, "x");
+  if (!lua_isnumber(L, -1))
+    goto error;
   p.x = lua_tointeger(L, -1);
   lua_getfield(L, 1, "y");
+  if (!lua_isnumber(L, -1))
+    goto error;
   p.y = lua_tointeger(L, -1);
+  /* Let's pop .x and .y from the stack. */
   lua_pop(L, 2);
+  /* Let's push on the stack the returned value. */
   lua_pushnumber(L, chk_get_char_at(&CURRENT_FILE, p));
+  return 1;
+error:
+  lua_pop(L, 1);
+  lua_pushnil(L);
   return 1;
 }
 
