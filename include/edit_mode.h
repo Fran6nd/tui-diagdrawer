@@ -48,5 +48,6 @@ edit_mode arrow_mode();
 edit_mode line_mode();
 edit_mode text_mode();
 edit_mode select_mode();
+edit_mode plugin_mode(char *);
 
 #endif
