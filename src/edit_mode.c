@@ -48,52 +48,53 @@ void register_modes() {
   register_mode(text_mode());
   register_mode(select_mode());
   /* Let's register our Lua plugins. */
+  {
+    char *dir = "/.tui-diagdrawer";
+    char path[100] = {0};
+    strcpy(path, getenv("HOME"));
+    strcat(path, dir);
+    struct stat sb;
 
-  char *dir = "/.tui-diagdrawer";
-  char path[100] = {0};
-  strcpy(path, getenv("HOME"));
-  strcat(path, dir);
-  struct stat sb;
-
-  /* If the script folder is not existing, we create it. */
-  if (stat(path, &sb) == 0 && S_ISDIR(sb.st_mode)) {
-  } else {
-    mkdir(path, 0777);
-  }
-  /*Let's iterate over LUA files.*/
-  DIR *folder;
-  struct dirent *entry;
-  int files = 0;
-  folder = opendir(path);
-  if (folder == NULL) {
-    ui_show_text_info("Error:\nCannot read ~/.tui_diagdrawer.");
-  } else {
-
-    while ((entry = readdir(folder))) {
-      files++;
-      if (strcmp("..", entry->d_name) != 0 && strcmp(".", entry->d_name) != 0) {
-        char filename[100] = {0};
-        strcpy(filename, path);
-        strcat(filename, "/");
-        strcat(filename, entry->d_name);
-        if (filename[strlen(filename) - 1] == 'a')
-          if (filename[strlen(filename) - 2] == 'u')
-            if (filename[strlen(filename) - 3] == 'l')
-              if (filename[strlen(filename) - 4] == '.')
-                register_mode(plugin_mode(filename));
-      }
-      // register_mode(plugin_mode(entry->d_name));
+    /* If the script folder is not existing, we create it. */
+    if (stat(path, &sb) == 0 && S_ISDIR(sb.st_mode)) {
+    } else {
+      mkdir(path, 0777);
     }
+    /*Let's iterate over LUA files.*/
+    DIR *folder;
+    struct dirent *entry;
+    int files = 0;
+    folder = opendir(path);
+    if (folder == NULL) {
+      ui_show_text_info("Error:\nCannot read ~/.tui_diagdrawer.");
+    } else {
 
-    closedir(folder);
+      while ((entry = readdir(folder))) {
+        files++;
+        if (strcmp("..", entry->d_name) != 0 &&
+            strcmp(".", entry->d_name) != 0) {
+          char filename[100] = {0};
+          strcpy(filename, path);
+          strcat(filename, "/");
+          strcat(filename, entry->d_name);
+          if (filename[strlen(filename) - 1] == 'a')
+            if (filename[strlen(filename) - 2] == 'u')
+              if (filename[strlen(filename) - 3] == 'l')
+                if (filename[strlen(filename) - 4] == '.')
+                  register_mode(plugin_mode(filename));
+        }
+      }
+
+      closedir(folder);
+    }
   }
   /* Here we build the menu dynamically from registered edit modes. */
   char *common_line = "      [%c] to enter %s mode\n";
   char mode_help[1000] = {0};
   int i;
   for (i = 0; i < edit_mode_counter; i++) {
-    char buf[100];
-    memset(buf, 0, 100);
+    char buf[1000];
+    memset(buf, 0, 1000);
     strcpy(buf, common_line);
     sprintf(buf, common_line, modes[i].key, modes[i].name);
     strcat(mode_help, buf);

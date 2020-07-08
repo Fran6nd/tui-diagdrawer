@@ -1,4 +1,5 @@
 #include "edit_mode.h"
+#include "ui.h"
 #include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
@@ -6,12 +7,8 @@
 static void on_key_event(edit_mode *em, int c) {}
 
 static char *get_help(edit_mode *em) {
-  return "You are in the ARROW mode.\n"
-         "You can use [space] to select the starting point\n"
-         "and then [space] again to select the ending point\n"
-         "and draw the arrow!\n"
-         "\n"
-         "Press any key to continue.";
+  lua_getglobal((lua_State *)em->data, "HELP");
+  return (char *)lua_tostring((lua_State *)em->data, 1);
 }
 
 static void on_free(edit_mode *em) { lua_close((lua_State *)em->data); }
@@ -36,6 +33,10 @@ edit_mode plugin_mode(char *path) {
   EDIT_MODE_RECT.data = (void *)L;
   int status = luaL_loadfile(L, path);
   if (status) {
+
+    char buffer[500] = {0};
+    sprintf(buffer, "Couldn't load file: %s\n", lua_tostring(L, -1));
+    ui_show_text_info(buffer);
     EDIT_MODE_RECT.null = 1;
     return EDIT_MODE_RECT;
   } else { /* Ask Lua to run our little script */
@@ -43,13 +44,17 @@ edit_mode plugin_mode(char *path) {
     if (result) {
       char buffer[500] = {0};
       sprintf(buffer, "Failed to run script: %s\n", lua_tostring(L, -1));
+      ui_show_text_info(buffer);
       EDIT_MODE_RECT.null = 1;
       return EDIT_MODE_RECT;
     } else {
       lua_getglobal(L, "NAME");
       EDIT_MODE_RECT.name = (char *)lua_tostring(L, 1);
       lua_getglobal(L, "KEY");
-      EDIT_MODE_RECT.key = lua_tointeger(L, 1);
+      EDIT_MODE_RECT.key = lua_tointeger(L, 2);
+      char buffer[500] = {0};
+      sprintf(buffer, "Loading: %d %s\n", EDIT_MODE_RECT.key, EDIT_MODE_RECT.name);
+      ui_show_text_info(buffer);
       return EDIT_MODE_RECT;
     }
   }
