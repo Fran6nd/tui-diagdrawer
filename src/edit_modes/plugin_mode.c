@@ -113,8 +113,12 @@ static void on_key_event(edit_mode *em, int c) {
   lua_getglobal(l, "on_key_event");
   if (lua_isfunction(l, 1)) {
     lua_pushnumber(l, c);
-    lua_pcall(l, 1, 0,
-              0); /* pops the function and 0 parameters, pushes 0 results */
+    if (lua_pcall(l, 1, 0, 0)
+        /* pops the function and 0 parameters, pushes 0 results */) {
+      char buffer[500] = {0};
+      sprintf(buffer, "Failed to run script: %s\n", lua_tostring(l, -1));
+      ui_show_text_info(buffer);
+    }
   }
 }
 
@@ -122,7 +126,11 @@ static char *get_help(edit_mode *em) {
   lua_State *l = (lua_State *)em->data;
   lua_getglobal(l, "get_help");
   if (lua_isfunction(l, 1)) {
-    lua_pcall(l, 0, 1, 0);
+    if (lua_pcall(l, 0, 1, 0)) {
+      char buffer[500] = {0};
+      sprintf(buffer, "Failed to run script: %s\n", lua_tostring(l, -1));
+      ui_show_text_info(buffer);
+    }
   }
   if (lua_isstring(l, 1)) {
     char *output = (char *)lua_tostring(l, 1);
@@ -150,7 +158,11 @@ static character on_draw(edit_mode *em, position p, character c) {
     lua_setfield(l, -2, "character");
     lua_pushinteger(l, c.color);
     lua_setfield(l, -2, "color");
-    lua_pcall(l, 2, 1, 0);
+    if (lua_pcall(l, 2, 1, 0)) {
+      char buffer[500] = {0};
+      sprintf(buffer, "Failed to run script: %s\n", lua_tostring(l, -1));
+      ui_show_text_info(buffer);
+    }
     if (lua_istable(l, -1)) {
       lua_getfield(l, -1, "character");
       c.c = lua_tointeger(l, -1);
