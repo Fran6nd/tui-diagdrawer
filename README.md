@@ -13,6 +13,9 @@ This project is not intended to be a good text editor but a good ascii diagram d
 Even if I'm trying to improve the `TEXT` mode as much as possible :)<br>
 The main purpose of this project is to help writing documentation for devs<br>
 but it can also be used to draw a tui videogame map!<br>
+<br>
+Be careful if you want to use plugins written by aomeone else!<br>
+The sandbox is not done yet<br>
 
 ## How to use
 
@@ -52,7 +55,7 @@ In case af style changes, of course it's welcome but do not forget to explain wh
 * Finding words, chunk...
 * Display strings bigger than screen in help viewport.
 * Improve the text editor.
-* Enable LUA scripting
+* Better sandbox LUA scripts.
 * Enable the user to change the name of the outpout file.
 
 # Here is what we can do:
