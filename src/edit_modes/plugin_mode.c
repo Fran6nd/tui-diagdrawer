@@ -31,7 +31,24 @@ static char *get_help(edit_mode *em) {
 
 static void on_free(edit_mode *em) { lua_close((lua_State *)em->data); }
 
-static character on_draw(edit_mode *em, position p, character c) { return c; }
+static character on_draw(edit_mode *em, position p, character c) {
+  lua_State *l = (lua_State *)em->data;
+  lua_getglobal(l, "on_draw");
+  if (lua_isfunction(l, 1)) {
+    lua_newtable(l);
+    lua_pushinteger(l, p.x);
+    lua_setfield(l, -2, "x");
+    lua_pushinteger(l, p.y);
+    lua_setfield(l, -2, "y");
+    lua_newtable(l);
+    lua_pushinteger(l, c.c);
+    lua_setfield(l, -2, "character");
+    lua_pushinteger(l, c.color);
+    lua_setfield(l, -2, "color");
+    lua_pcall(l, 2, 0, 0);
+  }
+  return c;
+}
 
 static void on_left_column_add(edit_mode *em) {}
 static void on_top_line_add(edit_mode *em) {}
