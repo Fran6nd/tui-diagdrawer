@@ -5,6 +5,7 @@
 #include <lualib.h>
 
 static int l_set_char_at(lua_State *L) {
+  lua_settop(L, 2);
   position p;
   luaL_checktype(L, 1, LUA_TTABLE);
   luaL_checktype(L, 2, LUA_INT_TYPE);
@@ -18,6 +19,7 @@ static int l_set_char_at(lua_State *L) {
   return 0; /* number of results */
 }
 static int l_get_char_at(lua_State *L) {
+  lua_settop(L, 1);
   luaL_checktype(L, 1, LUA_TTABLE);
   position p;
   lua_getfield(L, 1, "x");
@@ -31,8 +33,8 @@ static int l_get_char_at(lua_State *L) {
 }
 
 static int l_show_message(lua_State *L) {
-  ui_show_text((char *)lua_tostring(L, 1)); /* get argument */
-  return 0;                                 /* number of results */
+  ui_show_text((char *)lua_tostring(L, 1));
+  return 0;
 }
 
 static int l_move_cursor(lua_State *L) {
@@ -48,8 +50,8 @@ static int l_move_cursor(lua_State *L) {
 }
 
 static int l_show_message_blocking(lua_State *L) {
-  ui_show_text_info((char *)lua_tostring(L, 1)); /* get argument */
-  return 0;                                      /* number of results */
+  ui_show_text_info((char *)lua_tostring(L, 1));
+  return 0;
 }
 
 static int l_get_cursor_pos(lua_State *l) {
@@ -134,6 +136,7 @@ static char *get_help(edit_mode *em) {
 static void on_free(edit_mode *em) { lua_close((lua_State *)em->data); }
 
 static character on_draw(edit_mode *em, position p, character c) {
+
   lua_State *l = (lua_State *)em->data;
   lua_getglobal(l, "on_draw");
   if (!lua_isnil(l, 1) && lua_isfunction(l, 1)) {
