@@ -16,24 +16,26 @@ char menu_buffer[10000] = {0};
 /* Here we add an edit_mode after checking if there is no conflicts with the key
  * used. */
 void register_mode(edit_mode em) {
-  int i;
-  for (i = 0; i < edit_mode_counter; i++) {
-    if (modes[i].key == em.key) {
-      ui_show_text_info(
-          "Error\nTrying to register an edit mode\n using an already "
-          "used key.");
-      return;
+  if (!em.null) {
+    int i;
+    for (i = 0; i < edit_mode_counter; i++) {
+      if (modes[i].key == em.key) {
+        ui_show_text_info(
+            "Error\nTrying to register an edit mode\n using an already "
+            "used key.");
+        return;
+      }
     }
+    if (edit_mode_counter == 0) {
+      modes = malloc(1 * sizeof(edit_mode));
+      modes[0] = em;
+    } else {
+      modes = (edit_mode *)realloc(modes,
+                                   sizeof(edit_mode) * (edit_mode_counter + 1));
+      modes[edit_mode_counter] = em;
+    }
+    edit_mode_counter++;
   }
-  if (edit_mode_counter == 0) {
-    modes = malloc(1 * sizeof(edit_mode));
-    modes[0] = em;
-  } else {
-    modes = (edit_mode *)realloc(modes,
-                                 sizeof(edit_mode) * (edit_mode_counter + 1));
-    modes[edit_mode_counter] = em;
-  }
-  edit_mode_counter++;
 }
 
 /* Here we register all edit modes that are gonna be availables. */
@@ -78,7 +80,7 @@ void register_modes() {
           if (filename[strlen(filename) - 2] == 'u')
             if (filename[strlen(filename) - 3] == 'l')
               if (filename[strlen(filename) - 4] == '.')
-                ui_show_text_info(filename);
+                register_mode(plugin_mode(filename));
       }
       // register_mode(plugin_mode(entry->d_name));
     }

@@ -31,6 +31,8 @@ struct edit_mode {
   /* Used to store a custom data into the edit_mode struct sucj as a lua script.
    */
   void *data;
+  /* Used to knowif NULL1 */
+  int null;s
 };
 
 extern struct edit_mode *modes;
