@@ -84,6 +84,7 @@ edit_mode arrow_mode() {
                               .on_left_column_add = on_left_column_add,
                               .on_top_line_add = on_top_line_add,
                               .on_abort = on_abort,
-                              .get_help = get_help};
+                              .get_help = get_help,
+                              .null = 0};
   return EDIT_MODE_RECT;
 }
