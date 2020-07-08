@@ -66,7 +66,7 @@ void register_modes() {
     int files = 0;
     folder = opendir(path);
     if (folder == NULL) {
-      ui_show_text_info("Error:\nCannot read ~/.tui_diagdrawer.");
+      ui_show_text_info("Error:\nCannot read ~/.tui-diagdrawer.");
     } else {
 
       while ((entry = readdir(folder))) {

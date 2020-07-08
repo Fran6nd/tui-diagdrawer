@@ -41,6 +41,8 @@ endif
 
 install: tui-diagdrawer
 	sudo cp tui-diagdrawer /usr/local/bin
+	mkdir -p ~/.tui-diagdrawer
+	cp src/demo_plugin.lua ~/.tui-diagdrawer
 uninstall:
 	sudo rm /usr/local/bin/tui-diagdrawer
 	rm -rf ~/.tui-diagdrawer

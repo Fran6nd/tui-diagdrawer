@@ -256,7 +256,10 @@ edit_mode plugin_mode(char *path) {
     ui_show_text_info(buffer);
     EDIT_MODE_PLUGIN.null = 1;
     return EDIT_MODE_PLUGIN;
-  } else { /* Ask Lua to run our little script */
+  } else {
+    /* #FIXME: Allow only some libs. */
+    luaL_openlibs(L);
+    /* Ask Lua to run our little script */
     int result = lua_pcall(L, 0, LUA_MULTRET, 0);
     if (result) {
       char buffer[500] = {0};
