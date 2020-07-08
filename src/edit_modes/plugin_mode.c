@@ -8,7 +8,9 @@ static void on_key_event(edit_mode *em, int c) {}
 
 static char *get_help(edit_mode *em) {
   lua_getglobal((lua_State *)em->data, "HELP");
-  return (char *)lua_tostring((lua_State *)em->data, 1);
+  char *help = (char *)lua_tostring((lua_State *)em->data, 1);
+  lua_pop((lua_State *)em->data, 1);
+  return help;
 }
 
 static void on_free(edit_mode *em) { lua_close((lua_State *)em->data); }
@@ -50,11 +52,10 @@ edit_mode plugin_mode(char *path) {
     } else {
       lua_getglobal(L, "NAME");
       EDIT_MODE_RECT.name = (char *)lua_tostring(L, 1);
+      lua_pop(L, 1);
       lua_getglobal(L, "KEY");
-      EDIT_MODE_RECT.key = lua_tointeger(L, 2);
-      char buffer[500] = {0};
-      sprintf(buffer, "Loading: %d %s\n", EDIT_MODE_RECT.key, EDIT_MODE_RECT.name);
-      ui_show_text_info(buffer);
+      EDIT_MODE_RECT.key = lua_tointeger(L, 1);
+      lua_pop(L, 1);
       return EDIT_MODE_RECT;
     }
   }
