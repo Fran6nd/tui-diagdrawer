@@ -45,7 +45,16 @@ static character on_draw(edit_mode *em, position p, character c) {
     lua_setfield(l, -2, "character");
     lua_pushinteger(l, c.color);
     lua_setfield(l, -2, "color");
-    lua_pcall(l, 2, 0, 0);
+    lua_pcall(l, 2, 1, 0);
+    if (lua_istable(l, -1)) {
+      lua_getfield(l, -1, "character");
+      c.c = lua_tointeger(l, -1);
+      lua_pop(l, 1);
+      lua_getfield(l, -1, "color");
+      c.color = lua_tointeger(l, -1);
+      lua_pop(l,1);
+    }
+    lua_pop(l, -1);
   }
   return c;
 }
