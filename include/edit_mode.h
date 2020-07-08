@@ -28,6 +28,9 @@ struct edit_mode {
   /* Used to abort the current task.
    * Return 1 if a task has been aborted, else 0. */
   int (*on_abort)(edit_mode *);
+  /* Used to store a custom data into the edit_mode struct sucj as a lua script.
+   */
+  void *data;
 };
 
 extern struct edit_mode *modes;
