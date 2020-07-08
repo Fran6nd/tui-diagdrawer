@@ -18,6 +18,7 @@ static int l_set_char_at(lua_State *L) {
   chk_set_char_at(&CURRENT_FILE, p, c);
   return 0; /* number of results */
 }
+
 static int l_get_char_at(lua_State *L) {
   lua_settop(L, 1);
   luaL_checktype(L, 1, LUA_TTABLE);
@@ -109,15 +110,18 @@ static void bind(lua_State *L) {
 
 static void on_key_event(edit_mode *em, int c) {
   lua_State *l = (lua_State *)em->data;
-  // lua_pushinteger(l, c);
   lua_getglobal(l, "on_key_event");
-  if (lua_isfunction(l, 1)) {
-    lua_pushnumber(l, c);
-    if (lua_pcall(l, 1, 0, 0)
-        /* pops the function and 0 parameters, pushes 0 results */) {
-      char buffer[500] = {0};
-      sprintf(buffer, "Failed to run script: %s\n", lua_tostring(l, -1));
-      ui_show_text_info(buffer);
+  if (lua_isnil(l, 1)) {
+    lua_pop(l, 1);
+  } else {
+    if (lua_isfunction(l, 1)) {
+      lua_pushnumber(l, c);
+      if (lua_pcall(l, 1, 0, 0)
+          /* pops the function and 0 parameters, pushes 0 results */) {
+        char buffer[500] = {0};
+        sprintf(buffer, "Failed to run script: %s\n", lua_tostring(l, -1));
+        ui_show_text_info(buffer);
+      }
     }
   }
 }
@@ -125,19 +129,23 @@ static void on_key_event(edit_mode *em, int c) {
 static char *get_help(edit_mode *em) {
   lua_State *l = (lua_State *)em->data;
   lua_getglobal(l, "get_help");
-  if (lua_isfunction(l, 1)) {
-    if (lua_pcall(l, 0, 1, 0)) {
-      char buffer[500] = {0};
-      sprintf(buffer, "Failed to run script: %s\n", lua_tostring(l, -1));
-      ui_show_text_info(buffer);
-    }
-  }
-  if (lua_isstring(l, 1)) {
-    char *output = (char *)lua_tostring(l, 1);
+  if (lua_isnil(l, 1)) {
     lua_pop(l, 1);
-    return output;
+  } else {
+    if (lua_isfunction(l, 1)) {
+      if (lua_pcall(l, 0, 1, 0)) {
+        char buffer[500] = {0};
+        sprintf(buffer, "Failed to run script: %s\n", lua_tostring(l, -1));
+        ui_show_text_info(buffer);
+      }
+    }
+    if (lua_isstring(l, 1)) {
+      char *output = (char *)lua_tostring(l, 1);
+      lua_pop(l, 1);
+      return output;
+    }
+    lua_pop(l, 1);
   }
-  lua_pop(l, 1);
   return "No help available.";
 }
 
@@ -147,37 +155,67 @@ static character on_draw(edit_mode *em, position p, character c) {
 
   lua_State *l = (lua_State *)em->data;
   lua_getglobal(l, "on_draw");
-  if (!lua_isnil(l, 1) && lua_isfunction(l, 1)) {
-    lua_newtable(l);
-    lua_pushinteger(l, p.x);
-    lua_setfield(l, -2, "x");
-    lua_pushinteger(l, p.y);
-    lua_setfield(l, -2, "y");
-    lua_newtable(l);
-    lua_pushinteger(l, c.c);
-    lua_setfield(l, -2, "character");
-    lua_pushinteger(l, c.color);
-    lua_setfield(l, -2, "color");
-    if (lua_pcall(l, 2, 1, 0)) {
-      char buffer[500] = {0};
-      sprintf(buffer, "Failed to run script: %s\n", lua_tostring(l, -1));
-      ui_show_text_info(buffer);
+  if (lua_isnil(l, 1)) {
+    lua_pop(l, 1);
+  } else {
+    if (!lua_isnil(l, 1) && lua_isfunction(l, 1)) {
+      lua_newtable(l);
+      lua_pushinteger(l, p.x);
+      lua_setfield(l, -2, "x");
+      lua_pushinteger(l, p.y);
+      lua_setfield(l, -2, "y");
+      lua_newtable(l);
+      lua_pushinteger(l, c.c);
+      lua_setfield(l, -2, "character");
+      lua_pushinteger(l, c.color);
+      lua_setfield(l, -2, "color");
+      if (lua_pcall(l, 2, 1, 0)) {
+        char buffer[500] = {0};
+        sprintf(buffer, "Failed to run [on_draw]: %s\n", lua_tostring(l, -1));
+        ui_show_text_info(buffer);
+      }
+      if (lua_istable(l, -1)) {
+        lua_getfield(l, -1, "character");
+        c.c = lua_tointeger(l, -1);
+        lua_pop(l, 1);
+        lua_getfield(l, -1, "color");
+        c.color = lua_tointeger(l, -1);
+        lua_pop(l, 1);
+      }
+      lua_pop(l, -1);
     }
-    if (lua_istable(l, -1)) {
-      lua_getfield(l, -1, "character");
-      c.c = lua_tointeger(l, -1);
-      lua_pop(l, 1);
-      lua_getfield(l, -1, "color");
-      c.color = lua_tointeger(l, -1);
-      lua_pop(l, 1);
-    }
-    lua_pop(l, -1);
   }
   return c;
 }
 
-static void on_left_column_add(edit_mode *em) {}
-static void on_top_line_add(edit_mode *em) {}
+static void on_left_column_add(edit_mode *em) {
+  lua_State *l = (lua_State *)em->data;
+  lua_getglobal(l, "on_left_column_add");
+  if (lua_isnil(l, 1)) {
+    lua_pop(l, 1);
+  } else {
+    if (lua_pcall(l, 0, 0, 0)) {
+      char buffer[500] = {0};
+      sprintf(buffer, "Failed to run [on_left_column_add]: %s\n",
+              lua_tostring(l, -1));
+      ui_show_text_info(buffer);
+    }
+  }
+}
+static void on_top_line_add(edit_mode *em) {
+  lua_State *l = (lua_State *)em->data;
+  lua_getglobal(l, "on_top_line_add");
+  if (lua_isnil(l, 1)) {
+    lua_pop(l, 1);
+  } else {
+    if (lua_pcall(l, 0, 0, 0)) {
+      char buffer[500] = {0};
+      sprintf(buffer, "Failed to run [on_top_line_add]: %s\n",
+              lua_tostring(l, -1));
+      ui_show_text_info(buffer);
+    }
+  }
+}
 
 static int on_abort(edit_mode *em) { return 0; }
 
@@ -211,12 +249,28 @@ edit_mode plugin_mode(char *path) {
     } else {
       bind(L);
       lua_getglobal(L, "NAME");
-      EDIT_MODE_RECT.name = (char *)lua_tostring(L, 1);
-      lua_pop(L, 1);
-      lua_getglobal(L, "KEY");
-      EDIT_MODE_RECT.key = lua_tointeger(L, 1);
-      lua_pop(L, 1);
-      return EDIT_MODE_RECT;
+      if (lua_isnil(L, 1)) {
+        goto error;
+      } else {
+        EDIT_MODE_RECT.name = (char *)lua_tostring(L, 1);
+        lua_pop(L, 1);
+        lua_getglobal(L, "KEY");
+        if (lua_isnil(L, 1)) {
+          goto error;
+        } else {
+          EDIT_MODE_RECT.key = lua_tointeger(L, 1);
+          lua_pop(L, 1);
+          return EDIT_MODE_RECT;
+        }
+      }
     }
+  error:
+    lua_pop(L, 1);
+    EDIT_MODE_RECT.null = 1;
+    EDIT_MODE_RECT.on_free(&EDIT_MODE_RECT);
+    char buf[100] = {0};
+    sprintf(buf, "Error:\nCannot load script:\n%s\nMissing NAME or KEY", path);
+    ui_show_text_info(buf);
+    return EDIT_MODE_RECT;
   }
 }
