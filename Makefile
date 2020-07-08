@@ -43,3 +43,4 @@ install: tui-diagdrawer
 	sudo cp tui-diagdrawer /usr/local/bin
 uninstall:
 	sudo rm /usr/local/bin/tui-diagdrawer
+	rm -rf ~/.tui-diagdrawer
