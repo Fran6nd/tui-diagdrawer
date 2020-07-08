@@ -117,10 +117,18 @@ static void on_key_event(edit_mode *em, int c) {
 }
 
 static char *get_help(edit_mode *em) {
-  lua_getglobal((lua_State *)em->data, "HELP");
-  char *help = (char *)lua_tostring((lua_State *)em->data, 1);
-  lua_pop((lua_State *)em->data, 1);
-  return help;
+  lua_State *l = (lua_State *)em->data;
+  lua_getglobal(l, "get_help");
+  if (lua_isfunction(l, 1)) {
+    lua_pcall(l, 0, 1, 0);
+  }
+  if (lua_isstring(l, 1)) {
+    char *output = (char *)lua_tostring(l, 1);
+    lua_pop(l, 1);
+    return output;
+  }
+  lua_pop(l, 1);
+  return "No help available.";
 }
 
 static void on_free(edit_mode *em) { lua_close((lua_State *)em->data); }
