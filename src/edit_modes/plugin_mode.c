@@ -6,6 +6,16 @@
 
 static void on_key_event(edit_mode *em, int c) {}
 
+static int l_show_message(lua_State *L) {
+  ui_show_text_info((char *)lua_tostring(L, 1)); /* get argument */
+  return 1;                                      /* number of results */
+}
+
+static void bind(lua_State *L) {
+  lua_pushcfunction(L, l_show_message);
+  lua_setglobal(L, "show_message");
+}
+
 static char *get_help(edit_mode *em) {
   lua_getglobal((lua_State *)em->data, "HELP");
   char *help = (char *)lua_tostring((lua_State *)em->data, 1);
@@ -42,6 +52,7 @@ edit_mode plugin_mode(char *path) {
     EDIT_MODE_RECT.null = 1;
     return EDIT_MODE_RECT;
   } else { /* Ask Lua to run our little script */
+    bind(L);
     int result = lua_pcall(L, 0, LUA_MULTRET, 0);
     if (result) {
       char buffer[500] = {0};
