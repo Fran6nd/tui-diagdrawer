@@ -4,7 +4,13 @@
 #include <lua.h>
 #include <lualib.h>
 
-static void on_key_event(edit_mode *em, int c) {}
+static void on_key_event(edit_mode *em, int c) {
+  lua_getglobal((lua_State *)em->data, "on_key_event");
+  if (lua_isfunction((lua_State *)em->data, 1)) {
+    lua_call((lua_State *)em->data, 0,
+             0); /* pops the function and 0 parameters, pushes 0 results */
+  }
+}
 
 static int l_show_message(lua_State *L) {
   ui_show_text_info((char *)lua_tostring(L, 1)); /* get argument */
@@ -52,7 +58,6 @@ edit_mode plugin_mode(char *path) {
     EDIT_MODE_RECT.null = 1;
     return EDIT_MODE_RECT;
   } else { /* Ask Lua to run our little script */
-    bind(L);
     int result = lua_pcall(L, 0, LUA_MULTRET, 0);
     if (result) {
       char buffer[500] = {0};
@@ -61,6 +66,7 @@ edit_mode plugin_mode(char *path) {
       EDIT_MODE_RECT.null = 1;
       return EDIT_MODE_RECT;
     } else {
+      bind(L);
       lua_getglobal(L, "NAME");
       EDIT_MODE_RECT.name = (char *)lua_tostring(L, 1);
       lua_pop(L, 1);
