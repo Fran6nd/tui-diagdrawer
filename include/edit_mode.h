@@ -32,7 +32,7 @@ struct edit_mode {
    */
   void *data;
   /* Used to knowif NULL1 */
-  int null;s
+  int null;
 };
 
 extern struct edit_mode *modes;
