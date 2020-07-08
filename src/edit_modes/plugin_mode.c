@@ -13,13 +13,38 @@ static void on_key_event(edit_mode *em, int c) {
 }
 
 static int l_show_message(lua_State *L) {
+  ui_show_text((char *)lua_tostring(L, 1)); /* get argument */
+  return 0;                                 /* number of results */
+}
+
+static int l_show_message_blocking(lua_State *L) {
   ui_show_text_info((char *)lua_tostring(L, 1)); /* get argument */
-  return 1;                                      /* number of results */
+  return 0;                                      /* number of results */
+}
+
+static int l_get_cursor_pos(lua_State *l) {
+  lua_newtable(l);
+  lua_pushinteger(l, get_cursor_pos().x);
+  lua_setfield(l, -2, "x");
+  lua_pushinteger(l, get_cursor_pos().y);
+  lua_setfield(l, -2, "y");
+  return 1;
 }
 
 static void bind(lua_State *L) {
   lua_pushcfunction(L, l_show_message);
   lua_setglobal(L, "show_message");
+  lua_pushcfunction(L, l_show_message_blocking);
+  lua_setglobal(L, "show_message_blocking");
+  lua_pushcfunction(L, l_get_cursor_pos);
+  lua_setglobal(L, "get_cursor_pos");
+  /* Let's push all colors. */
+  lua_pushinteger(L, COL_SELECTION);
+  lua_setglobal(L, "COL_SELECTION");
+  lua_pushinteger(L, COL_EMPTY);
+  lua_setglobal(L, "COL_EMPTY");
+  lua_pushinteger(L, COL_NORMAL);
+  lua_setglobal(L, "COL_NORMAL");
 }
 
 static char *get_help(edit_mode *em) {
@@ -52,7 +77,7 @@ static character on_draw(edit_mode *em, position p, character c) {
       lua_pop(l, 1);
       lua_getfield(l, -1, "color");
       c.color = lua_tointeger(l, -1);
-      lua_pop(l,1);
+      lua_pop(l, 1);
     }
     lua_pop(l, -1);
   }
