@@ -237,6 +237,9 @@ static void on_top_line_add(edit_mode *em) {
 
 static int on_abort(edit_mode *em) { return 0; }
 
+/* Function called from edit_mode.c for any LUA extension:
+ * It builds the struct edit_mode, load and bind the script.
+ */
 edit_mode plugin_mode(char *path) {
   edit_mode EDIT_MODE_PLUGIN = {.on_key_event = on_key_event,
                                 .on_free = on_free,
@@ -257,8 +260,13 @@ edit_mode plugin_mode(char *path) {
     EDIT_MODE_PLUGIN.null = 1;
     return EDIT_MODE_PLUGIN;
   } else {
-    /* #FIXME: Allow only some libs. */
+    /* Loading all the std lib, disbling io and os for safety purpose. */
     luaL_openlibs(L);
+    lua_pushnil(L);
+    lua_setglobal(L, "os");
+    lua_pushnil(L);
+    lua_setglobal(L, "io");
+
     /* Ask Lua to run our little script */
     int result = lua_pcall(L, 0, LUA_MULTRET, 0);
     if (result) {
