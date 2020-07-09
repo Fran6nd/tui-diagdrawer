@@ -1,5 +1,6 @@
 #include "edit_mode.h"
 #include "ui.h"
+#include "undo_redo.h"
 #include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
@@ -47,6 +48,11 @@ error:
   lua_pop(L, 1);
   lua_pushnil(L);
   return 1;
+}
+
+static int l_do_change(lua_State *L) {
+  do_change(&CURRENT_FILE);
+  return 0;
 }
 
 static int l_show_message(lua_State *L) {
@@ -106,6 +112,8 @@ error:
 
 static void bind(lua_State *L) {
   /* Let's push all tools */
+  lua_pushcfunction(L, l_do_change);
+  lua_setglobal(L, "do_change");
   lua_pushcfunction(L, l_set_char_at);
   lua_setglobal(L, "set_char_at");
   lua_pushcfunction(L, l_get_char_at);

@@ -32,6 +32,8 @@ function on_key_event(key)
         show_message_blocking(get_char_at(get_cursor_pos()))
         set_char_at(get_cursor_pos(), string.byte("x"))
         p = get_cursor_pos()
+        -- Now we make a recovery point for the undo/redo system.
+        do_change()
     end
 end
 

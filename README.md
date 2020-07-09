@@ -14,7 +14,7 @@ Even if I'm trying to improve the `TEXT` mode as much as possible :)<br>
 The main purpose of this project is to help writing documentation for devs<br>
 but it can also be used to draw a tui-videogame map!<br>
 <br>
-The project support LUA scripting (scripts are in~/.tui-diagdrawer)<br>
+The project support LUA scripting (scripts are in `~/.tui-diagdrawer`)<br>
 and if you run `make install` it will install a demo script.<br>
 Be careful if you want to use plugins written by someone else!<br>
 The sandbox is not done yet!<br>
