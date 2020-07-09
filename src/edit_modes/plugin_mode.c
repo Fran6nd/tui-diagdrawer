@@ -86,17 +86,21 @@ static int l_set_cursor_pos(lua_State *L) {
   lua_settop(L, 1);
   luaL_checktype(L, 1, LUA_TTABLE);
   lua_getfield(L, -1, "x");
-  p.x = lua_tointeger(L, -1);
   lua_getfield(L, 1, "y");
+  if (!lua_isinteger(L, -1))
+    goto error;
+  if (!lua_isinteger(L, -1))
+    goto error;
+  p.x = lua_tointeger(L, -2);
   p.y = lua_tointeger(L, -1);
-  lua_pop(L, 2);
   position delta = {.x = get_cursor_pos().x - UP_LEFT_CORNER.x,
                     .y = get_cursor_pos().y - UP_LEFT_CORNER.y};
   p.x -= delta.x;
   p.y -= delta.y;
   UP_LEFT_CORNER.x = p.x;
   UP_LEFT_CORNER.y = p.y;
-
+error:
+  lua_pop(L, 2);
   return 0;
 }
 
