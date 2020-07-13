@@ -14,8 +14,10 @@ static int l_set_char_at(lua_State *L) {
   /* Now we read table.x and table.y */
   position p;
   lua_getfield(L, 1, "x");
+  luaL_checktype(L, -1, LUA_INT_TYPE);
   p.x = lua_tointeger(L, -1);
   lua_getfield(L, 1, "y");
+  luaL_checktype(L, -1, LUA_INT_TYPE);
   p.y = lua_tointeger(L, -1);
   /* Now we read the int value ofthe char to draw. */
   int c = lua_tointeger(L, 2);
@@ -32,21 +34,15 @@ static int l_get_char_at(lua_State *L) {
   luaL_checktype(L, 1, LUA_TTABLE);
   position p;
   lua_getfield(L, 1, "x");
-  if (!lua_isnumber(L, -1))
-    goto error;
+  luaL_checktype(L, -1, LUA_INT_TYPE);
   p.x = lua_tointeger(L, -1);
   lua_getfield(L, 1, "y");
-  if (!lua_isnumber(L, -1))
-    goto error;
+  luaL_checktype(L, -1, LUA_INT_TYPE);
   p.y = lua_tointeger(L, -1);
   /* Let's pop .x and .y from the stack. */
   lua_pop(L, 2);
   /* Let's push on the stack the returned value. */
   lua_pushnumber(L, chk_get_char_at(&CURRENT_FILE, p));
-  return 1;
-error:
-  lua_pop(L, 1);
-  lua_pushnil(L);
   return 1;
 }
 
@@ -73,6 +69,7 @@ static int l_move_cursor(lua_State *L) {
 }
 
 static int l_show_message_blocking(lua_State *L) {
+  luaL_checktype(L, -1, LUA_TSTRING);
   ui_show_text_info((char *)lua_tostring(L, 1));
   return 0;
 }
@@ -92,11 +89,9 @@ static int l_set_cursor_pos(lua_State *L) {
   lua_settop(L, 1);
   luaL_checktype(L, 1, LUA_TTABLE);
   lua_getfield(L, -1, "x");
+  luaL_checktype(L, 1, LUA_INT_TYPE);
   lua_getfield(L, 1, "y");
-  if (!lua_isinteger(L, -1))
-    goto error;
-  if (!lua_isinteger(L, -1))
-    goto error;
+  luaL_checktype(L, 1, LUA_INT_TYPE);
   p.x = lua_tointeger(L, -2);
   p.y = lua_tointeger(L, -1);
   position delta = {.x = get_cursor_pos().x - UP_LEFT_CORNER.x,
@@ -105,7 +100,6 @@ static int l_set_cursor_pos(lua_State *L) {
   p.y -= delta.y;
   UP_LEFT_CORNER.x = p.x;
   UP_LEFT_CORNER.y = p.y;
-error:
   lua_pop(L, 2);
   return 0;
 }
