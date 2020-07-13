@@ -52,11 +52,13 @@ static int l_do_change(lua_State *L) {
 }
 
 static int l_show_message(lua_State *L) {
+  luaL_checktype(L, 1, LUA_TSTRING);
   ui_show_text((char *)lua_tostring(L, 1));
   return 0;
 }
 
 static int l_move_cursor(lua_State *L) {
+  luaL_checktype(L, 1, LUA_INT_TYPE);
   position p = move_cursor(lua_tointeger(L, 1));
   if (p.null)
     return 0;
@@ -69,7 +71,7 @@ static int l_move_cursor(lua_State *L) {
 }
 
 static int l_show_message_blocking(lua_State *L) {
-  luaL_checktype(L, -1, LUA_TSTRING);
+  luaL_checktype(L, 1, LUA_TSTRING);
   ui_show_text_info((char *)lua_tostring(L, 1));
   return 0;
 }
