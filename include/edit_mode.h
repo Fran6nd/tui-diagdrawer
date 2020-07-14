@@ -21,6 +21,8 @@ struct edit_mode {
    * They are used to tell the edit_mode that everything moved. */
   void (*on_top_line_add)(edit_mode *);
   void (*on_left_column_add)(edit_mode *);
+  /* Called when opening the mode from the menu. */
+  void (*on_open)(edit_mode *);
   /* Called when exiting the current mode. */
   void (*on_exit)(edit_mode *);
   /* Called when the app is closing. */

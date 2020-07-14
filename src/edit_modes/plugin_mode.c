@@ -4,20 +4,45 @@
 #include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
+#include <stdlib.h>
+
+typedef struct data data;
+struct data {
+  lua_State *L;
+  int error;
+};
+
+data *current_mode_data;
+
+static int check_type(lua_State *L, int index, int type) {
+  if (lua_type(L, index) != type) {
+    char *type_found = lua_typename(L, index);
+    char *type_expected = lua_typename(L, index);
+    return 0;
+  }
+  return 1;
+}
 
 static int l_set_char_at(lua_State *L) {
-  /* Keep only two firsts args. */
+  /* Keep only two args. */
   lua_settop(L, 2);
   /* Let's check our args types. */
   luaL_checktype(L, 1, LUA_TTABLE);
   luaL_checktype(L, 2, LUA_INT_TYPE);
   /* Now we read table.x and table.y */
   position p;
+
   lua_getfield(L, 1, "x");
-  luaL_checktype(L, -1, LUA_INT_TYPE);
-  p.x = lua_tointeger(L, -1);
   lua_getfield(L, 1, "y");
   luaL_checktype(L, -1, LUA_INT_TYPE);
+  luaL_checktype(L, -2, LUA_INT_TYPE);
+  if (!lua_isinteger(L, -1) || !lua_isinteger(L, -2) || !lua_isinteger(L, 2)) {
+    current_mode_data->error = 1;
+    lua_pop(L, 3);
+    return 0;
+  }
+
+  p.x = lua_tointeger(L, -2);
   p.y = lua_tointeger(L, -1);
   /* Now we read the int value ofthe char to draw. */
   int c = lua_tointeger(L, 2);
@@ -135,8 +160,30 @@ static void bind(lua_State *L) {
   lua_setglobal(L, "COL_NORMAL");
 }
 
+static int error_handler(lua_State *L) { return 0; }
+
+int lua_mypcall(lua_State *L, int nargs, int nret) {
+  /* calculate stack position for message handler */
+  int hpos = lua_gettop(L) - nargs;
+  int ret = 0;
+  /* push custom error message handler */
+  lua_pushcfunction(L, error_handler);
+  /* move it before function and arguments */
+  lua_insert(L, hpos);
+  /* call lua_pcall function with custom handler */
+  ret = lua_pcall(L, nargs, nret, hpos);
+  /* remove custom error message handler from stack */
+  lua_remove(L, hpos);
+  /* pass return value of lua_pcall */
+  return ret;
+}
+
 static void on_key_event(edit_mode *em, int c) {
-  lua_State *L = (lua_State *)em->data;
+  data *d = (data *)em->data;
+  if (d->error) {
+    return;
+  }
+  lua_State *L = (lua_State *)((data *)em->data)->L;
   lua_getglobal(L, "on_key_event");
   if (lua_isnil(L, 1)) {
     lua_pop(L, 1);
@@ -155,13 +202,19 @@ static void on_key_event(edit_mode *em, int c) {
 }
 
 static char *get_help(edit_mode *em) {
-  lua_State *L = (lua_State *)em->data;
+  data *d = (data *)em->data;
+  if (d->error) {
+    return ("Error:\n"
+            "An error occured in your LUA script.\n"
+            "This edit-mode is now disabled.\n");
+  }
+  lua_State *L = (lua_State *)((data *)em->data)->L;
   lua_getglobal(L, "get_help");
   if (lua_isnil(L, 1)) {
     lua_pop(L, 1);
   } else {
     if (lua_isfunction(L, 1)) {
-      if (lua_pcall(L, 0, 1, 0)) {
+      if (lua_mypcall(L, 0, 1)) {
         char buffer[500] = {0};
         sprintf(buffer, "Failed to run get_help: %s\n", lua_tostring(L, -1));
         ui_show_text_info(buffer);
@@ -177,11 +230,20 @@ static char *get_help(edit_mode *em) {
   return "No help available.";
 }
 
-static void on_free(edit_mode *em) { lua_close((lua_State *)em->data); }
+static void on_free(edit_mode *em) {
+  data *d = (data *)em->data;
+  lua_close(d->L);
+}
 
 static character on_draw(edit_mode *em, position p, character c) {
+  data *d = (data *)em->data;
+  /* If there is an error, we show everything in RED and disable LUA calls. */
+  if (d->error) {
+    c.color = COL_CURSOR;
+    return c;
+  }
+  lua_State *L = (lua_State *)d->L;
 
-  lua_State *L = (lua_State *)em->data;
   lua_getglobal(L, "on_draw");
   if (lua_isnil(L, 1)) {
     lua_pop(L, 1);
@@ -197,7 +259,7 @@ static character on_draw(edit_mode *em, position p, character c) {
       lua_setfield(L, -2, "character");
       lua_pushinteger(L, c.color);
       lua_setfield(L, -2, "color");
-      if (lua_pcall(L, 2, 1, 0)) {
+      if (lua_mypcall(L, 2, 1)) {
         char buffer[500] = {0};
         sprintf(buffer, "Failed to run [on_draw]: %s\n", lua_tostring(L, -1));
         ui_show_text_info(buffer);
@@ -222,7 +284,7 @@ static void on_left_column_add(edit_mode *em) {
   if (lua_isnil(L, 1)) {
     lua_pop(L, 1);
   } else {
-    if (lua_pcall(L, 0, 0, 0)) {
+    if (lua_mypcall(L, 0, 0)) {
       char buffer[500] = {0};
       sprintf(buffer, "Failed to run [on_left_column_add]: %s\n",
               lua_tostring(L, -1));
@@ -231,19 +293,21 @@ static void on_left_column_add(edit_mode *em) {
   }
 }
 static void on_top_line_add(edit_mode *em) {
-  lua_State *l = (lua_State *)em->data;
-  lua_getglobal(l, "on_top_line_add");
-  if (lua_isnil(l, 1)) {
-    lua_pop(l, 1);
+  lua_State *L = (lua_State *)((data *)em->data)->L;
+  lua_getglobal(L, "on_top_line_add");
+  if (lua_isnil(L, 1)) {
+    lua_pop(L, 1);
   } else {
-    if (lua_pcall(l, 0, 0, 0)) {
+    if (lua_mypcall(L, 0, 0)) {
       char buffer[500] = {0};
       sprintf(buffer, "Failed to run [on_top_line_add]: %s\n",
-              lua_tostring(l, -1));
+              lua_tostring(L, -1));
       ui_show_text_info(buffer);
     }
   }
 }
+
+static void on_open(edit_mode *em) { current_mode_data = (data *)em->data; }
 
 static int on_abort(edit_mode *em) { return 0; }
 
@@ -257,10 +321,14 @@ edit_mode plugin_mode(char *path) {
                                 .on_left_column_add = on_left_column_add,
                                 .on_top_line_add = on_top_line_add,
                                 .on_abort = on_abort,
-                                .get_help = get_help};
+                                .get_help = get_help,
+                                .on_open = on_open};
 
   lua_State *L = luaL_newstate();
-  EDIT_MODE_PLUGIN.data = (void *)L;
+  data *d = (data *)malloc(sizeof(data));
+  d->error = 0;
+  d->L = L;
+  EDIT_MODE_PLUGIN.data = d;
   int status = luaL_loadfile(L, path);
   if (status) {
 
@@ -278,7 +346,7 @@ edit_mode plugin_mode(char *path) {
     lua_setglobal(L, "io");
 
     /* Ask Lua to run our little script */
-    int result = lua_pcall(L, 0, LUA_MULTRET, 0);
+    int result = lua_mypcall(L, 0, LUA_MULTRET);
     if (result) {
       char buffer[500] = {0};
       sprintf(buffer, "Failed to run script: %s\n", lua_tostring(L, -1));

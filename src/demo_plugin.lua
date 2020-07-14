@@ -29,8 +29,8 @@ function on_key_event(key)
         --local p = get_cursor_pos()
         --p.y = p.y + 1
         --set_cursor_pos(p)
-        show_message_blocking(get_char_at(get_cursor_pos()))
-        set_char_at(get_cursor_pos(), string.byte("x"))
+        -- show_message_blocking(get_char_at(get_cursor_pos()))
+        set_char_at(get_cursor_pos(), "x", 1)
         p = get_cursor_pos()
         -- Now we make a recovery point for the undo/redo system.
         do_change()

@@ -239,6 +239,9 @@ int main(int argc, char *argv[]) {
             break;
           default:
             EDIT_MODE = get_edit_mode(c);
+            if (EDIT_MODE->on_open) {
+              EDIT_MODE->on_open(EDIT_MODE);
+            }
             break;
           }
         } while (EDIT_MODE == NULL && looping == 1);
