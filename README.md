@@ -23,9 +23,15 @@ The sandbox is not done yet!<br>
 
 ### How to setup
 
-To install dependancies:
+To install dependancies (ncurses and Lua):
 
 * `sudo apt-get install libncurses5-dev libncursesw5-dev`
+* `curl -R -O http://www.lua.org/ftp/lua-5.4.0.tar.gz`
+* `tar zxf lua-5.4.0.tar.gz`
+* `cd lua-5.4.0`
+* `make`
+* `make install`
+
 
 To build the project:
 
