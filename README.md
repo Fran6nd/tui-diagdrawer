@@ -63,8 +63,10 @@ In case af style changes, of course it's welcome but do not forget to explain wh
 * Finding words, chunk...
 * Display strings bigger than screen in help viewport.
 * Improve the text editor.
-* Better sandbox LUA scripts.
+* Better sandbox for LUA scripts.
 * Enable the user to change the name of the outpout file.
+* Better Lua errors handling (avoid segfault if args not ok).
+* Capability to override existing built-in edit modes.
 
 # Here is what we can do:
 
