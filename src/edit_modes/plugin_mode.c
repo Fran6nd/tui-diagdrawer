@@ -52,8 +52,16 @@ static int l_do_change(lua_State *L) {
 }
 
 static int l_show_message(lua_State *L) {
+  lua_tostring(L, 1);
   luaL_checktype(L, 1, LUA_TSTRING);
   ui_show_text((char *)lua_tostring(L, 1));
+  return 0;
+}
+
+static int l_show_message_blocking(lua_State *L) {
+  lua_tostring(L, 1);
+  luaL_checktype(L, 1, LUA_TSTRING);
+  ui_show_text_info((char *)lua_tostring(L, 1));
   return 0;
 }
 
@@ -68,12 +76,6 @@ static int l_move_cursor(lua_State *L) {
   lua_pushinteger(L, p.y);
   lua_setfield(L, -2, "y");
   return 1;
-}
-
-static int l_show_message_blocking(lua_State *L) {
-  luaL_checktype(L, 1, LUA_TSTRING);
-  ui_show_text_info((char *)lua_tostring(L, 1));
-  return 0;
 }
 
 static int l_get_cursor_pos(lua_State *L) {
