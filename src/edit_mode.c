@@ -20,9 +20,12 @@ void register_mode(edit_mode em) {
     int i;
     for (i = 0; i < edit_mode_counter; i++) {
       if (modes[i].key == em.key) {
-        ui_show_text_info(
-            "Error\nTrying to register an edit mode\n using an already "
-            "used key.");
+        /*
+         * We do not register the edit_mode if the key is already taken.
+         *
+         * It allows us to override built-ins edit_modes with LUA plugins.
+         *
+         */
         return;
       }
     }
@@ -40,13 +43,6 @@ void register_mode(edit_mode em) {
 
 /* Here we register all edit modes that are gonna be availables. */
 void register_modes() {
-  /* Let's register all edit_modes. */
-  register_mode(rect_mode());
-  register_mode(put_mode());
-  register_mode(line_mode());
-  register_mode(arrow_mode());
-  register_mode(text_mode());
-  register_mode(select_mode());
   /* Let's register our Lua plugins. */
   {
     char *dir = "/.tui-diagdrawer";
@@ -68,7 +64,6 @@ void register_modes() {
     if (folder == NULL) {
       ui_show_text_info("Error:\nCannot read ~/.tui-diagdrawer.");
     } else {
-
       while ((entry = readdir(folder))) {
         files++;
         if (strcmp("..", entry->d_name) != 0 &&
@@ -88,6 +83,13 @@ void register_modes() {
       closedir(folder);
     }
   }
+  /* Let's register all edit_modes. */
+  register_mode(rect_mode());
+  register_mode(put_mode());
+  register_mode(line_mode());
+  register_mode(arrow_mode());
+  register_mode(text_mode());
+  register_mode(select_mode());
   /* Here we build the menu dynamically from registered edit modes. */
   char *common_line = "      [%c] to enter %s mode\n";
   char mode_help[1000] = {0};
