@@ -19,8 +19,6 @@ static void on_key_event(edit_mode *em, int c)
       position previous_pos = {.x = get_cursor_pos().x - delta.x, .y = get_cursor_pos().y - delta.y, .null = 0};
       position p_min = pos_min(previous_pos, get_cursor_pos());
       position p_max = pos_max(previous_pos, get_cursor_pos());
-      delta.x = -delta.x;
-      delta.y = -delta.y;
       while (delta.x < 0)
       {
         delta.x++;
