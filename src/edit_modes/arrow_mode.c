@@ -36,7 +36,6 @@ static void on_key_event(edit_mode *em, int c)
         delta.y++;
         position tmp = get_cursor_pos();
         tmp.y = tmp.y + delta.y;
-
         while (pl_is_inside(&PATH, tmp) != -1)
         {
           pl_remove_last(&PATH);
@@ -60,7 +59,6 @@ static void on_key_event(edit_mode *em, int c)
         delta.y--;
         position tmp = get_cursor_pos();
         tmp.y = tmp.y + delta.y;
-
         while (pl_is_inside(&PATH, tmp) != -1)
         {
           pl_remove_last(&PATH);
