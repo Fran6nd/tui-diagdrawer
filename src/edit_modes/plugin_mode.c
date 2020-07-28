@@ -18,9 +18,14 @@ static int check_type(lua_State *L, int index, int type) {
   if (lua_type(L, index) != type) {
     const char *type_found = lua_typename(L, lua_type(L, index));
     const char *type_expected = lua_typename(L, type);
-    char buf[200]= {0};
-    sprintf(buf, "%s expected, got %s", type_found, type_expected);
-    ui_show_text_info(buf);
+    char buf[200] = {0};
+    lua_Debug ar;
+    if (lua_getstack(L, 1, &ar)) {
+      lua_getinfo(L, "nSl", &ar);
+      sprintf(buf, "Error line %d in function %s: %s expected as #%d, got %s",
+              ar.linedefined, ar.currentline, type_found, index, type_expected);
+      ui_show_text_info(buf);
+    }
     return 0;
   }
   return 1;
