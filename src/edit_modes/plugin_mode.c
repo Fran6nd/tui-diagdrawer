@@ -14,6 +14,8 @@ struct data {
 
 data *current_mode_data;
 
+
+
 static int check_type(lua_State *L, int index, int type) {
   if (lua_type(L, index) != type) {
     const char *type_found = lua_typename(L, lua_type(L, index));
@@ -23,7 +25,7 @@ static int check_type(lua_State *L, int index, int type) {
     if (lua_getstack(L, 1, &ar)) {
       lua_getinfo(L, "nSl", &ar);
       sprintf(buf, "Error line %d in function %s: %s expected as #%d, got %s",
-              ar.linedefined, ar.currentline, type_found, index, type_expected);
+              ar.currentline, "dff", type_found, index, type_expected);
       ui_show_text_info(buf);
     }
     return 0;
