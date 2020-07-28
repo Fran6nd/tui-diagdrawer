@@ -16,8 +16,11 @@ data *current_mode_data;
 
 static int check_type(lua_State *L, int index, int type) {
   if (lua_type(L, index) != type) {
-    char *type_found = lua_typename(L, index);
-    char *type_expected = lua_typename(L, index);
+    const char *type_found = lua_typename(L, lua_type(L, index));
+    const char *type_expected = lua_typename(L, type);
+    char buf[200]= {0};
+    sprintf(buf, "%s expected, got %s", type_found, type_expected);
+    ui_show_text_info(buf);
     return 0;
   }
   return 1;
@@ -27,15 +30,15 @@ static int l_set_char_at(lua_State *L) {
   /* Keep only two args. */
   lua_settop(L, 2);
   /* Let's check our args types. */
-  luaL_checktype(L, 1, LUA_TTABLE);
-  luaL_checktype(L, 2, LUA_INT_TYPE);
+  check_type(L, 1, LUA_TTABLE);
+  check_type(L, 2, LUA_INT_TYPE);
   /* Now we read table.x and table.y */
   position p;
 
   lua_getfield(L, 1, "x");
   lua_getfield(L, 1, "y");
-  luaL_checktype(L, -1, LUA_INT_TYPE);
-  luaL_checktype(L, -2, LUA_INT_TYPE);
+  check_type(L, -1, LUA_INT_TYPE);
+  check_type(L, -2, LUA_INT_TYPE);
   if (!lua_isinteger(L, -1) || !lua_isinteger(L, -2) || !lua_isinteger(L, 2)) {
     current_mode_data->error = 1;
     lua_pop(L, 3);
@@ -56,13 +59,13 @@ static int l_set_char_at(lua_State *L) {
 
 static int l_get_char_at(lua_State *L) {
   lua_settop(L, 1);
-  luaL_checktype(L, 1, LUA_TTABLE);
+  check_type(L, 1, LUA_TTABLE);
   position p;
   lua_getfield(L, 1, "x");
-  luaL_checktype(L, -1, LUA_INT_TYPE);
+  check_type(L, -1, LUA_INT_TYPE);
   p.x = lua_tointeger(L, -1);
   lua_getfield(L, 1, "y");
-  luaL_checktype(L, -1, LUA_INT_TYPE);
+  check_type(L, -1, LUA_INT_TYPE);
   p.y = lua_tointeger(L, -1);
   /* Let's pop .x and .y from the stack. */
   lua_pop(L, 2);
@@ -78,20 +81,20 @@ static int l_do_change(lua_State *L) {
 
 static int l_show_message(lua_State *L) {
   lua_tostring(L, 1);
-  luaL_checktype(L, 1, LUA_TSTRING);
+  check_type(L, 1, LUA_TSTRING);
   ui_show_text((char *)lua_tostring(L, 1));
   return 0;
 }
 
 static int l_show_message_blocking(lua_State *L) {
   lua_tostring(L, 1);
-  luaL_checktype(L, 1, LUA_TSTRING);
+  check_type(L, 1, LUA_TSTRING);
   ui_show_text_info((char *)lua_tostring(L, 1));
   return 0;
 }
 
 static int l_move_cursor(lua_State *L) {
-  luaL_checktype(L, 1, LUA_INT_TYPE);
+  check_type(L, 1, LUA_INT_TYPE);
   position p = move_cursor(lua_tointeger(L, 1));
   if (p.null)
     return 0;
@@ -116,11 +119,11 @@ static int l_set_cursor_pos(lua_State *L) {
   position p;
   p.null = 0;
   lua_settop(L, 1);
-  luaL_checktype(L, 1, LUA_TTABLE);
+  check_type(L, 1, LUA_TTABLE);
   lua_getfield(L, -1, "x");
-  luaL_checktype(L, 1, LUA_INT_TYPE);
+  check_type(L, 1, LUA_INT_TYPE);
   lua_getfield(L, 1, "y");
-  luaL_checktype(L, 1, LUA_INT_TYPE);
+  check_type(L, 1, LUA_INT_TYPE);
   p.x = lua_tointeger(L, -2);
   p.y = lua_tointeger(L, -1);
   position delta = {.x = get_cursor_pos().x - UP_LEFT_CORNER.x,
