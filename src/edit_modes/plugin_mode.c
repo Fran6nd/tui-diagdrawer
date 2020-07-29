@@ -4,6 +4,18 @@
 #include <lauxlib.h>
 #include <lua.h>
 #include <lualib.h>
+#include <setjmp.h>
+
+/* jump point */
+static jmp_buf custom_lua_panic_jump;
+
+/* custom panic handler */
+static int custom_lua_atpanic(lua_State *lua)
+{
+    longjmp(custom_lua_panic_jump, 1);
+    /* will never return */
+    return 0;
+}
 
 static int l_set_char_at(lua_State *L) {
   /* Keep only two firsts args. */
@@ -260,6 +272,7 @@ edit_mode plugin_mode(char *path) {
                                 .get_help = get_help};
 
   lua_State *L = luaL_newstate();
+  lua_atpanic(L, &custom_lua_atpanic);
   EDIT_MODE_PLUGIN.data = (void *)L;
   int status = luaL_loadfile(L, path);
   if (status) {
