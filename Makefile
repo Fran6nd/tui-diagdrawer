@@ -24,7 +24,7 @@ edit_mode.o: src/edit_mode.c
 	gcc -g -O -c src/edit_modes/select_mode.c -std=c99 -o select_mode.o -Iinclude
 	gcc -g -O -c src/edit_modes/plugin_mode.c  -std=c99 -Iinclude -o plugin_mode.o
 main.o: chunk.o
-	gcc -g -D _DEFAULT_SOURCE -O -c  src/main.c -std=c99 -o main.o -Iinclude -lncurses
+	gcc -g -D _DEFAULT_SOURCE -O -c  src/main.c -std=c99 -o main.o -Iinclude
 tui-diagdrawer: main.o position.o ui.o undo_redo.o position_list.o chunk.o edit_mode.o
 	gcc -g main.o edit_mode.o rect_mode.o put_mode.o line_mode.o arrow_mode.o text_mode.o select_mode.o plugin_mode.o undo_redo.o chunk.o position.o position_list.o ui.o -Iinclude -lncurses -llua -lm -ldl -o tui-diagdrawer
 all:tui-diagdrawer show_keyname
