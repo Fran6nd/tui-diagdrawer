@@ -66,7 +66,7 @@ In case af style changes, of course it's welcome but do not forget to explain wh
 * Better sandbox for LUA scripts.
 * Enable the user to change the name of the outpout file.
 * Better Lua errors handling (avoid segfault if args not ok).
-* Capability to override existing built-in edit modes.
+* Capability handle mouse movements.
 
 # Here is what we can do:
 
