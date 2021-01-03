@@ -88,23 +88,26 @@ static int l_get_cursor_pos(lua_State *L) {
 }
 
 static int l_set_cursor_pos(lua_State *L) {
-  position p;
-  p.null = 0;
+  /* Let's read the position given as argument. */
   lua_settop(L, 1);
   luaL_checktype(L, 1, LUA_TTABLE);
-  lua_getfield(L, -1, "x");
-  luaL_checktype(L, 1, LUA_INT_TYPE);
+  position p;
+  lua_getfield(L, 1, "x");
+  luaL_checktype(L, -1, LUA_INT_TYPE);
+  p.x = lua_tointeger(L, -1);
   lua_getfield(L, 1, "y");
-  luaL_checktype(L, 1, LUA_INT_TYPE);
-  p.x = lua_tointeger(L, -2);
+  luaL_checktype(L, -1, LUA_INT_TYPE);
   p.y = lua_tointeger(L, -1);
+  /* Let's pop .x and .y from the stack. */
+  lua_pop(L, 2);
+
+  /* Let's calculate the new pos. */
   position delta = {.x = get_cursor_pos().x - UP_LEFT_CORNER.x,
                     .y = get_cursor_pos().y - UP_LEFT_CORNER.y};
   p.x -= delta.x;
   p.y -= delta.y;
   UP_LEFT_CORNER.x = p.x;
   UP_LEFT_CORNER.y = p.y;
-  lua_pop(L, 2);
   return 0;
 }
 
