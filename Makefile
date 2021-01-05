@@ -29,9 +29,9 @@ tui-diagdrawer: main.o position.o ui.o undo_redo.o position_list.o chunk.o edit_
 	gcc -g main.o edit_mode.o rect_mode.o put_mode.o line_mode.o arrow_mode.o text_mode.o select_mode.o plugin_mode.o undo_redo.o chunk.o position.o position_list.o ui.o -Iinclude -lncurses -llua -lm -ldl -o tui-diagdrawer
 all:tui-diagdrawer show_keyname
 clean:
-	rm *.o
-	rm tui-diagdrawer
-	rm show_keyname
+	rm -f *.o
+	rm -f tui-diagdrawer
+	rm -f show_keyname
 rebuild: clean all
 
 #PREFIX is environment variable, but if it is not set, then set default value
