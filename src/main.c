@@ -11,7 +11,8 @@
 #include "ui.h"
 #include "undo_redo.h"
 
-char *NAME = "Untitled.txt";
+char *default_name = "Untitled.txt";
+
 position UP_LEFT_CORNER = {0, 0};
 chunk CURRENT_FILE;
 edit_mode *EDIT_MODE;
@@ -171,11 +172,13 @@ int main(int argc, char *argv[]) {
   init_pair(COL_EMPTY, COLOR_BLACK, COLOR_BLUE);
   init_pair(COL_SELECTION, COLOR_BLACK, COLOR_CYAN);
 
-  if (argc != 2)
+  if (argc != 2){
     CURRENT_FILE = chk_new(COLS - 2, LINES - 2);
+    FILENAME = default_name;
+  }
   else {
     CURRENT_FILE = chk_new_from_file(argv[1]);
-    NAME = argv[1];
+    FILENAME = argv[1];
   }
   int looping = 1;
   do_change(&CURRENT_FILE);
@@ -224,10 +227,10 @@ int main(int argc, char *argv[]) {
             looping = 0;
             break;
           case 'w':
-            chk_save_to_file(&CURRENT_FILE, NAME);
+            chk_save_to_file(&CURRENT_FILE, FILENAME);
             break;
           case 'x':
-            chk_save_to_file(&CURRENT_FILE, NAME);
+            chk_save_to_file(&CURRENT_FILE, FILENAME);
             looping = 0;
             break;
           case '\t':

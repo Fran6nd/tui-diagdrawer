@@ -5,3 +5,5 @@ ascii-drawer
 show_keyname
 ascii-diagdrawer
 tui-diagdrawer
+lua-*
+*.txt

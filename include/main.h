@@ -31,6 +31,8 @@ typedef struct character {
   int color;
 } character;
 
+char * FILENAME;
+
 position get_cursor_pos();
 position move_cursor();
 int is_writable(char);
