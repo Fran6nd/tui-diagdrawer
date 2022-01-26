@@ -18,7 +18,11 @@
 #define MODE_ARROW 6
 
 /* [Ctrl] + h for help. */
+#ifdef __linux__
 #define K_HELP 8
+#elif __APPLE__
+#define K_HELP 263
+#endif
 /* [Ctrl] + u for undo. */
 #define K_UNDO 21
 /* [Ctrl] + r for redo. */
