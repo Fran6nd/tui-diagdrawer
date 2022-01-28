@@ -75,9 +75,13 @@ static void on_key_event(edit_mode *em, int c)
       do_change(&CURRENT_FILE);
       for (i = 0; i < PATH.size; i++)
       {
-
-        chk_set_char_at(&CURRENT_FILE, PATH.list[i],
-                        pl_get_arrow_char(&PATH, i));
+        char prev_char = chk_get_char_at(&CURRENT_FILE, PATH.list[i]);
+        if ((prev_char == '|' || prev_char == '-' || prev_char == '+') && i == 0)
+          chk_set_char_at(&CURRENT_FILE, PATH.list[i],
+                          '+');
+        else
+          chk_set_char_at(&CURRENT_FILE, PATH.list[i],
+                          pl_get_arrow_char(&PATH, i));
       }
       pl_empty(&PATH);
       PATH = pl_new();
@@ -107,10 +111,12 @@ static character on_draw(edit_mode *em, position p, character c)
   if (i != -1)
   {
     char tmp = pl_get_arrow_char(&PATH, i);
-    if(c.c == '|' || c.c == '-' || c.c == '+'){
+    if ((c.c == '|' || c.c == '-' || c.c == '+') && i == 0)
+    {
       c.c = '+';
     }
-    else{
+    else
+    {
       c.c = tmp;
     }
   }
