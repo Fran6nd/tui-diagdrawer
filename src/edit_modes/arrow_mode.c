@@ -106,7 +106,13 @@ static character on_draw(edit_mode *em, position p, character c)
   int i = pl_is_inside(&PATH, p);
   if (i != -1)
   {
-    c.c = pl_get_arrow_char(&PATH, i);
+    char tmp = pl_get_arrow_char(&PATH, i);
+    if(c.c == '|' || c.c == '-' || c.c == '+'){
+      c.c = '+';
+    }
+    else{
+      c.c = tmp;
+    }
   }
   return c;
 }
