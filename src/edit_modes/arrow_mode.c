@@ -75,6 +75,7 @@ static void on_key_event(edit_mode *em, int c)
       do_change(&CURRENT_FILE);
       for (i = 0; i < PATH.size; i++)
       {
+        /* If the arrow started from an existing line we insert a '+'. */
         char prev_char = chk_get_char_at(&CURRENT_FILE, PATH.list[i]);
         if ((prev_char == '|' || prev_char == '-' || prev_char == '+') && i == 0)
           chk_set_char_at(&CURRENT_FILE, PATH.list[i],
@@ -110,6 +111,7 @@ static character on_draw(edit_mode *em, position p, character c)
   int i = pl_is_inside(&PATH, p);
   if (i != -1)
   {
+    /* If the arrow started from an existing line we display a '+'. */
     char tmp = pl_get_arrow_char(&PATH, i);
     if ((c.c == '|' || c.c == '-' || c.c == '+') && i == 0)
     {
